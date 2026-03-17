@@ -10,7 +10,10 @@
   "scripts": {
     "build": "turbo run build",
     "build:plugins": "turbo run build --filter=\"./plugins/*\"",
-    "dev": "turbo run dev",
+    "dev:starter": "turbo run dev --filter=@hana/starter",
+    "dev:docs": "turbo run dev --filter=@hana/docs",
+    "dev:admin": "turbo run dev --filter=@hana/admin",
+    "dev:playground": "turbo run dev --filter=@hana/playground",
     "test": "turbo run test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

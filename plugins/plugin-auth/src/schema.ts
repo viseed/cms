@@ -1,7 +1,2 @@
-import { users } from '@hana/schema'
-import { sessions } from '@hana/schema'
-
-export const authSchema = {
-  users,
-  sessions,
-}
+// Auth relies on core tables that are already part of the base CMS schema.
+export const authSchema = {}

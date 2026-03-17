@@ -47,3 +47,7 @@ coverage/
 # Temp files
 *.tmp
 *.temp
+
+# Data files
+data.*
+playground.db

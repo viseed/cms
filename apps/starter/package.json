@@ -1,5 +1,5 @@
 {
-  "name": "my-hana-project",
+  "name": "@hana/starter",
   "version": "0.1.0",
   "private": true,
   "type": "module",

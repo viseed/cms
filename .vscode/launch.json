@@ -16,6 +16,20 @@
       "program": "${workspaceFolder}/apps/playground/src/index.ts",
       "cwd": "${workspaceFolder}/apps/playground",
       "watchMode": true
+    },
+    {
+      "name": "Debug Admin Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/admin"
+    },
+    {
+      "name": "Debug Docs Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bun run dev",
+      "cwd": "${workspaceFolder}/apps/docs"
     }
   ]
 }
