@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Starter Dev",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/starter/src/index.ts",
+      "cwd": "${workspaceFolder}/apps/starter",
+      "watchMode": true
+    },
+    {
+      "name": "Debug Playground Dev",
+      "type": "bun",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/playground/src/index.ts",
+      "cwd": "${workspaceFolder}/apps/playground",
+      "watchMode": true
+    }
+  ]
+}
