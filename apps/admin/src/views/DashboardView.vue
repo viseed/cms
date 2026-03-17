@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <h1>Dashboard</h1>
-    <p class="subtitle">Welcome to Hanabi CMS</p>
+    <p class="subtitle">Welcome to Hana CMS</p>
 
     <div class="stats-grid">
       <div class="stat-card">

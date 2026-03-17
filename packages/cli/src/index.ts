@@ -11,7 +11,7 @@ async function main(): Promise<void> {
     case 'init': {
       const name = args[0]
       if (!name) {
-        console.error('Usage: hanabi init <project-name>')
+        console.error('Usage: hana init <project-name>')
         process.exit(1)
       }
       await initProject(name)
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: hanabi plugin <install|uninstall> <package-name>')
+        console.error('Usage: hana plugin <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -42,10 +42,10 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.log('Hanabi CMS CLI')
+      console.log('Hana CMS CLI')
       console.log('')
       console.log('Commands:')
-      console.log('  init <name>                     Create a new Hanabi CMS project')
+      console.log('  init <name>                     Create a new Hana CMS project')
       console.log('  migrate                         Run database migrations')
       console.log('  plugin install <package>         Install a plugin')
       console.log('  plugin uninstall <package>       Uninstall a plugin')

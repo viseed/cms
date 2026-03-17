@@ -1,5 +1,5 @@
 {
-  "name": "@hanabi/registry",
+  "name": "@hana/registry",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -15,10 +15,10 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanabi/types": "workspace:*",
-    "@hanabi/validator": "workspace:*"
+    "@hana/types": "workspace:*",
+    "@hana/validator": "workspace:*"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*"
+    "@hana/config": "workspace:*"
   }
 }

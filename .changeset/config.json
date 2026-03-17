@@ -4,14 +4,14 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@hanabi/core", "@hanabi/types", "@hanabi/schema", "@hanabi/validator", "@hanabi/registry"]
+    ["@hana/core", "@hana/types", "@hana/schema", "@hana/validator", "@hana/registry"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@hanabi/playground",
-    "@hanabi/admin",
-    "@hanabi/docs"
+    "@hana/playground",
+    "@hana/admin",
+    "@hana/docs"
   ]
 }

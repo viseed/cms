@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import { Database } from 'bun:sqlite'
-import type { DatabaseConfig } from '@hanabi/types'
-import { coreSchema, mergeSchemas } from '@hanabi/schema'
+import type { DatabaseConfig } from '@hana/types'
+import { coreSchema, mergeSchemas } from '@hana/schema'
 
 export type DatabaseInstance = ReturnType<typeof drizzle>
 

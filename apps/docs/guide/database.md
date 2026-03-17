@@ -1,6 +1,6 @@
 # Database
 
-Hanabi CMS uses Drizzle ORM for type-safe database access.
+Hana CMS uses Drizzle ORM for type-safe database access.
 
 ## Schema Merging
 
@@ -21,16 +21,16 @@ const finalSchema = mergeSchemas(coreSchema, blogSchema, mediaSchema)
 
 The core schema includes:
 
-- `hanabi_users` — User accounts
-- `hanabi_sessions` — Auth sessions
-- `hanabi_installed_plugins` — Plugin registry
+- `hana_users` — User accounts
+- `hana_sessions` — Auth sessions
+- `hana_installed_plugins` — Plugin registry
 
 ## Migrations
 
 Run migrations using the CLI:
 
 ```bash
-bunx hanabi migrate
+bunx hana migrate
 ```
 
 This collects schemas from all installed plugins and generates/applies Drizzle migrations.

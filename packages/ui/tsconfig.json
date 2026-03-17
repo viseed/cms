@@ -1,5 +1,5 @@
 {
-  "extends": "@hanabi/config/tsconfig.lib.json",
+  "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "vue"

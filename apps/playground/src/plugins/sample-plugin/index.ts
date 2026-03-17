@@ -1,4 +1,4 @@
-import type { CMSPlugin } from '@hanabi/types'
+import type { CMSPlugin } from '@hana/types'
 import { Hono } from 'hono'
 
 /**

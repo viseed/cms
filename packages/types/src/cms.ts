@@ -19,8 +19,8 @@ export interface CMSConfig {
   }
 }
 
-export interface HanabiCMS {
-  use(plugin: import('./plugin').CMSPlugin): HanabiCMS
+export interface HanaCMS {
+  use(plugin: import('./plugin').CMSPlugin): HanaCMS
   launch(): unknown
   getDatabase(): unknown
   getPlugins(): Array<import('./plugin').CMSPlugin>

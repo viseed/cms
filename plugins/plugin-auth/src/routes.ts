@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { loginSchema } from '@hanabi/validator'
+import { loginSchema } from '@hana/validator'
 
 export function setupAuthRoutes(app: Hono): void {
   const auth = new Hono()

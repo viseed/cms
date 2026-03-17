@@ -1,5 +1,5 @@
 {
-  "name": "@hanabi/plugin-blog",
+  "name": "@hana/plugin-blog",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -14,12 +14,12 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanabi/types": "workspace:*",
-    "@hanabi/validator": "workspace:*",
+    "@hana/types": "workspace:*",
+    "@hana/validator": "workspace:*",
     "hono": "^4.7.0",
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*"
+    "@hana/config": "workspace:*"
   }
 }

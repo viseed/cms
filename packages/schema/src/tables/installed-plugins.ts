@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
-export const installedPlugins = sqliteTable('hanabi_installed_plugins', {
+export const installedPlugins = sqliteTable('hana_installed_plugins', {
   id: text('id').primaryKey(),
   name: text('name').notNull().unique(),
   version: text('version').notNull(),

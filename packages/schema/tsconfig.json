@@ -1,4 +1,4 @@
 {
-  "extends": "@hanabi/config/tsconfig.lib.json",
+  "extends": "@hana/config/tsconfig.lib.json",
   "include": ["src"]
 }

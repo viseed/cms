@@ -1,4 +1,4 @@
-export { HanabiCMS, createCMS } from './hanabi-cms'
+export { HanaCMS, createCMS } from './hana-cms'
 export { HookRegistry } from './hook-registry'
 export { createDatabase, type DatabaseInstance } from './database'
 
@@ -10,4 +10,4 @@ export type {
   PluginFactory,
   ComponentRegistry,
   PluginManifest,
-} from '@hanabi/types'
+} from '@hana/types'

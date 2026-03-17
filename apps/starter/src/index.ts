@@ -1,6 +1,6 @@
-import { createCMS } from '@hanabi/core'
-import { authPlugin } from '@hanabi/plugin-auth'
-import { blogPlugin } from '@hanabi/plugin-blog'
+import { createCMS } from '@hana/core'
+import { authPlugin } from '@hana/plugin-auth'
+import { blogPlugin } from '@hana/plugin-blog'
 
 const cms = createCMS({
   db: {
@@ -14,7 +14,7 @@ cms.use(blogPlugin())
 
 const app = await cms.launch()
 
-console.log('Hanabi CMS running at http://localhost:3000')
+console.log('Hana CMS running at http://localhost:3000')
 
 export default {
   port: 3000,

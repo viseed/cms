@@ -1,5 +1,5 @@
 {
-  "name": "my-hanabi-project",
+  "name": "my-hana-project",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "build": "bun build src/index.ts --outdir dist --target bun"
   },
   "dependencies": {
-    "@hanabi/core": "workspace:*",
-    "@hanabi/plugin-auth": "workspace:*",
-    "@hanabi/plugin-blog": "workspace:*"
+    "@hana/core": "workspace:*",
+    "@hana/plugin-auth": "workspace:*",
+    "@hana/plugin-blog": "workspace:*"
   }
 }

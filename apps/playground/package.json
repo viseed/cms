@@ -1,5 +1,5 @@
 {
-  "name": "@hanabi/playground",
+  "name": "@hana/playground",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,15 +8,15 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@hanabi/core": "workspace:*",
-    "@hanabi/types": "workspace:*",
-    "@hanabi/schema": "workspace:*",
-    "@hanabi/plugin-auth": "workspace:*",
-    "@hanabi/plugin-blog": "workspace:*",
-    "@hanabi/plugin-media": "workspace:*",
+    "@hana/core": "workspace:*",
+    "@hana/types": "workspace:*",
+    "@hana/schema": "workspace:*",
+    "@hana/plugin-auth": "workspace:*",
+    "@hana/plugin-blog": "workspace:*",
+    "@hana/plugin-media": "workspace:*",
     "hono": "^4.7.0"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*"
+    "@hana/config": "workspace:*"
   }
 }

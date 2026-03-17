@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: Hanabi CMS
+  name: Hana CMS
   text: Lightweight & Extensible
   tagline: A plugin-based CMS framework built on Hono + Drizzle + Bun
   actions:
@@ -10,7 +10,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/hanabi-cms/hanabi
+      link: https://github.com/hana-cms/hana
 features:
   - title: Plugin Architecture
     details: Extend everything with official and community plugins. Install from NPM or dynamically from CDN.

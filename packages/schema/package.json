@@ -1,5 +1,5 @@
 {
-  "name": "@hanabi/schema",
+  "name": "@hana/schema",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -17,7 +17,7 @@
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*",
-    "@hanabi/types": "workspace:*"
+    "@hana/config": "workspace:*",
+    "@hana/types": "workspace:*"
   }
 }

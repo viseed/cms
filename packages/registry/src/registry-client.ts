@@ -2,7 +2,7 @@ import type {
   PluginManifest,
   PluginRegistryEntry,
   PluginRegistryResponse,
-} from '@hanabi/types'
+} from '@hana/types'
 import { verifyBundleIntegrity } from './integrity'
 
 export interface RegistryClientOptions {

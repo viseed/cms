@@ -1,24 +1,24 @@
-# Hanabi CMS
+# Hana CMS
 
 A lightweight, extensible CMS framework built on **Hono** + **Drizzle** + **Vue 3** for the **Bun** runtime.
 
 ## Architecture
 
 ```
-hanabi-cms/
+hana-cms/
 ├── packages/
-│   ├── core/           # @hanabi/core — Hono engine, Plugin system, DB bridge
-│   ├── types/          # @hanabi/types — Shared TypeScript interfaces
-│   ├── validator/      # @hanabi/validator — Zod validation schemas
-│   ├── schema/         # @hanabi/schema — Drizzle base tables & merge helper
-│   ├── registry/       # @hanabi/registry — Plugin marketplace client
-│   ├── ui/             # @hanabi/ui — Vue component registry
-│   ├── config/         # @hanabi/config — Shared tsconfig
-│   └── cli/            # @hanabi/cli — CLI commands
+│   ├── core/           # @hana/core — Hono engine, Plugin system, DB bridge
+│   ├── types/          # @hana/types — Shared TypeScript interfaces
+│   ├── validator/      # @hana/validator — Zod validation schemas
+│   ├── schema/         # @hana/schema — Drizzle base tables & merge helper
+│   ├── registry/       # @hana/registry — Plugin marketplace client
+│   ├── ui/             # @hana/ui — Vue component registry
+│   ├── config/         # @hana/config — Shared tsconfig
+│   └── cli/            # @hana/cli — CLI commands
 ├── plugins/
-│   ├── plugin-auth/    # @hanabi/plugin-auth
-│   ├── plugin-blog/    # @hanabi/plugin-blog
-│   └── plugin-media/   # @hanabi/plugin-media
+│   ├── plugin-auth/    # @hana/plugin-auth
+│   ├── plugin-blog/    # @hana/plugin-blog
+│   └── plugin-media/   # @hana/plugin-media
 ├── apps/
 │   ├── admin/          # Vue 3 admin dashboard
 │   ├── playground/     # Development test environment

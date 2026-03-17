@@ -1,4 +1,4 @@
-import type { CMSHookName, CMSPluginHooks } from '@hanabi/types'
+import type { CMSHookName, CMSPluginHooks } from '@hana/types'
 
 type HookHandler = CMSPluginHooks[CMSHookName]
 

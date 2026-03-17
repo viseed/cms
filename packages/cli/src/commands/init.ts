@@ -12,18 +12,18 @@ const STARTER_PACKAGE_JSON = (name: string): string =>
         build: 'bun build src/index.ts --outdir dist --target bun',
       },
       dependencies: {
-        '@hanabi/core': 'latest',
-        '@hanabi/plugin-auth': 'latest',
-        '@hanabi/plugin-blog': 'latest',
+        '@hana/core': 'latest',
+        '@hana/plugin-auth': 'latest',
+        '@hana/plugin-blog': 'latest',
       },
     },
     null,
     2,
   )
 
-const STARTER_INDEX = `import { createCMS } from '@hanabi/core'
-import { authPlugin } from '@hanabi/plugin-auth'
-import { blogPlugin } from '@hanabi/plugin-blog'
+const STARTER_INDEX = `import { createCMS } from '@hana/core'
+import { authPlugin } from '@hana/plugin-auth'
+import { blogPlugin } from '@hana/plugin-blog'
 
 const cms = createCMS({
   db: {

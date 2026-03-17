@@ -1,11 +1,11 @@
 # Plugin System
 
-Hanabi CMS uses a hybrid plugin architecture supporting both NPM-based official plugins and CDN-based community plugins.
+Hana CMS uses a hybrid plugin architecture supporting both NPM-based official plugins and CDN-based community plugins.
 
 ## Creating a Plugin
 
 ```typescript
-import type { CMSPlugin } from '@hanabi/core'
+import type { CMSPlugin } from '@hana/core'
 
 export function myPlugin(): CMSPlugin {
   return {
@@ -38,14 +38,14 @@ export function myPlugin(): CMSPlugin {
 
 | Hook | When | Arguments |
 |------|------|-----------|
-| `cms:init` | After database is initialized | `HanabiCMS` instance |
+| `cms:init` | After database is initialized | `HanaCMS` instance |
 | `cms:ready` | After all routes are registered | `Hono` app instance |
 | `admin:register` | When admin UI loads | `ComponentRegistry` |
 
 ## Using a Plugin
 
 ```typescript
-import { createCMS } from '@hanabi/core'
+import { createCMS } from '@hana/core'
 import { myPlugin } from './my-plugin'
 
 const cms = createCMS({ ... })

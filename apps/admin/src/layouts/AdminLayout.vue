@@ -15,7 +15,7 @@ const navItems = [
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="logo">
-        <h2>Hanabi CMS</h2>
+        <h2>Hana CMS</h2>
       </div>
       <nav>
         <button

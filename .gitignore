@@ -1,10 +1,49 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
-.turbo/
 *.tsbuildinfo
+
+# Turbo
+.turbo/
+
+# Vite
+.vite/
+
+# VitePress
+**/.vitepress/cache/
+**/.vitepress/dist/
+
+# Environment
 .env
 .env.*
 !.env.example
+
+# Database
 *.db
 *.sqlite
+
+# Lockfiles (using bun)
 *.lock
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+
+# Temp files
+*.tmp
+*.temp

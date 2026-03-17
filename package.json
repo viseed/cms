@@ -1,6 +1,7 @@
 {
-  "name": "hanabi-cms",
+  "name": "hana-cms",
   "private": true,
+  "packageManager": "bun@1.3.10",
   "workspaces": [
     "packages/*",
     "plugins/*",

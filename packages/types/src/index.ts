@@ -9,7 +9,7 @@ export type {
   CMSConfig,
   DatabaseConfig,
   AdminConfig,
-  HanabiCMS,
+  HanaCMS,
 } from './cms'
 
 export type {

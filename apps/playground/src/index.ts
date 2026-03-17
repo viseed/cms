@@ -1,7 +1,7 @@
-import { createCMS } from '@hanabi/core'
-import { authPlugin } from '@hanabi/plugin-auth'
-import { blogPlugin } from '@hanabi/plugin-blog'
-import { mediaPlugin } from '@hanabi/plugin-media'
+import { createCMS } from '@hana/core'
+import { authPlugin } from '@hana/plugin-auth'
+import { blogPlugin } from '@hana/plugin-blog'
+import { mediaPlugin } from '@hana/plugin-media'
 import { samplePlugin } from './plugins/sample-plugin'
 
 const cms = createCMS({
@@ -21,7 +21,7 @@ cms.use(samplePlugin())
 
 const app = await cms.launch()
 
-console.log('Hanabi CMS Playground running at http://localhost:3000')
+console.log('Hana CMS Playground running at http://localhost:3000')
 
 export default {
   port: 3000,

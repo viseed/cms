@@ -1,6 +1,6 @@
 import type { Hono } from 'hono'
 import type { ComponentRegistry } from './component-registry'
-import type { HanabiCMS } from './cms'
+import type { HanaCMS } from './cms'
 
 export interface CMSPlugin {
   name: string
@@ -11,7 +11,7 @@ export interface CMSPlugin {
 }
 
 export interface CMSPluginHooks {
-  'cms:init': (cms: HanabiCMS) => void | Promise<void>
+  'cms:init': (cms: HanaCMS) => void | Promise<void>
   'cms:ready': (app: Hono) => void | Promise<void>
   'admin:register': (registry: ComponentRegistry) => void
 }

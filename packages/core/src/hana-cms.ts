@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
-import type { CMSConfig, CMSPlugin } from '@hanabi/types'
+import type { CMSConfig, CMSPlugin } from '@hana/types'
 import { HookRegistry } from './hook-registry'
 import { createDatabase, type DatabaseInstance } from './database'
 
-export class HanabiCMS {
+export class HanaCMS {
   private app: Hono
   private plugins: CMSPlugin[] = []
   private hooks = new HookRegistry()
@@ -22,7 +22,7 @@ export class HanabiCMS {
     }
   }
 
-  use(plugin: CMSPlugin): HanabiCMS {
+  use(plugin: CMSPlugin): HanaCMS {
     this.plugins.push(plugin)
 
     if (plugin.hooks) {
@@ -86,6 +86,6 @@ export class HanabiCMS {
   }
 }
 
-export function createCMS(config: CMSConfig): HanabiCMS {
-  return new HanabiCMS(config)
+export function createCMS(config: CMSConfig): HanaCMS {
+  return new HanaCMS(config)
 }

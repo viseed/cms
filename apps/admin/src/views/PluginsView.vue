@@ -22,21 +22,21 @@ onMounted(async () => {
     // API not available during static dev
     plugins.value = [
       {
-        name: '@hanabi/plugin-auth',
+        name: '@hana/plugin-auth',
         version: '0.1.0',
         description: 'Authentication & session management',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hanabi/plugin-blog',
+        name: '@hana/plugin-blog',
         version: '0.1.0',
         description: 'Blog posts & categories',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hanabi/plugin-media',
+        name: '@hana/plugin-media',
         version: '0.1.0',
         description: 'File upload & media management',
         installed: false,

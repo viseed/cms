@@ -1,9 +1,9 @@
 {
-  "name": "@hanabi/cli",
+  "name": "@hana/cli",
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "hanabi": "./dist/index.js"
+    "hana": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -17,9 +17,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanabi/types": "workspace:*"
+    "@hana/types": "workspace:*"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*"
+    "@hana/config": "workspace:*"
   }
 }

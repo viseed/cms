@@ -4,14 +4,14 @@
 
 | Plugin | Description |
 |--------|-------------|
-| `@hanabi/plugin-auth` | Authentication & session management |
-| `@hanabi/plugin-blog` | Blog posts & categories |
-| `@hanabi/plugin-media` | File upload & media library |
+| `@hana/plugin-auth` | Authentication & session management |
+| `@hana/plugin-blog` | Blog posts & categories |
+| `@hana/plugin-media` | File upload & media library |
 
 ## Install
 
 ```bash
-bun add @hanabi/plugin-blog
+bun add @hana/plugin-blog
 ```
 
 ## Community Plugins

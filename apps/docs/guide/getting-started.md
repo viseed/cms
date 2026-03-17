@@ -9,7 +9,7 @@
 ### Using the CLI
 
 ```bash
-bunx @hanabi/cli init my-project
+bunx @hana/cli init my-project
 cd my-project
 bun install
 bun run dev
@@ -20,15 +20,15 @@ bun run dev
 ```bash
 mkdir my-project && cd my-project
 bun init
-bun add @hanabi/core @hanabi/plugin-auth @hanabi/plugin-blog
+bun add @hana/core @hana/plugin-auth @hana/plugin-blog
 ```
 
 Create `src/index.ts`:
 
 ```typescript
-import { createCMS } from '@hanabi/core'
-import { authPlugin } from '@hanabi/plugin-auth'
-import { blogPlugin } from '@hanabi/plugin-blog'
+import { createCMS } from '@hana/core'
+import { authPlugin } from '@hana/plugin-auth'
+import { blogPlugin } from '@hana/plugin-blog'
 
 const cms = createCMS({
   db: {

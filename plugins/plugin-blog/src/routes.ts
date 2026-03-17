@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { createContentSchema, updateContentSchema, contentQuerySchema } from '@hanabi/validator'
+import { createContentSchema, updateContentSchema, contentQuerySchema } from '@hana/validator'
 
 export function setupBlogRoutes(app: Hono): void {
   const blog = new Hono()

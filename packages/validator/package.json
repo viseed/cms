@@ -1,5 +1,5 @@
 {
-  "name": "@hanabi/validator",
+  "name": "@hana/validator",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -17,7 +17,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@hanabi/config": "workspace:*",
-    "@hanabi/types": "workspace:*"
+    "@hana/config": "workspace:*",
+    "@hana/types": "workspace:*"
   }
 }
