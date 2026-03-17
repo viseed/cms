@@ -1,0 +1,4 @@
+{
+  "extends": "@hanabi/config/tsconfig.app.json",
+  "include": ["src"]
+}

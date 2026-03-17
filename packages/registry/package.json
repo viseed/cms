@@ -1,0 +1,24 @@
+{
+  "name": "@hanabi/registry",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "bunup",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@hanabi/types": "workspace:*",
+    "@hanabi/validator": "workspace:*"
+  },
+  "devDependencies": {
+    "@hanabi/config": "workspace:*"
+  }
+}

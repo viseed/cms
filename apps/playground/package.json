@@ -1,0 +1,22 @@
+{
+  "name": "@hanabi/playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@hanabi/core": "workspace:*",
+    "@hanabi/types": "workspace:*",
+    "@hanabi/schema": "workspace:*",
+    "@hanabi/plugin-auth": "workspace:*",
+    "@hanabi/plugin-blog": "workspace:*",
+    "@hanabi/plugin-media": "workspace:*",
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@hanabi/config": "workspace:*"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "@hanabi/config/tsconfig.app.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": ["vite/client"]
+  },
+  "include": ["src", "env.d.ts"]
+}

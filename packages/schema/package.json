@@ -1,0 +1,23 @@
+{
+  "name": "@hanabi/schema",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "bunup",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@hanabi/config": "workspace:*",
+    "@hanabi/types": "workspace:*"
+  }
+}

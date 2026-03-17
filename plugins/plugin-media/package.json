@@ -1,0 +1,25 @@
+{
+  "name": "@hanabi/plugin-media",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "bunup",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@hanabi/types": "workspace:*",
+    "@hanabi/validator": "workspace:*",
+    "hono": "^4.7.0",
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@hanabi/config": "workspace:*"
+  }
+}

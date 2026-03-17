@@ -1,0 +1,8 @@
+{
+  "extends": "@hanabi/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "vue"
+  },
+  "include": ["src"]
+}
