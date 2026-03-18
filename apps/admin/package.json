@@ -11,12 +11,12 @@
   "dependencies": {
     "@hana/types": "workspace:*",
     "@hana/ui": "workspace:*",
-    "vue": "^3.5.0",
-    "vue-router": "^4.5.0"
+    "vue": "^3.5.30",
+    "vue-router": "^5.0.3"
   },
   "devDependencies": {
     "@hana/config": "workspace:*",
-    "@vitejs/plugin-vue": "^5.2.0",
-    "vite": "^6.2.0"
+    "@vitejs/plugin-vue": "^6.0.5",
+    "vite": "^8.0.0"
   }
 }

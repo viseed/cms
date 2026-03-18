@@ -14,7 +14,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.0"
+    "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "@hana/config": "workspace:*",

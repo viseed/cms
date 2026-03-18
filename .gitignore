@@ -26,6 +26,7 @@ dist/
 
 # Lockfiles (using bun)
 *.lock
+!bun.lock
 
 # Logs
 *.log

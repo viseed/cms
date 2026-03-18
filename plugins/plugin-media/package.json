@@ -16,8 +16,8 @@
   "dependencies": {
     "@hana/types": "workspace:*",
     "@hana/validator": "workspace:*",
-    "hono": "^4.7.0",
-    "drizzle-orm": "^0.44.0"
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.8"
   },
   "devDependencies": {
     "@hana/config": "workspace:*"

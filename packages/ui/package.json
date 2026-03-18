@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@hana/types": "workspace:*",
-    "vue": "^3.5.0"
+    "vue": "^3.5.30"
   },
   "devDependencies": {
     "@hana/config": "workspace:*"
