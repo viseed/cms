@@ -33,3 +33,9 @@ export type {
   ThemeMenuItem,
   LayoutContext,
 } from './theme'
+
+export type {
+  ThemeManifest,
+  ThemeRegistryEntry,
+  ThemeRegistryResponse,
+} from './theme-manifest'

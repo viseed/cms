@@ -28,6 +28,8 @@ SQLite được tối ưu với: `PRAGMA journal_mode = WAL` (set tự động k
 users              → base user table
 sessions           → user sessions
 installed_plugins  → danh sách plugins đã cài (community plugins)
+installed_themes   → danh sách themes đã cài (metadata, integrity, version)
+theme_state        → active theme, settings snapshot, preview theme
 ```
 
 ### Plugin Tables
@@ -113,4 +115,4 @@ Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
 
 ## Last updated
 
-2026-03-21 — Initial creation
+2026-03-22 — Added installed_themes and theme_state core tables
