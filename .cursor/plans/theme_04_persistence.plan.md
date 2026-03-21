@@ -25,9 +25,10 @@ Tạo data model đủ nhỏ để hệ thống nhớ theme nào đã cài, them
 
 - Create: [packages/schema/src/tables/installed-themes.ts](../../packages/schema/src/tables/installed-themes.ts)
 - Create: [packages/schema/src/tables/theme-state.ts](../../packages/schema/src/tables/theme-state.ts)
-- Modify: [packages/schema/src/index.ts](../../packages/schema/src/index.ts)
-- Modify: [packages/schema/src/schema-builder.ts](../../packages/schema/src/schema-builder.ts)
+- Modify: [packages/schema/src/index.ts](../../packages/schema/src/index.ts) — thêm vào `coreSchema`
 - Modify: `[.cursor/rules/06-database-patterns.mdc](../rules/06-database-patterns.mdc)`
+
+> **Note:** Không cần sửa `schema-builder.ts` — builder chỉ merge plain objects, tables mới được thêm vào `coreSchema` trong `index.ts`.
 
 ## Tasks
 

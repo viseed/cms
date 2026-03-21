@@ -1,6 +1,7 @@
 ---
 name: Theme Settings Schema
 overview: Định nghĩa schema-driven settings cho Theme, độc lập với admin form rendering.
+todos: []
 isProject: false
 ---
 
@@ -13,7 +14,6 @@ Tạo contract thống nhất để mỗi theme mô tả settings của nó bằ
 ## Depends on
 
 - [theme_02_core_types.plan.md](theme_02_core_types.plan.md)
-- [theme_06_layout_contract.plan.md](theme_06_layout_contract.plan.md)
 
 ## Scope
 
@@ -32,13 +32,13 @@ Tạo contract thống nhất để mỗi theme mô tả settings của nó bằ
 
 1. Tạo `ThemeSettingsSchema` và `ThemeSettingsValue`.
 2. Hỗ trợ các field types đủ cho MVP:
-   - text
-   - textarea
-   - boolean
-   - select
-   - color
-   - image
-   - link list
+  - text
+  - textarea
+  - boolean
+  - select
+  - color
+  - image
+  - link list
 3. Cho phép group/section để UI dễ render sau này.
 4. Định nghĩa cơ chế default values và versioning nhẹ cho settings.
 5. Gắn `settingsSchema?` vào `CMSTheme`.
@@ -53,3 +53,4 @@ Tạo contract thống nhất để mỗi theme mô tả settings của nó bằ
 - Lưu settings xuống DB.
 - Admin form rendering.
 - Theme-specific custom validators phức tạp.
+

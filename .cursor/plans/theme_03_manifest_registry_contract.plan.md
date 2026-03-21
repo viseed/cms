@@ -25,8 +25,8 @@ Thiết kế contract để theme có thể được discover, verify compatibil
 
 - Create: [packages/types/src/theme-manifest.ts](../../packages/types/src/theme-manifest.ts)
 - Modify: [packages/types/src/index.ts](../../packages/types/src/index.ts)
-- Modify: [packages/types/src/manifest.ts](../../packages/types/src/manifest.ts)
-- Modify: [packages/registry/src/index.ts](../../packages/registry/src/index.ts)
+
+> **Note:** Không sửa `packages/types/src/manifest.ts` — plugin manifest giữ nguyên. Theme manifest là file riêng.
 
 ## Tasks
 

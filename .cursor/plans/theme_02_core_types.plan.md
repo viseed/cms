@@ -34,15 +34,53 @@ Giới thiệu `CMSTheme` như first-class type trong [packages/types/src](../..
 1. Tạo `CMSTheme` interface chỉ chứa metadata runtime tối thiểu:
   - `name`
   - `version`
-  - `layouts`
-  - `settingsSchema?`
-  - `assets?`
-2. Thêm `theme?: CMSTheme` vào `CMSConfig`.
-3. Thêm vào `HanaCMS` interface các getter type-level:
-  - `getTheme()`
-  - `hasTheme()`
-4. Export `CMSTheme` từ [packages/types/src/index.ts](../../packages/types/src/index.ts) và [packages/core/src/index.ts](../../packages/core/src/index.ts).
-5. Giữ tất cả thay đổi ở mức type-only, không thêm logic trong [packages/core/src/hana-cms.ts](../../packages/core/src/hana-cms.ts) ở plan này.
+  - `layouts` — typed chi tiết hơn ở plan 06, ban đầu dùng `Record<string, ThemeLayoutEntry>`
+  - `settingsSchema?` — typed chi tiết hơn ở plan 09
+  - `assets?` — mô tả CSS/JS/font paths mà theme cung cấp
+  - `hooks?` — typed chi tiết hơn ở plan 05
+2. Tạo `ThemeLayoutEntry` type — mỗi layout entry gồm Eta template path + optional data hook:
+
+```typescript
+export interface LayoutContext<TData = Record<string, unknown>> {
+  data: TData
+  settings: ThemeSettingsValue
+  menus: Record<string, ThemeMenuItem[]>
+  request: { url: string; params: Record<string, string> }
+}
+
+export interface ThemeLayoutEntry<TData = Record<string, unknown>> {
+  template: string // relative path to .eta file
+  data?: (defaultData: TData, cms: HanaCMS) => TData | Promise<TData>
+}
+```
+
+1. Tạo `ThemeFactory` type tương tự `PluginFactory`:
+
+```typescript
+export type ThemeFactory = (options?: Record<string, unknown>) => CMSTheme
+```
+
+1. Tạo `ThemeAssets` interface tối thiểu:
+
+```typescript
+export interface ThemeAssets {
+  css?: string[]     // relative paths to CSS files
+  js?: string[]      // relative paths to JS files
+  fonts?: string[]   // relative paths to font files
+  staticDir?: string // directory containing static assets
+}
+```
+
+1. Thêm `theme?: CMSTheme` vào `CMSConfig`.
+2. Thêm vào `HanaCMS` interface các getter type-level:
+  - `getTheme(): CMSTheme | undefined`
+  - `hasTheme(): boolean`
+3. Export `CMSTheme`, `ThemeFactory`, `ThemeAssets`, `ThemeLayoutEntry`, `LayoutContext` từ barrel files.
+4. Giữ tất cả thay đổi ở mức type-only, không thêm logic trong [packages/core/src/hana-cms.ts](../../packages/core/src/hana-cms.ts) ở plan này.
+
+> **Rendering decision:** `ThemeLayoutEntry.template` trỏ tới file `.eta` (Eta template engine). Core sẽ dùng Eta để render HTML từ template + data. Theme developer viết `.eta` files giống HTML thường, với syntax `<%= it.title %>` cho dynamic content. Client-side interactivity (Vue/React) không phải concern của theme — đó là việc của `plugin-vue`/`plugin-react`.
+
+> **Lưu ý overlap với Plan 05:** Plan này chỉ thêm type signatures vào `HanaCMS` interface. Implementation thật (getTheme/hasTheme trên class) nằm ở plan 05. Nếu muốn tránh interface-class mismatch giữa 2 plan, có thể chỉ thêm getter vào interface tại plan 05 cùng lúc implement. Quyết định tuỳ lúc implement.
 
 ## Acceptance
 

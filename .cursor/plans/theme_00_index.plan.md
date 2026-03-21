@@ -33,17 +33,18 @@ Tách Theme system thành nhiều implementation plans nhỏ, mỗi plan chỉ g
 flowchart TD
   plan01[Foundation] --> plan02[CoreTypes]
   plan02 --> plan03[ManifestRegistry]
+  plan02 --> plan09[SettingsSchema]
   plan03 --> plan04[Persistence]
   plan04 --> plan05[RuntimeMounting]
   plan05 --> plan06[LayoutContract]
   plan06 --> plan07[AdminCatalogRead]
-  plan07 --> plan08[AdminInstallUninstall]
-  plan06 --> plan09[SettingsSchema]
-  plan09 --> plan10[SettingsAdminUI]
-  plan08 --> plan11[ActivationLifecycle]
-  plan10 --> plan11
-  plan11 --> plan12[PreviewRollback]
   plan06 --> plan13[ExtensionPoints]
+  plan07 --> plan08[AdminInstallUninstall]
+  plan09 --> plan10[SettingsAdminUI]
+  plan07 --> plan10
+  plan08 --> plan11[ActivationLifecycle]
+  plan06 --> plan11
+  plan11 --> plan12[PreviewRollback]
   plan13 --> plan14[AdvancedEcosystem]
   plan12 --> plan14
 ```
@@ -54,6 +55,15 @@ flowchart TD
 - Một thời điểm chỉ có một theme active.
 - Các plan đầu phải additive, không phá plugin API hiện tại ở [packages/types/src/plugin.ts](../../packages/types/src/plugin.ts).
 - Khi interface hoặc rule-level architecture thay đổi, phải cập nhật `.cursor/rules/` tương ứng trong cùng task implementation.
+
+## Quyết định kiến trúc đã chốt
+
+- **Rendering mechanism:** Eta templates + render function pattern.
+  - Core đăng ký Hono routes theo layout keys, tự fetch default data phù hợp mỗi layout (ví dụ `post` → post data, `home` → recent posts).
+  - Theme cung cấp `.eta` template files + optional `data()` hook để extend/override data trước khi render.
+  - Output là HTML string — SEO-friendly, zero client JS mặc định.
+  - Client-side interactivity (Vue/React) là **plugin concern**: `plugin-vue` hoặc `plugin-react` inject runtime + mount points vào HTML output. Không phải core hay theme responsibility.
+  - Chi tiết type shapes xem plan 02 (`ThemeLayoutRenderer`, `LayoutContext`) và plan 06 (layout data contracts).
 
 ## Shared acceptance
 

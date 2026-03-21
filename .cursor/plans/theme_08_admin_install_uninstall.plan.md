@@ -1,6 +1,7 @@
 ---
 name: Theme Admin Install Uninstall
 overview: Bổ sung install và uninstall flows cho Theme, tách riêng khỏi activate flow.
+todos: []
 isProject: false
 ---
 
@@ -26,20 +27,20 @@ Cho phép cài và gỡ theme khỏi hệ thống mà chưa chạm tới chuyệ
 - Modify: [packages/core/src/hana-cms.ts](../../packages/core/src/hana-cms.ts)
 - Modify: [packages/registry/src/registry-client.ts](../../packages/registry/src/registry-client.ts)
 - Modify: [packages/registry/src/index.ts](../../packages/registry/src/index.ts)
-- Modify: [packages/cli/src/commands/plugin.ts](../../packages/cli/src/commands/plugin.ts)
 - Create: [packages/cli/src/commands/theme.ts](../../packages/cli/src/commands/theme.ts)
 - Modify: [apps/admin/src/views/ThemesView.vue](../../apps/admin/src/views/ThemesView.vue)
-- Modify: [packages/schema/src/tables/installed-themes.ts](../../packages/schema/src/tables/installed-themes.ts)
+
+> **Note:** Không sửa `packages/cli/src/commands/plugin.ts` — CLI cho theme là file riêng, plugin command giữ nguyên. Table `installed-themes.ts` đã tạo ở plan 04, không cần sửa thêm ở đây.
 
 ## Tasks
 
 1. Thêm registry client methods riêng cho theme:
-   - fetch available themes
-   - fetch theme manifest
-   - verify/load theme bundle
+  - fetch available themes
+  - fetch theme manifest
+  - verify/load theme bundle
 2. Thêm admin endpoints:
-   - `POST /api/admin/themes/:name/install`
-   - `POST /api/admin/themes/:name/uninstall`
+  - `POST /api/admin/themes/:name/install`
+  - `POST /api/admin/themes/:name/uninstall`
 3. Persist installed theme metadata vào bảng themes.
 4. Tạo CLI command theme tương tự plugin command để hỗ trợ “cài thủ công nếu có code”.
 5. Chỉ cho uninstall khi theme đó không active, hoặc trả lỗi rõ ràng.
@@ -54,3 +55,4 @@ Cho phép cài và gỡ theme khỏi hệ thống mà chưa chạm tới chuyệ
 - Activate theme.
 - Preview theme.
 - Theme settings.
+
