@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 
 const router = createRouter({
-  history: createWebHistory('/admin'),
+  history: createWebHistory('/admin/'),
   routes: [
     { path: '/', component: () => import('./views/DashboardView.vue') },
     { path: '/plugins', component: () => import('./views/PluginsView.vue') },

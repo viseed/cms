@@ -36,7 +36,6 @@ alwaysApply: true
 | App | Filter name | Mô tả | Port mặc định |
 |---|---|---|---|
 | `apps/admin` | `@hana/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin` | 5173 (dev) |
-| `apps/playground` | `@hana/playground` | Dev test env — `workspace:*` references, có sample plugin | 3001 |
 | `apps/docs` | `@hana/docs` | VitePress documentation site | 5174 |
 | `apps/starter` | `@hana/starter` | Template project cho end-users clone | — |
 
@@ -55,4 +54,4 @@ packages/registry/src/integrity.ts  → verifyBundle()
 
 ## Last updated
 
-2026-03-21 — Initial creation
+2026-03-21 — Removed `apps/playground`

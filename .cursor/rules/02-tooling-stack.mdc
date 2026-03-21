@@ -64,7 +64,6 @@ bun test --watch      # watch mode
 bun run dev:starter    # turbo run dev --filter=@hana/starter
 bun run dev:admin      # turbo run dev --filter=@hana/admin
 bun run dev:docs       # turbo run dev --filter=@hana/docs
-bun run dev:playground # turbo run dev --filter=@hana/playground
 ```
 
 Config: `turbo.json` (root)
@@ -98,4 +97,4 @@ Build output của admin → embedded vào `core/dist/admin`
 
 ## Last updated
 
-2026-03-21 — Initial creation
+2026-03-21 — Removed `apps/playground` dev command

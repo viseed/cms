@@ -21,7 +21,6 @@ hana-cms/
 │   └── plugin-media/   # @hana/plugin-media
 ├── apps/
 │   ├── admin/          # Vue 3 admin dashboard
-│   ├── playground/     # Development test environment
 │   ├── docs/           # VitePress documentation
 │   └── starter/        # Starter template
 ```
@@ -37,9 +36,6 @@ bun run dev
 
 # Build all packages
 bun run build
-
-# Run playground
-cd apps/playground && bun run dev
 
 # Run docs
 cd apps/docs && bun run dev

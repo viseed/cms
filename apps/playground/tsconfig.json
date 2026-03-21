@@ -1,4 +1,0 @@
-{
-  "extends": "@hana/config/tsconfig.app.json",
-  "include": ["src"]
-}

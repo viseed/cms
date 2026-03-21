@@ -10,14 +10,6 @@
       "watchMode": true
     },
     {
-      "name": "Debug Playground Dev",
-      "type": "bun",
-      "request": "launch",
-      "program": "${workspaceFolder}/apps/playground/src/index.ts",
-      "cwd": "${workspaceFolder}/apps/playground",
-      "watchMode": true
-    },
-    {
       "name": "Debug Admin Dev",
       "type": "node-terminal",
       "request": "launch",

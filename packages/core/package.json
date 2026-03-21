@@ -23,6 +23,7 @@
     "@hana/validator": "workspace:*"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*"
+    "@hana/config": "workspace:*",
+    "@types/node": "^25.5.0"
   }
 }
