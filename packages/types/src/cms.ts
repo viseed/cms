@@ -1,3 +1,6 @@
+import type { CMSPlugin } from './plugin'
+import type { CMSTheme } from './theme'
+
 export interface DatabaseConfig {
   driver: 'sqlite' | 'turso' | 'postgres'
   url: string
@@ -12,7 +15,8 @@ export interface AdminConfig {
 export interface CMSConfig {
   db: DatabaseConfig
   admin?: AdminConfig
-  plugins?: Array<import('./plugin').CMSPlugin>
+  plugins?: Array<CMSPlugin>
+  theme?: CMSTheme
   server?: {
     port?: number
     hostname?: string
@@ -20,8 +24,10 @@ export interface CMSConfig {
 }
 
 export interface HanaCMS {
-  use(plugin: import('./plugin').CMSPlugin): HanaCMS
+  use(plugin: CMSPlugin): HanaCMS
   launch(): unknown
   getDatabase(): unknown
-  getPlugins(): Array<import('./plugin').CMSPlugin>
+  getPlugins(): Array<CMSPlugin>
+  getTheme(): CMSTheme | undefined
+  hasTheme(): boolean
 }

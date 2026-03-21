@@ -10,4 +10,12 @@ export type {
   PluginFactory,
   ComponentRegistry,
   PluginManifest,
+  CMSTheme,
+  CMSThemeHooks,
+  ThemeFactory,
+  ThemeAssets,
+  ThemeLayoutEntry,
+  ThemeSettingsValue,
+  ThemeMenuItem,
+  LayoutContext,
 } from '@hana/types'

@@ -22,3 +22,14 @@ export type {
   PluginRegistryEntry,
   PluginRegistryResponse,
 } from './manifest'
+
+export type {
+  CMSTheme,
+  CMSThemeHooks,
+  ThemeFactory,
+  ThemeAssets,
+  ThemeLayoutEntry,
+  ThemeSettingsValue,
+  ThemeMenuItem,
+  LayoutContext,
+} from './theme'

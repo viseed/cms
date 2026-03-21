@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import type { CMSConfig, CMSPlugin } from '@hana/types'
+import type { CMSConfig, CMSPlugin, CMSTheme } from '@hana/types'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { createDatabase, type DatabaseInstance } from './database'
@@ -68,6 +68,14 @@ export class HanaCMS {
 
   getPlugins(): CMSPlugin[] {
     return [...this.plugins]
+  }
+
+  getTheme(): CMSTheme | undefined {
+    return this.config.theme
+  }
+
+  hasTheme(): boolean {
+    return this.config.theme !== undefined
   }
 
   getApp(): Hono {
