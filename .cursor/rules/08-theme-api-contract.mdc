@@ -1,0 +1,85 @@
+---
+description: Theme API contract — CMSTheme interface, layout/region/slot vocabulary, boundary với Plugin
+globs: ["packages/types/src/theme.ts", "packages/core/src/theme*", "packages/schema/src/theme*"]
+alwaysApply: false
+---
+
+# Theme API Contract
+
+> **Khi thay đổi `CMSTheme` interface, manifest, required layouts, hoặc theme vocabulary → cập nhật file này.**
+
+## Theme là gì
+
+Theme là **presentation abstraction** — chịu trách nhiệm duy nhất cho **giao diện hiển thị** phía front-end (HTML/CSS) của CMS.
+
+Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
+
+| | Theme | Plugin |
+|---|---|---|
+| Trách nhiệm | Presentation — layout, styling, template rendering | Behavior — schema, routes, hooks, business logic |
+| Interface | `CMSTheme` | `CMSPlugin` |
+| Số lượng active | **Đúng 1** tại mọi thời điểm | Không giới hạn |
+| Dependency hướng | Theme không import từ bất kỳ plugin cụ thể nào | Plugin không biết theme nào đang active |
+| Rendering | Cung cấp `.eta` template files + optional `data()` hook | Có thể inject client runtime qua extension points |
+
+## Vocabulary — Dùng thống nhất trong code / docs / admin UI
+
+| Thuật ngữ | Định nghĩa | Ví dụ |
+|---|---|---|
+| **theme** | Một gói presentation bao gồm templates, assets, và metadata | `@starter/default-theme` |
+| **layout** | Một template cấp trang, ánh xạ 1:1 với route pattern | `home`, `post`, `page`, `archive`, `404` |
+| **region** | Vùng đặt tên bên trong layout, nhận nội dung được render | `header`, `sidebar`, `footer`, `content` |
+| **slot** | Điểm mở rộng bên trong region, cho phép plugin/widget inject markup | `sidebar:before`, `footer:widget-area` |
+| **theme settings** | Key-value config do theme khai báo schema, end-user tuỳ chỉnh qua admin | `{ primaryColor: '#3b82f6', showSidebar: true }` |
+| **active theme** | Theme duy nhất đang được mount để render mọi request phía front-end | Lưu trong DB, thay đổi qua admin |
+
+### Quy tắc đặt tên trong code
+
+- Biến/type liên quan đến theme dùng prefix `theme` hoặc `Theme`: `ThemeManifest`, `activeTheme`, `themeSettings`.
+- **KHÔNG** dùng từ `template` để chỉ theme concept. `template` chỉ dùng khi nói về Eta template file (`.eta`).
+- Layout keys dùng **kebab-case**: `blog-post`, `single-page`, `archive`.
+- Region names dùng **kebab-case**: `main-content`, `left-sidebar`.
+- Slot names dùng pattern `region:qualifier`: `sidebar:before`, `header:nav`.
+
+## Boundary Rules
+
+### Theme KHÔNG được ❌
+
+- Import từ bất kỳ `plugins/*` package nào.
+- Đăng ký Hono routes riêng.
+- Khai báo Drizzle schema tables (ngoài core `installed_themes` do `@hana/schema` quản lý).
+- Chạy business logic (validation, auth, data mutation).
+
+### Theme ĐƯỢC phép ✅
+
+- Khai báo layouts mà nó hỗ trợ (qua manifest).
+- Cung cấp `.eta` template files cho từng layout.
+- Khai báo settings schema (JSON Schema hoặc Zod — chốt ở plan 09).
+- Export optional `data()` hook để extend/override data context trước khi render.
+- Include static assets (CSS, images, fonts).
+
+### Plugin tương tác với Theme qua
+
+- **Slots**: Plugin inject markup vào named slots thông qua core API, không gọi theme trực tiếp.
+- **Extension points**: Core cung cấp hook để plugin thêm `<script>`, `<style>`, hoặc mount points vào HTML output.
+- Plugin **KHÔNG** gọi theme function hay import theme module.
+
+## Rendering Mechanism (đã chốt)
+
+- **Eta templates** + render function pattern.
+- Core đăng ký Hono routes theo layout keys, tự fetch default data.
+- Theme cung cấp `.eta` files + optional `data()` hook.
+- Output là HTML string — SEO-friendly, zero client JS mặc định.
+- Client-side interactivity (Vue/React) là **plugin concern**, không phải theme/core.
+
+## Non-goals (MVP)
+
+- Theme marketplace / CDN distribution.
+- Theme versioning / auto-update.
+- Multiple active themes (A/B testing).
+- Theme inheritance / parent-child.
+- Visual theme editor (drag-and-drop).
+
+## Last updated
+
+2026-03-22 — Initial creation (Theme Foundation plan)

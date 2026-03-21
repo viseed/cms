@@ -39,6 +39,16 @@ alwaysApply: true
 | `apps/docs` | `@hana/docs` | VitePress documentation site | 5174 |
 | `apps/starter` | `@hana/starter` | Template project cho end-users clone | — |
 
+## Theme System
+
+> Theme là **presentation abstraction** — tách biệt hoàn toàn với Plugin.
+> Chi tiết contract xem `08-theme-api-contract.mdc`.
+
+- Theme chịu trách nhiệm cho layout, styling, và template rendering (Eta).
+- Một thời điểm chỉ có **đúng 1 theme active**.
+- Theme **không** đăng ký routes hay schema tables riêng — chỉ cung cấp `.eta` templates, static assets, và optional `data()` hook.
+- Types cho theme nằm trong `@hana/types`, persistence trong `@hana/schema`, runtime mounting trong `@hana/core`.
+
 ## Entry Points Quan Trọng
 
 ```
@@ -54,4 +64,4 @@ packages/registry/src/integrity.ts  → verifyBundle()
 
 ## Last updated
 
-2026-03-21 — Removed `apps/playground`
+2026-03-22 — Added Theme System section
