@@ -1,0 +1,96 @@
+---
+description: Dependency rules — Import graph, ngăn circular dependency giữa các packages
+alwaysApply: true
+---
+
+# Dependency Rules — Import Graph
+
+> Vi phạm dependency rules = tạo circular dependency = build fail.
+> **Khi thêm package mới hoặc thay đổi import → cập nhật file này.**
+
+## Dependency Graph (chiều mũi tên = "được phép import từ")
+
+```
+@hana/config    ←── (không import từ ai, chỉ là tsconfig)
+
+@hana/types     ←── (không import từ bất kỳ @hana/* nào)
+                     └── Mọi package khác đều import từ đây
+
+@hana/validator ←── @hana/types
+
+@hana/schema    ←── @hana/types
+
+@hana/registry  ←── @hana/types
+
+@hana/core      ←── @hana/types, @hana/validator, @hana/schema, @hana/registry
+
+@hana/ui        ←── @hana/types, @hana/registry
+
+@hana/cli       ←── @hana/core
+
+plugins/*       ←── @hana/types, @hana/core, @hana/ui  (KHÔNG import từ nhau)
+
+apps/*          ←── bất kỳ package nào (apps là leaf node)
+```
+
+## Quy tắc cứng
+
+### Được phép ✅
+
+```typescript
+// Trong @hana/validator — import types
+import type { CMSPlugin } from '@hana/types'
+
+// Trong @hana/core — import từ các packages thấp hơn
+import { mergeSchemas } from '@hana/schema'
+import type { CMSConfig } from '@hana/types'
+
+// Trong plugin — import từ types và core
+import type { CMSPlugin } from '@hana/types'
+import { HanaCMS } from '@hana/core'
+```
+
+### Không được phép ❌
+
+```typescript
+// @hana/types import từ bất kỳ @hana/* nào
+import { something } from '@hana/core'  // ❌ circular
+
+// @hana/schema import từ @hana/core
+import { HanaCMS } from '@hana/core'    // ❌ circular
+
+// Plugin import từ plugin khác
+// plugins/plugin-blog import từ plugins/plugin-auth ❌
+
+// @hana/core import từ @hana/ui
+import { ComponentRegistry } from '@hana/ui'  // ❌ circular
+```
+
+## Import Type-Only
+
+Khi chỉ cần interface/type (không cần runtime value), **luôn dùng `import type`**:
+
+```typescript
+// ✅ Đúng — chỉ dùng type lúc compile
+import type { CMSPlugin, CMSConfig } from '@hana/types'
+
+// ❌ Sai — tạo runtime dependency không cần thiết
+import { CMSPlugin } from '@hana/types'
+```
+
+## Workspace References
+
+Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
+
+```json
+{
+  "dependencies": {
+    "@hana/types": "workspace:*",
+    "@hana/schema": "workspace:*"
+  }
+}
+```
+
+## Last updated
+
+2026-03-21 — Initial creation

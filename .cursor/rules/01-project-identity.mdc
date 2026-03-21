@@ -1,0 +1,35 @@
+---
+description: Project identity — Tên, scope, runtime, và các thông tin cốt lõi của Hana CMS
+alwaysApply: true
+---
+
+# Project Identity — Hana CMS
+
+## Tên & Package Scope
+
+- **Project name**: Hana CMS (tên codebase là `hana-cms`)
+- **Package scope**: `@hana/*` — tất cả internal packages dùng prefix này
+- **Repo type**: Private monorepo (không publish lên npm public registry hiện tại)
+
+## Runtime
+
+- **Primary runtime**: [Bun](https://bun.sh) — KHÔNG dùng `node` để run server
+- **Package manager**: `bun` — KHÔNG dùng `npm`, `pnpm`, hoặc `yarn`
+- **Install command**: `bun install`
+- **Script execution**: `bun run <script>` hoặc `bunx <tool>`
+
+## Server Framework
+
+- **HTTP framework**: [Hono](https://hono.dev) — multi-runtime (Bun / Node / Cloudflare Workers)
+- Hono được dùng làm nền tảng cho tất cả API routes trong core và plugins
+- Import từ `hono`, không import từ `@hono/node-server` (đã có Bun adapter)
+
+## Architecture Pattern
+
+- **Plugin-first**: Mọi tính năng (auth, blog, media) là plugins, không hardcode vào core
+- **Extensible**: Plugins đăng ký routes, schema, hooks, và UI components qua API chuẩn
+- **Admin UI**: Vue 3 SPA build vào `core/dist/admin`, được serve bởi Hono static middleware
+
+## Last updated
+
+2026-03-21 — Initial creation

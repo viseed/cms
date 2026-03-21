@@ -1,0 +1,116 @@
+---
+description: Database patterns — Drizzle ORM conventions, schema design, driver support
+globs: ["packages/schema/**", "packages/core/src/database.ts", "plugins/**"]
+alwaysApply: false
+---
+
+# Database Patterns — Drizzle ORM
+
+> **Khi thêm DB driver mới hoặc thay đổi schema patterns → cập nhật file này.**
+
+## Driver Support (hiện tại)
+
+| Driver | Status | Config |
+|---|---|---|
+| `sqlite` | ✅ Production-ready | `{ driver: 'sqlite', url: './data.db' }` |
+| `turso` | 🔜 Planned | `{ driver: 'turso', url: 'libsql://...', authToken: '...' }` |
+| `postgres` | 🔜 Planned | `{ driver: 'postgres', url: 'postgresql://...' }` |
+
+Source: `packages/core/src/database.ts` — thêm driver mới ở hàm `createDatabase()`
+
+SQLite được tối ưu với: `PRAGMA journal_mode = WAL` (set tự động khi khởi tạo)
+
+## Schema Architecture
+
+### Core Tables (`packages/schema/`)
+
+```
+users              → base user table
+sessions           → user sessions
+installed_plugins  → danh sách plugins đã cài (community plugins)
+```
+
+### Plugin Tables
+
+- Mỗi plugin export `schema` object chứa Drizzle table definitions
+- Table name **bắt buộc phải có prefix** của plugin tên để tránh collision:
+
+```typescript
+// ✅ Đúng
+const posts      = sqliteTable('blog_posts', ...)      // prefix: blog_
+const categories = sqliteTable('blog_categories', ...) // prefix: blog_
+
+// ❌ Sai — tên chung có thể conflict với plugin khác
+const posts = sqliteTable('posts', ...)
+```
+
+### Schema Merge Flow
+
+```
+HanaCMS.launch()
+  └─ createDatabase(config, pluginSchemas)
+       └─ mergeSchemas(coreSchema, ...pluginSchemas)
+            ├─ Throw nếu có key trùng nhau
+            └─ Return merged schema object → pass vào drizzle()
+```
+
+Source: `packages/schema/src/schema-builder.ts`
+
+## Conventions khi viết Drizzle Schema
+
+```typescript
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
+
+export const blogPosts = sqliteTable('blog_posts', {
+  // ID: integer autoIncrement
+  id: integer('id').primaryKey({ autoIncrement: true }),
+
+  // Timestamps: luôn thêm createdAt, updatedAt
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+
+  // Text fields
+  title: text('title').notNull(),
+  slug:  text('slug').notNull().unique(),
+}, (table) => ({
+  // Index quan trọng
+  slugIdx: index('blog_posts_slug_idx').on(table.slug),
+}))
+```
+
+## Lấy DB Instance trong Plugin
+
+```typescript
+// ✅ Đúng — nhận qua cms:init hook
+let db: ReturnType<typeof import('@hana/core').createDatabase>
+
+export const hooks = {
+  'cms:init': async (cms) => {
+    db = cms.getDatabase()
+  }
+}
+
+// ❌ Sai — KHÔNG tự tạo connection riêng trong plugin
+import { Database } from 'bun:sqlite'
+const db = new Database('./data.db')  // ❌
+```
+
+## Migration
+
+```bash
+# Chạy migration qua CLI
+bunx hanabi migrate
+
+# Lệnh này: thu thập schemas từ core + tất cả installed plugins
+# → generate Drizzle migration files → apply vào DB
+```
+
+Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
+
+## Last updated
+
+2026-03-21 — Initial creation

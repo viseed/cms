@@ -1,0 +1,101 @@
+---
+description: Tooling stack — Các tools chính xác đang dùng, tránh AI suggest sai tools
+alwaysApply: true
+---
+
+# Tooling Stack — Hana CMS (03/2026)
+
+Đây là danh sách tool **đang thực sự dùng**. KHÔNG suggest thay thế trừ khi được yêu cầu.
+
+## Build
+
+| Tool | Package | Lý do chọn |
+|---|---|---|
+| **bunup** | `bunup` (root `bunup.config.ts`) | Bun-native bundler, nhanh ~9x so với tsup, tự gen `.d.ts` |
+
+```bash
+bun run build          # build tất cả packages qua Turborepo
+bun run build:plugins  # build plugins only
+```
+
+**KHÔNG dùng**: `tsup`, `tsdown`, `tsc --build`, `rollup`, `esbuild` trực tiếp, `vite build` cho packages
+
+## Lint & Format
+
+| Tool | Config file | Lý do chọn |
+|---|---|---|
+| **Biome v2** | `biome.json` (root) | Type-aware, 35x nhanh hơn Prettier, thay cả ESLint + Prettier |
+
+```bash
+bun run lint          # biome check .
+bun run lint:fix      # biome check --write .
+bun run format        # biome format --write .
+```
+
+**Config thực tế** (`biome.json`):
+- indent: 2 spaces
+- quotes: single
+- semicolons: `asNeeded` (không có semicolon cuối dòng)
+- lineWidth: 100
+
+**KHÔNG dùng**: `eslint`, `prettier`, `.eslintrc`, `.prettierrc`
+
+## Test
+
+| Tool | Lý do chọn |
+|---|---|
+| **bun test** | Built-in, tương thích Jest API, không cần cài thêm |
+
+```bash
+bun test              # chạy tất cả *.test.ts
+bun test --watch      # watch mode
+```
+
+**KHÔNG dùng**: `vitest`, `jest`, `mocha`
+
+## Monorepo
+
+| Layer | Tool | Vai trò |
+|---|---|---|
+| Task orchestration | **Turborepo** | Caching, parallel tasks, dependency graph |
+| Package management | **Bun workspaces** | Linking, hoisting, lockfile |
+
+```bash
+bun run dev:starter    # turbo run dev --filter=@hana/starter
+bun run dev:admin      # turbo run dev --filter=@hana/admin
+bun run dev:docs       # turbo run dev --filter=@hana/docs
+bun run dev:playground # turbo run dev --filter=@hana/playground
+```
+
+Config: `turbo.json` (root)
+
+## Version & Publish
+
+| Tool | Config |
+|---|---|
+| **@changesets/cli** | `.changeset/config.json` |
+
+```bash
+bun run changeset          # tạo changeset mới
+bun run version-packages   # bump versions
+bun run publish-packages   # publish lên npm
+```
+
+## Frontend (apps/admin)
+
+| Tool | Version |
+|---|---|
+| **Vue 3** | Latest |
+| **Vite** | (trong `apps/admin/vite.config.ts`) |
+
+Build output của admin → embedded vào `core/dist/admin`
+
+## Documentation
+
+| Tool | App |
+|---|---|
+| **VitePress** | `apps/docs` |
+
+## Last updated
+
+2026-03-21 — Initial creation

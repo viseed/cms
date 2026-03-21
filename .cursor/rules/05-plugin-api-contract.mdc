@@ -1,0 +1,127 @@
+---
+description: Plugin API contract — Interface CMSPlugin, hooks lifecycle, conventions khi viết plugin
+globs: ["plugins/**", "packages/types/src/plugin.ts", "packages/core/**"]
+alwaysApply: false
+---
+
+# Plugin API Contract
+
+> **Khi thay đổi `CMSPlugin` interface hoặc thêm hooks mới → cập nhật file này.**
+> Source of truth: `packages/types/src/plugin.ts`
+
+## Interface CMSPlugin (hiện tại)
+
+```typescript
+// packages/types/src/plugin.ts
+interface CMSPlugin {
+  name: string      // required — unique identifier, dùng kebab-case
+  version: string   // required — semver (vd: "1.0.0")
+  schema?: Record<string, unknown>    // Drizzle table objects từ plugin
+  hooks?: Partial<CMSPluginHooks>     // lifecycle hooks
+  routes?: (app: Hono) => void        // đăng ký Hono routes
+}
+
+interface CMSPluginHooks {
+  'cms:init':        (cms: HanaCMS) => void | Promise<void>
+  'cms:ready':       (app: Hono)    => void | Promise<void>
+  'admin:register':  (registry: ComponentRegistry) => void
+}
+```
+
+## Lifecycle Hooks — Thứ tự thực thi
+
+```
+1. createCMS(config)         → HanaCMS constructor, đăng ký tất cả plugins
+2. cms.launch()
+   ├─ createDatabase()       → merge schemas từ core + tất cả plugins
+   ├─ hooks.run('cms:init')  → mỗi plugin nhận HanaCMS instance (setup DB, services)
+   ├─ plugin.routes(app)     → đăng ký Hono routes cho từng plugin
+   └─ hooks.run('cms:ready') → app đã có routes, chuẩn bị nhận request
+3. admin:register            → được gọi khi Admin UI khởi tạo ComponentRegistry
+```
+
+## Quy tắc viết Plugin
+
+### Schema
+
+```typescript
+// ✅ Đúng — export Drizzle table objects
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+
+export const posts = sqliteTable('blog_posts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+})
+
+// Plugin export schema object
+export const schema = { posts }
+```
+
+- Table name **phải có prefix** của plugin để tránh conflict (`blog_posts`, không phải `posts`)
+- Schema phải là plain Drizzle table objects — KHÔNG custom SQL string (đó là Community plugin)
+- `mergeSchemas()` sẽ throw nếu có key trùng nhau
+
+### Routes
+
+```typescript
+// ✅ Đúng
+export function routes(app: Hono): void {
+  app.get('/blog/posts', async (c) => {
+    // lấy db qua context hoặc dependency injection
+    return c.json({ posts: [] })
+  })
+}
+```
+
+- Routes prefix bằng tên plugin: `/blog/`, `/auth/`, `/media/`
+- KHÔNG tự tạo Hono instance riêng — nhận `app` từ param
+- KHÔNG tự tạo DB connection — nhận qua `cms:init` hook
+
+### Hooks
+
+```typescript
+// ✅ Đúng — lấy db trong cms:init
+let db: DatabaseInstance
+
+export const hooks: CMSPlugin['hooks'] = {
+  'cms:init': async (cms) => {
+    db = cms.getDatabase()
+  },
+}
+```
+
+### Plugin Factory Pattern
+
+```typescript
+// ✅ Chuẩn — export factory function
+import type { CMSPlugin } from '@hana/types'
+
+export function createBlogPlugin(options?: BlogPluginOptions): CMSPlugin {
+  return {
+    name: 'plugin-blog',
+    version: '1.0.0',
+    schema,
+    hooks,
+    routes,
+  }
+}
+
+// Dùng:
+createCMS({
+  plugins: [createBlogPlugin({ postsPerPage: 10 })],
+})
+```
+
+## Two-Type Plugin Architecture
+
+| | Official Plugins | Community Plugins |
+|---|---|---|
+| Phân phối | npm package | CDN/S3 ESM bundle |
+| Cài đặt | `bun add` + restart | dynamic import, không restart |
+| Schema | Drizzle type-safe objects | raw SQL string (`schema_sql`) |
+| Dependencies | full npm deps | self-bundled, không external deps |
+| Ví dụ | `@hana/plugin-auth` | third-party từ registry |
+
+## Last updated
+
+2026-03-21 — Initial creation

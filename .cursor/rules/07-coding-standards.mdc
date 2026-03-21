@@ -1,0 +1,150 @@
+---
+description: Coding standards — TypeScript conventions, code style theo Biome config thực tế
+globs: ["**/*.ts", "**/*.vue", "**/*.tsx"]
+alwaysApply: false
+---
+
+# Coding Standards — Hana CMS
+
+> Source of truth cho style: `biome.json` (root).
+> **Khi đổi biome config → cập nhật file này.**
+
+## Formatting (Biome v2)
+
+```
+indent:      2 spaces (KHÔNG tabs)
+quotes:      single (')
+semicolons:  asNeeded — KHÔNG có semicolon cuối dòng
+lineWidth:   100 characters
+```
+
+Ví dụ đúng:
+
+```typescript
+// ✅ no semicolons, single quotes, 2-space indent
+import type { CMSPlugin } from '@hana/types'
+
+export function createPlugin(name: string): CMSPlugin {
+  return {
+    name,
+    version: '1.0.0',
+  }
+}
+```
+
+## TypeScript
+
+### Export style
+
+```typescript
+// ✅ Named exports trong packages (KHÔNG default export)
+export class HanaCMS { ... }
+export function createCMS(config: CMSConfig): HanaCMS { ... }
+export type { CMSConfig, CMSPlugin }
+
+// ❌ Tránh default export trong packages/
+export default HanaCMS
+```
+
+### Type imports
+
+```typescript
+// ✅ Dùng import type khi chỉ cần type
+import type { CMSPlugin, CMSConfig } from '@hana/types'
+import type { Hono } from 'hono'
+
+// ✅ Import value khi cần runtime
+import { Hono } from 'hono'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
+```
+
+### Error handling
+
+```typescript
+// ✅ Throw với context cụ thể
+throw new Error(`Database driver "${config.driver}" is not yet supported. Use "sqlite".`)
+throw new Error(`Schema conflict: table "${key}" is defined by multiple plugins.`)
+
+// ✅ Async error handling
+async function fetchData() {
+  try {
+    const data = await someAsyncOperation()
+    return data
+  } catch (error) {
+    throw new Error(`fetchData failed: ${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+// ❌ Empty catch, swallow errors
+try { ... } catch (_) { }
+```
+
+### Async patterns
+
+```typescript
+// ✅ async/await
+const result = await cms.launch()
+
+// ❌ .then() chains
+cms.launch().then(app => ...).catch(err => ...)
+```
+
+### Naming conventions
+
+```
+Variables/functions:  camelCase    (createDatabase, hookRegistry)
+Classes:              PascalCase   (HanaCMS, HookRegistry, PluginRegistryClient)
+Interfaces/Types:     PascalCase   (CMSPlugin, DatabaseConfig)
+Constants:            UPPER_SNAKE  (MAX_RETRY_COUNT) — chỉ cho true constants
+Files:                kebab-case   (hook-registry.ts, schema-builder.ts)
+Directories:          kebab-case   (plugin-auth/, packages/core/)
+```
+
+### `noExplicitAny`
+
+Biome config: `noExplicitAny: "warn"` — cố gắng tránh `any`, dùng `unknown` và narrow type:
+
+```typescript
+// ✅ Dùng unknown + type guard
+function process(value: unknown) {
+  if (typeof value === 'string') { ... }
+}
+
+// ⚠️ Cần có comment lý do nếu phải dùng any
+const handler = handler as (...a: unknown[]) => unknown  // HookRegistry internal
+```
+
+## File Organization (trong mỗi package)
+
+```
+packages/core/src/
+├── index.ts           ← re-export public API
+├── hana-cms.ts        ← main class
+├── hook-registry.ts   ← HookRegistry
+└── database.ts        ← createDatabase()
+```
+
+- `index.ts` chỉ re-export, không có logic
+- Mỗi file có **1 responsibility chính**
+- File không vượt quá ~150 lines (nếu quá → tách module)
+
+## Vue (apps/admin)
+
+```vue
+<!-- ✅ script setup syntax -->
+<script setup lang="ts">
+import { ref } from 'vue'
+const count = ref(0)
+</script>
+
+<template>
+  <div>{{ count }}</div>
+</template>
+```
+
+- Dùng `<script setup>` (Composition API), KHÔNG Options API
+- Component names: PascalCase (`AdminLayout.vue`, `PluginsView.vue`)
+
+## Last updated
+
+2026-03-21 — Initial creation

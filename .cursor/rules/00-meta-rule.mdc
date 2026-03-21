@@ -1,0 +1,42 @@
+---
+description: Meta-rule — Quy tắc tự cập nhật rules khi project thay đổi kiến trúc
+alwaysApply: true
+---
+
+# Meta Rule — Giữ Rules Đồng Bộ Với Project
+
+Rules trong `.cursor/rules/` phản ánh trạng thái **thực tế** của project.
+Khi làm việc ở **Plan mode** hoặc **Agent mode**, nếu thực hiện bất kỳ thay đổi kiến trúc nào,
+**PHẢI cập nhật rule file tương ứng** trong cùng session hoặc PR đó.
+
+## Bảng ánh xạ: Thay đổi → Rule cần cập nhật
+
+| Thay đổi | Rule file cần cập nhật |
+|---|---|
+| Thêm package mới vào `packages/` | `03-package-map.mdc`, `04-dependency-rules.mdc` |
+| Thêm plugin mới vào `plugins/` | `03-package-map.mdc` |
+| Thêm app mới vào `apps/` | `03-package-map.mdc` |
+| Xoá / đổi tên package, plugin, app | `03-package-map.mdc`, `04-dependency-rules.mdc` |
+| Thay đổi `CMSPlugin` interface | `05-plugin-api-contract.mdc` |
+| Thêm hook mới vào `CMSPluginHooks` | `05-plugin-api-contract.mdc` |
+| Thêm DB driver mới (turso, postgres) | `06-database-patterns.mdc` |
+| Thay đổi build tool / test runner / linter | `02-tooling-stack.mdc` |
+| Đổi biome config (indent, quotes...) | `07-coding-standards.mdc` |
+| Đổi tên package scope (ví dụ @hana → @hanabi) | `01-project-identity.mdc`, `03-package-map.mdc`, `04-dependency-rules.mdc` |
+| Thay đổi dependency graph giữa packages | `04-dependency-rules.mdc` |
+
+## Checklist khi kết thúc mỗi Plan / Agent session
+
+Trước khi hoàn thành task, tự hỏi:
+
+- [ ] Có package/plugin/app mới không? → cập nhật `03-package-map.mdc`
+- [ ] Có thay đổi interface `CMSPlugin` không? → cập nhật `05-plugin-api-contract.mdc`
+- [ ] Có thay đổi import graph không? → cập nhật `04-dependency-rules.mdc`
+- [ ] Có thay đổi tooling không? → cập nhật `02-tooling-stack.mdc`
+- [ ] Rules đã reflect đúng trạng thái thực của project chưa?
+
+## Nguyên tắc
+
+- Rules **KHÔNG** được outdate so với code thực tế
+- Nếu rule mâu thuẫn với code → **code là source of truth**, cập nhật rule
+- Mỗi rule file có section `## Last updated` để tracking
