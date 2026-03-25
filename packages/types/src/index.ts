@@ -30,10 +30,28 @@ export type {
   ThemeAssets,
   ThemeLayoutEntry,
   ThemeLayoutMap,
+  ThemeSettingsSchema,
   ThemeSettingsValue,
   ThemeMenuItem,
   LayoutContext,
 } from './theme'
+
+export type {
+  ThemeSettingsField,
+  ThemeSettingsFieldBase,
+  ThemeSettingsTextField,
+  ThemeSettingsTextareaField,
+  ThemeSettingsBooleanField,
+  ThemeSettingsSelectField,
+  ThemeSettingsSelectOption,
+  ThemeSettingsColorField,
+  ThemeSettingsImageField,
+  ThemeSettingsLinkListField,
+  ThemeSettingsLinkItem,
+  ThemeSettingsSection,
+} from './theme-settings'
+
+export { resolveDefaultSettings } from './theme-settings'
 
 export type {
   RequiredLayoutKey,

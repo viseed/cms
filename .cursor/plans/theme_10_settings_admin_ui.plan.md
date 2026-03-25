@@ -1,6 +1,7 @@
 ---
 name: Theme Settings Admin UI
 overview: Render theme settings trong admin từ schema đã định nghĩa, chưa đụng preview live hay publish workflow.
+todos: []
 isProject: false
 ---
 
@@ -32,8 +33,8 @@ Cho admin sửa theme settings qua form generate từ schema, không hardcode pe
 ## Tasks
 
 1. Thêm endpoints:
-   - `GET /api/admin/themes/:name/settings`
-   - `PUT /api/admin/themes/:name/settings`
+  - `GET /api/admin/themes/:name/settings`
+  - `PUT /api/admin/themes/:name/settings`
 2. Tạo screen settings riêng cho active theme hoặc selected installed theme.
 3. Render form theo `ThemeSettingsSchema`.
 4. Persist settings JSON vào `hana_theme_state`.
@@ -49,3 +50,4 @@ Cho admin sửa theme settings qua form generate từ schema, không hardcode pe
 - Live preview.
 - Draft vs published settings.
 - Undo history.
+

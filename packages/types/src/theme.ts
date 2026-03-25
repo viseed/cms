@@ -5,12 +5,12 @@ import type {
   ThemeMenuDeclaration,
   ThemeMenuItem,
 } from './theme-layout'
+import type { ThemeSettingsSchema, ThemeSettingsValue } from './theme-settings'
 
 export type { ThemeMenuItem }
 
-export interface ThemeSettingsValue {
-  [key: string]: unknown
-}
+// Re-export so consumers can import ThemeSettingsValue from '@hana/types' directly.
+export type { ThemeSettingsSchema, ThemeSettingsValue }
 
 export interface LayoutContext<TData = Record<string, unknown>> {
   data: TData
@@ -45,7 +45,8 @@ export interface CMSTheme {
   version: string
   layouts: ThemeLayoutMap
   menuZones?: ThemeMenuDeclaration
-  settingsSchema?: Record<string, unknown>
+  /** Structured schema describing all configurable settings for this theme. */
+  settingsSchema?: ThemeSettingsSchema
   assets?: ThemeAssets
   hooks?: Partial<CMSThemeHooks>
 }

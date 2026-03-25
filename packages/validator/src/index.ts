@@ -30,3 +30,23 @@ export {
   type PluginManifestInput,
   type InstallPluginInput,
 } from './plugin'
+
+export {
+  themeSettingsFieldSchema,
+  themeSettingsTextFieldSchema,
+  themeSettingsTextareaFieldSchema,
+  themeSettingsBooleanFieldSchema,
+  themeSettingsSelectFieldSchema,
+  themeSettingsSelectOptionSchema,
+  themeSettingsColorFieldSchema,
+  themeSettingsImageFieldSchema,
+  themeSettingsLinkListFieldSchema,
+  themeSettingsLinkItemSchema,
+  themeSettingsSectionSchema,
+  themeSettingsSchemaValidator,
+  themeSettingsValueSchema,
+  type ThemeSettingsFieldInput,
+  type ThemeSettingsSectionInput,
+  type ThemeSettingsSchemaInput,
+  type ThemeSettingsValueInput,
+} from './theme-settings'
