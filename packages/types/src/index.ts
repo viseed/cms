@@ -29,10 +29,27 @@ export type {
   ThemeFactory,
   ThemeAssets,
   ThemeLayoutEntry,
+  ThemeLayoutMap,
   ThemeSettingsValue,
   ThemeMenuItem,
   LayoutContext,
 } from './theme'
+
+export type {
+  RequiredLayoutKey,
+  OptionalLayoutKey,
+  ThemeLayoutKey,
+  HomeLayoutData,
+  PostLayoutData,
+  CategoryLayoutData,
+  PageLayoutData,
+  NotFoundLayoutData,
+  LayoutDataMap,
+  RequiredMenuZone,
+  OptionalMenuZone,
+  ThemeMenuZone,
+  ThemeMenuDeclaration,
+} from './theme-layout'
 
 export type {
   ThemeManifest,

@@ -32,6 +32,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 | **slot** | Điểm mở rộng bên trong region, cho phép plugin/widget inject markup | `sidebar:before`, `footer:widget-area` |
 | **theme settings** | Key-value config do theme khai báo schema, end-user tuỳ chỉnh qua admin | `{ primaryColor: '#3b82f6', showSidebar: true }` |
 | **active theme** | Theme duy nhất đang được mount để render mọi request phía front-end | Lưu trong DB, thay đổi qua admin |
+| **menu zone** | Vùng navigation do theme khai báo, dữ liệu menu items do admin/plugin cung cấp | `primary`, `footer`, `mobile` |
 
 ### Quy tắc đặt tên trong code
 
@@ -64,6 +65,46 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 - **Extension points**: Core cung cấp hook để plugin thêm `<script>`, `<style>`, hoặc mount points vào HTML output.
 - Plugin **KHÔNG** gọi theme function hay import theme module.
 
+## Required Layouts (MVP)
+
+Mọi theme official/community **phải** cung cấp tất cả required layout keys:
+
+| Layout key | Route pattern | Data contract (`LayoutDataMap`) |
+|---|---|---|
+| `home` | `/` | `HomeLayoutData { posts, categories }` |
+| `post` | `/post/:slug` | `PostLayoutData { post, relatedPosts, comments? }` |
+| `category` | `/category/:slug` | `CategoryLayoutData { category, posts }` |
+| `page` | `/page/:slug` | `PageLayoutData { page }` |
+| `404` | `/404` | `NotFoundLayoutData {}` |
+
+Optional layout keys (`tag`, `author`, `search`, `archive`) — theme **có thể** cung cấp, nhưng không bắt buộc.
+
+Type enforcement: `CMSTheme.layouts` dùng `ThemeLayoutMap` — TypeScript sẽ báo lỗi nếu thiếu required key.
+
+### Layout Data Contracts
+
+Core dùng `LayoutDataMap` để biết cần fetch data gì cho mỗi layout trước khi render.
+Theme có thể extend/override data qua optional `data()` hook trong `ThemeLayoutEntry`.
+
+### Layout Variants (reserved)
+
+Convention cho future variants (ví dụ `post.default`, `post.fullWidth`) đã được đặt chỗ nhưng **chưa implement**.
+Hiện tại mỗi layout key map tới đúng 1 `ThemeLayoutEntry`.
+
+## Menu Zones
+
+Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
+
+| Zone | Bắt buộc | Mô tả |
+|---|---|---|
+| `primary` | ✅ | Main navigation |
+| `footer` | ✅ | Footer links |
+| `mobile` | ❌ | Mobile-specific menu (optional) |
+
+**Quan trọng**: Theme **chỉ khai báo** menu zones. Dữ liệu menu items thật (`ThemeMenuItem[]`) do admin UI hoặc plugin cung cấp tại runtime. Theme không hardcode navigation links.
+
+`ThemeMenuItem` interface: `{ label, url, target?, children? }`
+
 ## Rendering Mechanism (đã chốt)
 
 - **Eta templates** + render function pattern.
@@ -82,4 +123,4 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 
 ## Last updated
 
-2026-03-22 — Initial creation (Theme Foundation plan)
+2026-03-25 — Added Required Layouts, Layout Data Contracts, Menu Zones, ThemeLayoutMap (Theme Layout Contract plan)
