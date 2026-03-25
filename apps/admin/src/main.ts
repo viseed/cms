@@ -7,6 +7,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: () => import('./views/DashboardView.vue') },
     { path: '/plugins', component: () => import('./views/PluginsView.vue') },
+    { path: '/themes', component: () => import('./views/ThemesView.vue') },
     { path: '/content', component: () => import('./views/ContentView.vue') },
     { path: '/media', component: () => import('./views/MediaView.vue') },
   ],

@@ -1,6 +1,7 @@
 ---
 name: Theme Admin Catalog Read
 overview: Thêm read-only catalog cho themes trong admin API và admin app trước khi hỗ trợ install hay activate.
+todos: []
 isProject: false
 ---
 
@@ -32,18 +33,18 @@ Cho admin nhìn thấy danh sách themes đã cài và theme khả dụng mà ch
 ## Tasks
 
 1. Thêm endpoint read-only, ví dụ:
-   - `GET /api/admin/themes`
-   - `GET /api/admin/themes/active`
+  - `GET /api/admin/themes`
+  - `GET /api/admin/themes/active`
 2. Tạo `ThemesView.vue` song song với [apps/admin/src/views/PluginsView.vue](../../apps/admin/src/views/PluginsView.vue), nhưng chỉ đọc dữ liệu.
 3. Thêm route `/themes` vào router admin.
 4. Nếu nav admin cần, thêm menu item mới nhưng giữ UI tối giản.
 5. Trả về đủ fields để UI hiển thị:
-   - name
-   - version
-   - description
-   - installed
-   - active
-   - missingRequiredLayouts
+  - name
+  - version
+  - description
+  - installed
+  - active
+  - missingRequiredLayouts
 
 ## Acceptance
 
@@ -55,3 +56,4 @@ Cho admin nhìn thấy danh sách themes đã cài và theme khả dụng mà ch
 - Install/uninstall.
 - Activate/deactivate.
 - Settings editor.
+

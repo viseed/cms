@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import type { CMSConfig, CMSPlugin, CMSTheme } from '@hana/types'
+import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey } from '@hana/types'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { createDatabase, type DatabaseInstance } from './database'
@@ -175,6 +175,16 @@ export class HanaCMS {
       return c.json(plugins)
     })
 
+    adminApi.get('/themes', (c) => {
+      return c.json(this.buildThemeCatalog())
+    })
+
+    adminApi.get('/themes/active', (c) => {
+      const theme = this.config.theme
+      if (!theme) return c.json(null)
+      return c.json(this.describeTheme(theme, true))
+    })
+
     adminApi.post('/plugins/:name/install', (c) => {
       const name = c.req.param('name')
 
@@ -196,6 +206,36 @@ export class HanaCMS {
     })
 
     this.app.route('/api/admin', adminApi)
+  }
+
+  private static readonly REQUIRED_LAYOUTS: RequiredLayoutKey[] = [
+    'home',
+    'post',
+    'category',
+    'page',
+    '404',
+  ]
+
+  private describeTheme(theme: CMSTheme, active: boolean) {
+    const providedKeys = Object.keys(theme.layouts)
+    const missingRequiredLayouts = HanaCMS.REQUIRED_LAYOUTS.filter(
+      (key) => !providedKeys.includes(key),
+    )
+
+    return {
+      name: theme.name,
+      version: theme.version,
+      description: `${theme.name} theme`,
+      installed: true,
+      active,
+      missingRequiredLayouts,
+    }
+  }
+
+  private buildThemeCatalog() {
+    const theme = this.config.theme
+    if (!theme) return []
+    return [this.describeTheme(theme, true)]
   }
 
   private setupAdminServing(): void {

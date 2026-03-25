@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Content', path: '/content', icon: '✎' },
   { label: 'Media', path: '/media', icon: '⬡' },
   { label: 'Plugins', path: '/plugins', icon: '⚙' },
+  { label: 'Themes', path: '/themes', icon: '◈' },
 ]
 </script>
 
