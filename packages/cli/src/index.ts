@@ -3,6 +3,7 @@
 import { initProject } from './commands/init'
 import { runMigrations } from './commands/migrate'
 import { installPlugin, uninstallPlugin } from './commands/plugin'
+import { installTheme, uninstallTheme } from './commands/theme'
 
 const [command, ...args] = process.argv.slice(2)
 
@@ -41,6 +42,24 @@ async function main(): Promise<void> {
       break
     }
 
+    case 'theme': {
+      const action = args[0]
+      const packageName = args[1]
+      if (!action || !packageName) {
+        console.error('Usage: hana theme <install|uninstall> <package-name>')
+        process.exit(1)
+      }
+      if (action === 'install') {
+        await installTheme(packageName)
+      } else if (action === 'uninstall') {
+        await uninstallTheme(packageName)
+      } else {
+        console.error(`Unknown theme action: ${action}`)
+        process.exit(1)
+      }
+      break
+    }
+
     default:
       console.log('Hana CMS CLI')
       console.log('')
@@ -49,6 +68,8 @@ async function main(): Promise<void> {
       console.log('  migrate                         Run database migrations')
       console.log('  plugin install <package>         Install a plugin')
       console.log('  plugin uninstall <package>       Uninstall a plugin')
+      console.log('  theme install <package>          Install a theme')
+      console.log('  theme uninstall <package>        Uninstall a theme')
   }
 }
 

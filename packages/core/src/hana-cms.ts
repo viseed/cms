@@ -1,7 +1,10 @@
 import { resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey } from '@hana/types'
+import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
+import { installedThemes } from '@hana/schema'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
 import { createThemeRuntime, type ThemeRuntime } from './theme-runtime'
@@ -183,6 +186,67 @@ export class HanaCMS {
       const theme = this.config.theme
       if (!theme) return c.json(null)
       return c.json(this.describeTheme(theme, true))
+    })
+
+    adminApi.post('/themes/:name/install', async (c) => {
+      const name = c.req.param('name')
+      const db = this.getDatabase()
+
+      const existing = await db
+        .select()
+        .from(installedThemes)
+        .where(eq(installedThemes.name, name))
+        .get()
+
+      if (existing) {
+        return c.json({ error: `Theme "${name}" is already installed.` }, 409)
+      }
+
+      await db.insert(installedThemes).values({
+        id: randomUUID(),
+        name,
+        version: '0.0.0',
+        bundleUrl: '',
+        integrity: '',
+        requiredLayouts: [],
+      })
+
+      return c.json({
+        message: `Theme "${name}" installed successfully.`,
+        theme: name,
+        requiresRestart: true,
+      })
+    })
+
+    adminApi.post('/themes/:name/uninstall', async (c) => {
+      const name = c.req.param('name')
+      const db = this.getDatabase()
+
+      const activeTheme = this.config.theme
+      if (activeTheme && activeTheme.name === name) {
+        return c.json(
+          { error: `Cannot uninstall theme "${name}" because it is currently active.` },
+          400,
+        )
+      }
+
+      const existing = await db
+        .select()
+        .from(installedThemes)
+        .where(eq(installedThemes.name, name))
+        .get()
+
+      if (!existing) {
+        return c.json({ error: `Theme "${name}" is not installed.` }, 404)
+      }
+
+      await db.delete(installedThemes).where(eq(installedThemes.name, name))
+
+      return c.json({
+        message: `Theme "${name}" uninstalled successfully.`,
+        theme: name,
+        requiresRestart: true,
+      })
     })
 
     adminApi.post('/plugins/:name/install', (c) => {

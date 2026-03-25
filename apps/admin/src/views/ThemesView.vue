@@ -34,6 +34,20 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function installTheme(theme: ThemeItem) {
+  const res = await fetch(`/api/admin/themes/${theme.name}/install`, { method: 'POST' })
+  if (res.ok) {
+    theme.installed = true
+  }
+}
+
+async function uninstallTheme(theme: ThemeItem) {
+  const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, { method: 'POST' })
+  if (res.ok) {
+    theme.installed = false
+  }
+}
 </script>
 
 <template>
@@ -63,7 +77,22 @@ onMounted(async () => {
 
         <div class="theme-footer">
           <span class="theme-version">v{{ theme.version }}</span>
-          <span v-if="theme.installed" class="theme-status installed">Installed</span>
+          <button
+            v-if="theme.installed"
+            class="theme-action uninstall"
+            :disabled="theme.active"
+            :title="theme.active ? 'Cannot uninstall the active theme' : 'Uninstall theme'"
+            @click="uninstallTheme(theme)"
+          >
+            Uninstall
+          </button>
+          <button
+            v-else
+            class="theme-action install"
+            @click="installTheme(theme)"
+          >
+            Install
+          </button>
         </div>
       </div>
     </div>
@@ -154,12 +183,34 @@ onMounted(async () => {
   font-size: 0.8rem;
 }
 
-.theme-status {
-  font-size: 0.75rem;
+.theme-action {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
   font-weight: 600;
+  transition: all 0.15s ease;
+  border: 1px solid;
 }
 
-.theme-status.installed {
-  color: #2e7d32;
+.theme-action:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.theme-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.theme-action.install {
+  background: #6c63ff;
+  color: #fff;
+  border-color: #6c63ff;
+}
+
+.theme-action.uninstall {
+  background: #fff;
+  color: #e53935;
+  border-color: #e53935;
 }
 </style>
