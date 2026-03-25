@@ -4,6 +4,16 @@ import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
+import { createThemeRuntime, type ThemeRuntime } from './theme-runtime'
+
+const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
+  home: '/',
+  post: '/post/:slug',
+  page: '/page/:slug',
+  category: '/category/:slug',
+  archive: '/archive',
+  '404': '/404',
+}
 
 export class HanaCMS {
   private app: Hono
@@ -11,6 +21,7 @@ export class HanaCMS {
   private hooks = new HookRegistry()
   private db: DatabaseInstance | null = null
   private config: CMSConfig
+  private themeRuntime: ThemeRuntime | null = null
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -51,6 +62,10 @@ export class HanaCMS {
       }
     }
 
+    if (this.hasTheme()) {
+      await this.mountTheme()
+    }
+
     this.setupAdminApi()
     this.setupAdminServing()
 
@@ -80,6 +95,69 @@ export class HanaCMS {
 
   getApp(): Hono {
     return this.app
+  }
+
+  getThemeRuntime(): ThemeRuntime | null {
+    return this.themeRuntime
+  }
+
+  private async mountTheme(): Promise<void> {
+    const theme = this.config.theme
+    if (!theme) return
+
+    this.themeRuntime = createThemeRuntime(theme, this)
+
+    this.setupThemeStaticAssets(theme)
+    this.setupThemeRoutes(theme)
+
+    await this.hooks.run('theme:mount', theme)
+  }
+
+  private setupThemeStaticAssets(theme: CMSTheme): void {
+    const staticDir = theme.assets?.staticDir
+    if (!staticDir) return
+
+    const resolvedDir = resolve(process.cwd(), staticDir)
+
+    this.app.get(
+      '/theme/static/*',
+      serveStatic({
+        root: resolvedDir,
+        rewriteRequestPath: (path) => path.replace('/theme/static', ''),
+      }),
+    )
+  }
+
+  private setupThemeRoutes(theme: CMSTheme): void {
+    for (const layoutKey of Object.keys(theme.layouts)) {
+      const routePath = DEFAULT_LAYOUT_ROUTES[layoutKey]
+      if (!routePath) continue
+
+      this.app.get(routePath, async (c) => {
+        const defaultData: Record<string, unknown> = {
+          params: c.req.param() as Record<string, string>,
+          query: c.req.query(),
+          path: c.req.path,
+        }
+
+        const data = await this.hooks.runWaterfall('theme:beforeRender', layoutKey, defaultData)
+
+        const runtime = this.themeRuntime
+        if (!runtime) return c.text('Theme not mounted', 500)
+
+        const html = await runtime.renderLayout(layoutKey, {
+          data,
+          settings: {},
+          menus: {},
+          request: {
+            url: c.req.url,
+            params: c.req.param() as Record<string, string>,
+          },
+        })
+
+        return c.html(html)
+      })
+    }
   }
 
   private setupAdminApi(): void {

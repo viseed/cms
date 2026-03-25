@@ -22,22 +22,32 @@ interface CMSPlugin {
 }
 
 interface CMSPluginHooks {
-  'cms:init':        (cms: HanaCMS) => void | Promise<void>
-  'cms:ready':       (app: Hono)    => void | Promise<void>
-  'admin:register':  (registry: ComponentRegistry) => void
+  'cms:init':            (cms: HanaCMS) => void | Promise<void>
+  'cms:ready':           (app: Hono)    => void | Promise<void>
+  'admin:register':      (registry: ComponentRegistry) => void
+  'theme:mount':         (theme: CMSTheme) => void | Promise<void>
+  'theme:beforeRender':  (layoutKey: string, data: Record<string, unknown>) => Record<string, unknown> | Promise<Record<string, unknown>>
 }
 ```
 
 ## Lifecycle Hooks — Thứ tự thực thi
 
 ```
-1. createCMS(config)         → HanaCMS constructor, đăng ký tất cả plugins
+1. createCMS(config)            → HanaCMS constructor, đăng ký tất cả plugins
 2. cms.launch()
-   ├─ createDatabase()       → merge schemas từ core + tất cả plugins
-   ├─ hooks.run('cms:init')  → mỗi plugin nhận HanaCMS instance (setup DB, services)
-   ├─ plugin.routes(app)     → đăng ký Hono routes cho từng plugin
-   └─ hooks.run('cms:ready') → app đã có routes, chuẩn bị nhận request
-3. admin:register            → được gọi khi Admin UI khởi tạo ComponentRegistry
+   ├─ createDatabase()          → merge schemas từ core + tất cả plugins
+   ├─ hooks.run('cms:init')     → mỗi plugin nhận HanaCMS instance (setup DB, services)
+   ├─ plugin.routes(app)        → đăng ký Hono routes cho từng plugin
+   ├─ mountTheme()              → nếu config có theme:
+   │   ├─ createThemeRuntime()  → khởi tạo Eta engine, resolve template dir
+   │   ├─ setupThemeStaticAssets() → serve /theme/static/* nếu staticDir có
+   │   ├─ setupThemeRoutes()    → đăng ký routes cho mỗi layout (/, /post/:slug, ...)
+   │   └─ hooks.run('theme:mount') → plugins nhận CMSTheme instance
+   ├─ setupAdminApi()           → đăng ký /api/admin routes
+   ├─ setupAdminServing()       → serve admin SPA
+   └─ hooks.run('cms:ready')    → app đã có routes, chuẩn bị nhận request
+3. admin:register               → được gọi khi Admin UI khởi tạo ComponentRegistry
+4. theme:beforeRender           → mỗi request tới theme route, trước khi Eta render
 ```
 
 ## Quy tắc viết Plugin
@@ -124,4 +134,4 @@ createCMS({
 
 ## Last updated
 
-2026-03-21 — Initial creation
+2026-03-22 — Added `theme:mount` and `theme:beforeRender` hooks (Theme Runtime Mounting)

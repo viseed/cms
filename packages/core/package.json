@@ -16,11 +16,12 @@
     "test": "bun test"
   },
   "dependencies": {
-    "hono": "^4.7.0",
-    "drizzle-orm": "^0.44.0",
-    "@hana/types": "workspace:*",
     "@hana/schema": "workspace:*",
-    "@hana/validator": "workspace:*"
+    "@hana/types": "workspace:*",
+    "@hana/validator": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "eta": "^4.5.1",
+    "hono": "^4.7.0"
   },
   "devDependencies": {
     "@hana/config": "workspace:*",
