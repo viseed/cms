@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 interface ThemeItem {
   name: string
@@ -77,22 +80,32 @@ async function uninstallTheme(theme: ThemeItem) {
 
         <div class="theme-footer">
           <span class="theme-version">v{{ theme.version }}</span>
-          <button
-            v-if="theme.installed"
-            class="theme-action uninstall"
-            :disabled="theme.active"
-            :title="theme.active ? 'Cannot uninstall the active theme' : 'Uninstall theme'"
-            @click="uninstallTheme(theme)"
-          >
-            Uninstall
-          </button>
-          <button
-            v-else
-            class="theme-action install"
-            @click="installTheme(theme)"
-          >
-            Install
-          </button>
+          <div class="theme-actions">
+            <button
+              v-if="theme.active"
+              class="theme-action settings"
+              title="Configure theme settings"
+              @click="router.push(`/themes/${theme.name}/settings`)"
+            >
+              Settings
+            </button>
+            <button
+              v-if="theme.installed"
+              class="theme-action uninstall"
+              :disabled="theme.active"
+              :title="theme.active ? 'Cannot uninstall the active theme' : 'Uninstall theme'"
+              @click="uninstallTheme(theme)"
+            >
+              Uninstall
+            </button>
+            <button
+              v-else
+              class="theme-action install"
+              @click="installTheme(theme)"
+            >
+              Install
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -178,6 +191,11 @@ async function uninstallTheme(theme: ThemeItem) {
   justify-content: space-between;
 }
 
+.theme-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .theme-version {
   color: #999;
   font-size: 0.8rem;
@@ -212,5 +230,11 @@ async function uninstallTheme(theme: ThemeItem) {
   background: #fff;
   color: #e53935;
   border-color: #e53935;
+}
+
+.theme-action.settings {
+  background: #fff;
+  color: #6c63ff;
+  border-color: #6c63ff;
 }
 </style>

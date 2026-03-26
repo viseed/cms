@@ -4,7 +4,7 @@ import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey } from '@hana/ty
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
-import { installedThemes } from '@hana/schema'
+import { installedThemes, themeState } from '@hana/schema'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
 import { createThemeRuntime, type ThemeRuntime } from './theme-runtime'
@@ -247,6 +247,70 @@ export class HanaCMS {
         theme: name,
         requiresRestart: true,
       })
+    })
+
+    adminApi.get('/themes/:name/settings', async (c) => {
+      const name = c.req.param('name')
+      const theme = this.config.theme
+
+      if (!theme || theme.name !== name) {
+        return c.json({ error: `Theme "${name}" not found.` }, 404)
+      }
+
+      const db = this.getDatabase()
+      const row = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.activeThemeName, name))
+        .get()
+
+      return c.json({
+        schema: theme.settingsSchema ?? null,
+        values: (row?.settings as Record<string, unknown>) ?? {},
+      })
+    })
+
+    adminApi.put('/themes/:name/settings', async (c) => {
+      const name = c.req.param('name')
+      const theme = this.config.theme
+
+      if (!theme || theme.name !== name) {
+        return c.json({ error: `Theme "${name}" not found.` }, 404)
+      }
+
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      if (typeof body !== 'object' || body === null || !('values' in body)) {
+        return c.json({ error: 'Body must be { values: Record<string, unknown> }.' }, 400)
+      }
+
+      const values = (body as { values: Record<string, unknown> }).values
+      if (typeof values !== 'object' || values === null) {
+        return c.json({ error: '"values" must be an object.' }, 400)
+      }
+
+      const db = this.getDatabase()
+      const existing = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.activeThemeName, name))
+        .get()
+
+      if (existing) {
+        await db
+          .update(themeState)
+          .set({ settings: values, updatedAt: new Date() })
+          .where(eq(themeState.activeThemeName, name))
+      } else {
+        await db.insert(themeState).values({ activeThemeName: name, settings: values })
+      }
+
+      return c.json({ message: 'Settings saved.', values })
     })
 
     adminApi.post('/plugins/:name/install', (c) => {
