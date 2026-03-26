@@ -15,8 +15,10 @@ interface ThemeItem {
 
 const themes = ref<ThemeItem[]>([])
 const loading = ref(true)
+const actionLoading = ref<string | null>(null)
+const notification = ref<{ type: 'success' | 'error'; text: string } | null>(null)
 
-onMounted(async () => {
+async function loadThemes() {
   try {
     const res = await fetch('/api/admin/themes')
     if (res.ok) {
@@ -36,19 +38,67 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(loadThemes)
+
+function showNotification(type: 'success' | 'error', text: string) {
+  notification.value = { type, text }
+  setTimeout(() => {
+    notification.value = null
+  }, 5000)
+}
 
 async function installTheme(theme: ThemeItem) {
-  const res = await fetch(`/api/admin/themes/${theme.name}/install`, { method: 'POST' })
-  if (res.ok) {
-    theme.installed = true
+  actionLoading.value = theme.name
+  try {
+    const res = await fetch(`/api/admin/themes/${theme.name}/install`, { method: 'POST' })
+    if (res.ok) {
+      theme.installed = true
+    } else {
+      const body = await res.json().catch(() => ({}))
+      showNotification('error', body.error ?? `Failed to install theme "${theme.name}".`)
+    }
+  } finally {
+    actionLoading.value = null
   }
 }
 
 async function uninstallTheme(theme: ThemeItem) {
-  const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, { method: 'POST' })
-  if (res.ok) {
-    theme.installed = false
+  actionLoading.value = theme.name
+  try {
+    const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, { method: 'POST' })
+    if (res.ok) {
+      theme.installed = false
+    } else {
+      const body = await res.json().catch(() => ({}))
+      showNotification('error', body.error ?? `Failed to uninstall theme "${theme.name}".`)
+    }
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+async function activateTheme(theme: ThemeItem) {
+  actionLoading.value = theme.name
+  try {
+    const res = await fetch(`/api/admin/themes/${theme.name}/activate`, { method: 'POST' })
+    const body = await res.json().catch(() => ({}))
+
+    if (res.ok) {
+      showNotification(
+        'success',
+        body.message ?? `Theme "${theme.name}" activated. Restart required.`,
+      )
+      // Mark theme as pending-active in the UI so the user knows their choice was recorded
+      themes.value.forEach((t) => {
+        t.active = t.name === theme.name
+      })
+    } else {
+      showNotification('error', body.error ?? `Failed to activate theme "${theme.name}".`)
+    }
+  } finally {
+    actionLoading.value = null
   }
 }
 </script>
@@ -57,6 +107,14 @@ async function uninstallTheme(theme: ThemeItem) {
   <div class="themes-view">
     <h1>Theme Catalog</h1>
     <p class="subtitle">Installed themes and their status</p>
+
+    <div
+      v-if="notification"
+      class="notification"
+      :class="notification.type"
+    >
+      {{ notification.text }}
+    </div>
 
     <div v-if="loading" class="loading">Loading themes...</div>
 
@@ -90,9 +148,18 @@ async function uninstallTheme(theme: ThemeItem) {
               Settings
             </button>
             <button
+              v-if="theme.installed && !theme.active"
+              class="theme-action activate"
+              :disabled="actionLoading === theme.name"
+              title="Set as active theme (requires restart)"
+              @click="activateTheme(theme)"
+            >
+              {{ actionLoading === theme.name ? '...' : 'Activate' }}
+            </button>
+            <button
               v-if="theme.installed"
               class="theme-action uninstall"
-              :disabled="theme.active"
+              :disabled="theme.active || actionLoading === theme.name"
               :title="theme.active ? 'Cannot uninstall the active theme' : 'Uninstall theme'"
               @click="uninstallTheme(theme)"
             >
@@ -101,6 +168,7 @@ async function uninstallTheme(theme: ThemeItem) {
             <button
               v-else
               class="theme-action install"
+              :disabled="actionLoading === theme.name"
               @click="installTheme(theme)"
             >
               Install
@@ -236,5 +304,31 @@ async function uninstallTheme(theme: ThemeItem) {
   background: #fff;
   color: #6c63ff;
   border-color: #6c63ff;
+}
+
+.theme-action.activate {
+  background: #fff;
+  color: #0288d1;
+  border-color: #0288d1;
+}
+
+.notification {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.notification.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.notification.error {
+  background: #fce4ec;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
 }
 </style>

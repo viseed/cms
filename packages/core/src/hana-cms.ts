@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey } from '@hana/types'
+import type { CMSConfig, CMSPlugin, CMSTheme, ThemeLayoutMap, RequiredLayoutKey } from '@hana/types'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
@@ -178,8 +178,34 @@ export class HanaCMS {
       return c.json(plugins)
     })
 
-    adminApi.get('/themes', (c) => {
-      return c.json(this.buildThemeCatalog())
+    adminApi.get('/themes', async (c) => {
+      const db = this.getDatabase()
+      const dbRecords = await db.select().from(installedThemes).all()
+      const configTheme = this.config.theme
+
+      const catalog = dbRecords.map((record) => {
+        const isActive = configTheme?.name === record.name
+        const runtimeTheme = isActive ? configTheme : undefined
+        const missingRequiredLayouts = runtimeTheme
+          ? HanaCMS.REQUIRED_LAYOUTS.filter((k) => !(k in runtimeTheme.layouts))
+          : []
+
+        return {
+          name: record.name,
+          version: record.version,
+          description: record.description ?? `${record.name} theme`,
+          installed: true,
+          active: isActive,
+          missingRequiredLayouts,
+        }
+      })
+
+      // Include config.theme if it was never inserted into installedThemes
+      if (configTheme && !dbRecords.find((r) => r.name === configTheme.name)) {
+        catalog.push(this.describeTheme(configTheme, true))
+      }
+
+      return c.json(catalog)
     })
 
     adminApi.get('/themes/active', (c) => {
@@ -244,6 +270,88 @@ export class HanaCMS {
 
       return c.json({
         message: `Theme "${name}" uninstalled successfully.`,
+        theme: name,
+        requiresRestart: true,
+      })
+    })
+
+    adminApi.post('/themes/:name/activate', async (c) => {
+      const name = c.req.param('name')
+      const db = this.getDatabase()
+
+      // Validate: theme must be installed in DB
+      const installedRecord = await db
+        .select()
+        .from(installedThemes)
+        .where(eq(installedThemes.name, name))
+        .get()
+
+      if (!installedRecord) {
+        return c.json({ error: `Theme "${name}" is not installed.` }, 404)
+      }
+
+      // Validate: not already the active runtime theme
+      const currentTheme = this.config.theme
+      if (currentTheme?.name === name) {
+        return c.json({ error: `Theme "${name}" is already the active theme.` }, 409)
+      }
+
+      // Validate: required layouts — only possible when the theme object is loaded in config
+      const runtimeTheme = this.config.theme?.name === name ? this.config.theme : undefined
+      if (runtimeTheme) {
+        const missingLayouts = HanaCMS.REQUIRED_LAYOUTS.filter((k) => !(k in runtimeTheme.layouts))
+        if (missingLayouts.length > 0) {
+          return c.json(
+            { error: `Theme "${name}" is missing required layouts: ${missingLayouts.join(', ')}.` },
+            422,
+          )
+        }
+      }
+
+      // Validate: required plugins must be loaded
+      const requiredPlugins = installedRecord.requiredPlugins ?? []
+      if (requiredPlugins.length > 0) {
+        const loadedNames = new Set(this.plugins.map((p) => p.name))
+        const missing = requiredPlugins.filter((p) => !loadedNames.has(p))
+        if (missing.length > 0) {
+          return c.json(
+            {
+              error: `Theme "${name}" requires the following plugins which are not loaded: ${missing.join(', ')}.`,
+            },
+            422,
+          )
+        }
+      }
+
+      // Persist: upsert a themeState row so the active choice survives restarts
+      const existingRow = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.activeThemeName, name))
+        .get()
+
+      if (existingRow) {
+        await db
+          .update(themeState)
+          .set({ updatedAt: new Date() })
+          .where(eq(themeState.activeThemeName, name))
+      } else {
+        await db.insert(themeState).values({ activeThemeName: name })
+      }
+
+      // Fire hook: allow plugins to react to the pending theme switch
+      const nextTheme: CMSTheme =
+        runtimeTheme ??
+        ({
+          name: installedRecord.name,
+          version: installedRecord.version,
+          layouts: {} as ThemeLayoutMap,
+        } as CMSTheme)
+
+      await this.hooks.run('theme:activate', nextTheme, currentTheme)
+
+      return c.json({
+        message: `Theme "${name}" has been set as active. A restart is required for changes to take effect.`,
         theme: name,
         requiresRestart: true,
       })
@@ -358,12 +466,6 @@ export class HanaCMS {
       active,
       missingRequiredLayouts,
     }
-  }
-
-  private buildThemeCatalog() {
-    const theme = this.config.theme
-    if (!theme) return []
-    return [this.describeTheme(theme, true)]
   }
 
   private setupAdminServing(): void {

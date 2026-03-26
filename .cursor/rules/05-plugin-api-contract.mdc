@@ -27,6 +27,7 @@ interface CMSPluginHooks {
   'admin:register':      (registry: ComponentRegistry) => void
   'theme:mount':         (theme: CMSTheme) => void | Promise<void>
   'theme:beforeRender':  (layoutKey: string, data: Record<string, unknown>) => Record<string, unknown> | Promise<Record<string, unknown>>
+  'theme:activate':      (theme: CMSTheme, previousTheme?: CMSTheme) => void | Promise<void>
 }
 ```
 
@@ -48,6 +49,10 @@ interface CMSPluginHooks {
    └─ hooks.run('cms:ready')    → app đã có routes, chuẩn bị nhận request
 3. admin:register               → được gọi khi Admin UI khởi tạo ComponentRegistry
 4. theme:beforeRender           → mỗi request tới theme route, trước khi Eta render
+5. theme:activate               → khi admin gọi POST /api/admin/themes/:name/activate;
+                                   `theme` là theme sắp active, `previousTheme` là theme đang chạy.
+                                   Dùng để re-register components hay clean up state.
+                                   Restart vẫn cần thiết để theme thực sự mount vào runtime.
 ```
 
 ## Quy tắc viết Plugin
@@ -134,4 +139,4 @@ createCMS({
 
 ## Last updated
 
-2026-03-22 — Added `theme:mount` and `theme:beforeRender` hooks (Theme Runtime Mounting)
+2026-03-26 — Added `theme:activate` hook (Theme Activation Lifecycle)
