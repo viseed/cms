@@ -1,6 +1,6 @@
 ---
 description: Theme API contract — CMSTheme interface, layout/region/slot vocabulary, boundary với Plugin
-globs: ["packages/types/src/theme.ts", "packages/core/src/theme*", "packages/schema/src/theme*"]
+globs: ["packages/types/src/theme.ts", "packages/types/src/theme-extension-points.ts", "packages/core/src/theme*", "packages/schema/src/theme*", "packages/ui/src/theme-widget-registry.ts"]
 alwaysApply: false
 ---
 
@@ -30,6 +30,9 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 | **layout** | Một template cấp trang, ánh xạ 1:1 với route pattern | `home`, `post`, `page`, `archive`, `404` |
 | **region** | Vùng đặt tên bên trong layout, nhận nội dung được render | `header`, `sidebar`, `footer`, `content` |
 | **slot** | Điểm mở rộng bên trong region, cho phép plugin/widget inject markup | `sidebar:before`, `footer:widget-area` |
+| **extension region (MVP)** | Region id chuẩn theme mở cho inject; type `ThemeExtensionRegionId` | `header`, `footer`, `sidebar`, `hero`, `belowPost`, `afterContent` |
+| **extension slot** | `ThemeExtensionSlotId` — `string` do theme đặt; MVP regions là tập gợi ý chuẩn | `hero`, `sidebar:before`, hoặc id custom trong template |
+| **widget descriptor** | Metadata plugin đăng ký (không chứa HTML runtime); core merge theo slot | `ThemeExtensionWidgetDescriptor` |
 | **theme settings** | Key-value config do theme khai báo schema, end-user tuỳ chỉnh qua admin | `{ primaryColor: '#3b82f6', showSidebar: true }` |
 | **active theme** | Theme duy nhất đang được mount để render mọi request phía front-end | Lưu trong DB, thay đổi qua admin |
 | **path preview** | Thư mục dưới `themes/…` dùng tạm cho templates/static khi request có token hợp lệ (`hana_preview` cookie/query); không đổi active theme | `themes/dark/preview` — `theme_state.previewThemePath` + `previewToken` |
@@ -65,6 +68,14 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 - **Slots**: Plugin inject markup vào named slots thông qua core API, không gọi theme trực tiếp.
 - **Extension points**: Core cung cấp hook để plugin thêm `<script>`, `<style>`, hoặc mount points vào HTML output.
 - Plugin **KHÔNG** gọi theme function hay import theme module.
+
+### Extension points (regions / slots / widgets) — official contract
+
+- **Types**: `@hana/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
+- **Theme**: `CMSTheme.extensionPoints?` — optional manifest (`slots[]`) mô tả slot id theme thực sự render trong `.eta`.
+- **Nguyên tắc**: Plugin cung cấp **logic hoặc component identity** (`ThemeExtensionWidgetDescriptor` / registration với `source`); **theme quyết định vị trí** bằng cách khai báo slot và gọi render hook trong template.
+- **Admin UI registry** (Vue): `packages/ui/src/theme-widget-registry.ts` — `themeWidgetRegistry` giữ đăng ký widget theo `source` + `id`, query theo `slot` qua `getWidgetsForSlot` (không dùng `component-registry` cho mục đích này).
+- **Out of scope MVP**: drag-drop builder, per-page layout composer (chỉ contract + registry nhỏ).
 
 ## Required Layouts (MVP)
 
@@ -124,5 +135,6 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 
 ## Last updated
 
+2026-03-29 — Widget vocabulary: `ThemeExtensionWidget*`, `ThemeExtensionSlotId` as `string`, `themeWidgetRegistry` (`theme-widget-registry.ts`).
 2026-03-29 — Documented path-based theme preview (token-gated, `themes/` root only).
 2026-03-25 — Added Required Layouts, Layout Data Contracts, Menu Zones, ThemeLayoutMap (Theme Layout Contract plan)

@@ -5,6 +5,7 @@ import type {
   ThemeMenuDeclaration,
   ThemeMenuItem,
 } from './theme-layout'
+import type { ThemeExtensionManifest } from './theme-extension-points'
 import type { ThemeSettingsSchema, ThemeSettingsValue } from './theme-settings'
 
 export type { ThemeMenuItem }
@@ -45,6 +46,11 @@ export interface CMSTheme {
   version: string
   layouts: ThemeLayoutMap
   menuZones?: ThemeMenuDeclaration
+  /**
+   * Optional manifest of extension slots this theme renders.
+   * Plugins target these ids; the theme decides physical placement in templates.
+   */
+  extensionPoints?: ThemeExtensionManifest
   /** Structured schema describing all configurable settings for this theme. */
   settingsSchema?: ThemeSettingsSchema
   assets?: ThemeAssets

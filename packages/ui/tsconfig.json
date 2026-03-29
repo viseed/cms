@@ -2,7 +2,8 @@
   "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "jsxImportSource": "vue"
+    "jsxImportSource": "vue",
+    "rootDir": "src",
   },
   "include": ["src"]
 }

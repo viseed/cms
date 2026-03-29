@@ -16,7 +16,7 @@ alwaysApply: true
 | `packages/schema` | `@hana/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`), `mergeSchemas()` helper | `@hana/core`, plugins |
 | `packages/core` | `@hana/core` | `HanaCMS` class, `HookRegistry`, `createDatabase()`, static admin serve | plugins, apps, CLI |
 | `packages/registry` | `@hana/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@hana/core`, `@hana/ui` |
-| `packages/ui` | `@hana/ui` | Vue `ComponentRegistry`, base components, Plugin Marketplace UI | `apps/admin`, plugins |
+| `packages/ui` | `@hana/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
 | `packages/cli` | `@hana/cli` | CLI commands: `hanabi init`, `hanabi migrate`, `hanabi plugin install/uninstall` | standalone binary |
 | `packages/config` | `@hana/config` | Shared tsconfig (`tsconfig.base.json`, `tsconfig.app.json`, `tsconfig.lib.json`) | Tất cả packages |
 
@@ -64,4 +64,5 @@ packages/registry/src/integrity.ts  → verifyBundle()
 
 ## Last updated
 
+2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.
 2026-03-22 — Added Theme System section

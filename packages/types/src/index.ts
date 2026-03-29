@@ -37,6 +37,18 @@ export type {
 } from './theme'
 
 export type {
+  ThemeExtensionRegionId,
+  ThemeExtensionSlotId,
+  ThemeExtensionSlotManifestEntry,
+  ThemeExtensionManifest,
+  ThemeExtensionWidgetKind,
+  ThemeExtensionWidgetDescriptor,
+  ThemeExtensionWidgetRegistration,
+} from './theme-extension-points'
+
+export { THEME_EXTENSION_REGION_IDS } from './theme-extension-points'
+
+export type {
   ThemeSettingsField,
   ThemeSettingsFieldBase,
   ThemeSettingsTextField,
