@@ -10,7 +10,7 @@
   },
   "files": ["dist"],
   "scripts": {
-    "build": "bunup",
+    "build": "bunup && tsc -p tsconfig.build.json",
     "test": "bun test"
   },
   "dependencies": {
