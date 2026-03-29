@@ -23,7 +23,7 @@ Tách Theme system thành nhiều implementation plans nhỏ, mỗi plan chỉ g
 9. [theme_09_settings_schema.plan.md](theme_09_settings_schema.plan.md)
 10. [theme_10_settings_admin_ui.plan.md](theme_10_settings_admin_ui.plan.md)
 11. [theme_11_activation_lifecycle.plan.md](theme_11_activation_lifecycle.plan.md)
-12. [theme_12_preview_rollback.plan.md](theme_12_preview_rollback.plan.md)
+12. [theme_12_preview.plan.md](theme_12_preview.plan.md)
 13. [theme_13_extension_points.plan.md](theme_13_extension_points.plan.md)
 14. [theme_14_advanced_ecosystem.plan.md](theme_14_advanced_ecosystem.plan.md)
 
@@ -44,7 +44,7 @@ flowchart TD
   plan07 --> plan10
   plan08 --> plan11[ActivationLifecycle]
   plan06 --> plan11
-  plan11 --> plan12[PreviewRollback]
+  plan11 --> plan12[Preview]
   plan13 --> plan14[AdvancedEcosystem]
   plan12 --> plan14
 ```

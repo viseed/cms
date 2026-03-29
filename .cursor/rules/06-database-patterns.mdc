@@ -29,7 +29,7 @@ users              → base user table
 sessions           → user sessions
 installed_plugins  → danh sách plugins đã cài (community plugins)
 installed_themes   → danh sách themes đã cài (metadata, integrity, version)
-theme_state        → active theme, settings snapshot, preview theme
+theme_state        → active theme, settings snapshot, path preview (`previewThemePath` + `previewToken`)
 ```
 
 ### Plugin Tables

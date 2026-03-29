@@ -1,13 +1,25 @@
 import { resolve } from 'node:path'
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import type { CMSConfig, CMSPlugin, CMSTheme, ThemeLayoutMap, RequiredLayoutKey } from '@hana/types'
 import { eq } from 'drizzle-orm'
+import type { Context } from 'hono'
 import { Hono } from 'hono'
+import { getCookie, setCookie } from 'hono/cookie'
 import { serveStatic } from 'hono/bun'
 import { installedThemes, themeState } from '@hana/schema'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
-import { createThemeRuntime, type ThemeRuntime } from './theme-runtime'
+import {
+  buildPreviewPathFromParts,
+  normalizeThemePreviewRelativePath,
+  resolveValidatedPreviewRoot,
+} from './theme-preview-path'
+import {
+  createThemeRuntime,
+  resolveTemplateDirFromAbsoluteRoot,
+  resolveThemeStaticDirFromRoot,
+  type ThemeRuntime,
+} from './theme-runtime'
 
 const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
   home: '/',
@@ -104,6 +116,64 @@ export class HanaCMS {
     return this.themeRuntime
   }
 
+  /**
+   * When DB + request token match, returns absolute filesystem root for preview templates/static.
+   * Gated by `?hana_preview=` or `hana_preview` cookie so public traffic keeps the active theme.
+   */
+  private async getEffectivePreviewThemeRoot(c: Context): Promise<string | null> {
+    const theme = this.config.theme
+    if (!theme || !this.themeRuntime) return null
+
+    const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
+    if (!token) return null
+
+    const db = this.getDatabase()
+    const row = await db
+      .select()
+      .from(themeState)
+      .where(eq(themeState.activeThemeName, theme.name))
+      .get()
+
+    if (!row?.previewThemePath || !row.previewToken || row.previewToken !== token) {
+      return null
+    }
+
+    return resolveValidatedPreviewRoot(process.cwd(), row.previewThemePath)
+  }
+
+  private clearThemePreviewCookie(c: Context): void {
+    setCookie(c, 'hana_preview', '', { path: '/', maxAge: 0 })
+  }
+
+  private async clearThemePreviewState(c: Context) {
+    const theme = this.config.theme
+    if (!theme) {
+      this.clearThemePreviewCookie(c)
+      return c.json({ message: 'No theme loaded; preview cookie cleared if present.' })
+    }
+
+    const db = this.getDatabase()
+    const existing = await db
+      .select()
+      .from(themeState)
+      .where(eq(themeState.activeThemeName, theme.name))
+      .get()
+
+    if (existing) {
+      await db
+        .update(themeState)
+        .set({
+          previewThemePath: null,
+          previewToken: null,
+          updatedAt: new Date(),
+        })
+        .where(eq(themeState.activeThemeName, theme.name))
+    }
+
+    this.clearThemePreviewCookie(c)
+    return c.json({ message: 'Theme preview cleared.' })
+  }
+
   private async mountTheme(): Promise<void> {
     const theme = this.config.theme
     if (!theme) return
@@ -117,18 +187,28 @@ export class HanaCMS {
   }
 
   private setupThemeStaticAssets(theme: CMSTheme): void {
-    const staticDir = theme.assets?.staticDir
-    if (!staticDir) return
+    const defaultStaticRoot = theme.assets?.staticDir
+      ? resolve(process.cwd(), theme.assets.staticDir)
+      : null
 
-    const resolvedDir = resolve(process.cwd(), staticDir)
+    this.app.get('/theme/static/*', async (c, next) => {
+      const previewRoot = await this.getEffectivePreviewThemeRoot(c)
+      let root: string | null = null
+      if (previewRoot) {
+        root = resolveThemeStaticDirFromRoot(previewRoot)
+      }
+      if (!root && defaultStaticRoot) {
+        root = defaultStaticRoot
+      }
+      if (!root) {
+        return c.notFound()
+      }
 
-    this.app.get(
-      '/theme/static/*',
-      serveStatic({
-        root: resolvedDir,
+      return serveStatic({
+        root,
         rewriteRequestPath: (path) => path.replace('/theme/static', ''),
-      }),
-    )
+      })(c, next)
+    })
   }
 
   private setupThemeRoutes(theme: CMSTheme): void {
@@ -148,15 +228,24 @@ export class HanaCMS {
         const runtime = this.themeRuntime
         if (!runtime) return c.text('Theme not mounted', 500)
 
-        const html = await runtime.renderLayout(layoutKey, {
-          data,
-          settings: {},
-          menus: {},
-          request: {
-            url: c.req.url,
-            params: c.req.param() as Record<string, string>,
+        const previewRoot = await this.getEffectivePreviewThemeRoot(c)
+        const templateRoot = previewRoot
+          ? resolveTemplateDirFromAbsoluteRoot(previewRoot)
+          : undefined
+
+        const html = await runtime.renderLayout(
+          layoutKey,
+          {
+            data,
+            settings: {},
+            menus: {},
+            request: {
+              url: c.req.url,
+              params: c.req.param() as Record<string, string>,
+            },
           },
-        })
+          templateRoot ? { templateRoot } : undefined,
+        )
 
         return c.html(html)
       })
@@ -212,6 +301,124 @@ export class HanaCMS {
       const theme = this.config.theme
       if (!theme) return c.json(null)
       return c.json(this.describeTheme(theme, true))
+    })
+
+    adminApi.get('/themes/preview', async (c) => {
+      const theme = this.config.theme
+      if (!theme) {
+        return c.json({
+          active: false,
+          previewThemePath: null,
+          token: null,
+        })
+      }
+
+      const db = this.getDatabase()
+      const row = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.activeThemeName, theme.name))
+        .get()
+
+      const previewThemePath = row?.previewThemePath ?? null
+      const token = row?.previewToken ?? null
+      const active = Boolean(previewThemePath && token)
+
+      return c.json({
+        active,
+        previewThemePath,
+        token,
+      })
+    })
+
+    adminApi.post('/themes/preview', async (c) => {
+      const theme = this.config.theme
+      if (!theme) {
+        return c.json({ error: 'No theme is loaded in this process.' }, 400)
+      }
+
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      if (typeof body !== 'object' || body === null) {
+        return c.json({ error: 'Body must be an object.' }, 400)
+      }
+
+      const b = body as Record<string, unknown>
+      let relative: string | null = null
+      if (typeof b.path === 'string') {
+        relative = normalizeThemePreviewRelativePath(b.path)
+      } else if (typeof b.name === 'string' && typeof b.subdir === 'string') {
+        relative = buildPreviewPathFromParts(b.name, b.subdir)
+      }
+
+      if (!relative) {
+        return c.json(
+          {
+            error:
+              'Invalid preview target. Use { path: "themes/<name>/<subdir>" } or { name, subdir } with safe segments.',
+          },
+          400,
+        )
+      }
+
+      if (!resolveValidatedPreviewRoot(process.cwd(), relative)) {
+        return c.json({ error: 'Invalid or disallowed preview path.' }, 400)
+      }
+
+      const token = randomBytes(24).toString('hex')
+      const db = this.getDatabase()
+      const existing = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.activeThemeName, theme.name))
+        .get()
+
+      if (existing) {
+        await db
+          .update(themeState)
+          .set({
+            previewThemePath: relative,
+            previewToken: token,
+            updatedAt: new Date(),
+          })
+          .where(eq(themeState.activeThemeName, theme.name))
+      } else {
+        await db.insert(themeState).values({
+          activeThemeName: theme.name,
+          previewThemePath: relative,
+          previewToken: token,
+        })
+      }
+
+      setCookie(c, 'hana_preview', token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'Lax',
+        maxAge: 60 * 60 * 24 * 7,
+      })
+
+      const url = new URL(c.req.url)
+      const previewQueryExample = `${url.origin}/?hana_preview=${encodeURIComponent(token)}`
+
+      return c.json({
+        message: 'Theme preview enabled for this browser.',
+        previewThemePath: relative,
+        token,
+        previewQueryExample,
+      })
+    })
+
+    adminApi.delete('/themes/preview', async (c) => {
+      return this.clearThemePreviewState(c)
+    })
+
+    adminApi.post('/themes/preview/clear', async (c) => {
+      return this.clearThemePreviewState(c)
     })
 
     adminApi.post('/themes/:name/install', async (c) => {

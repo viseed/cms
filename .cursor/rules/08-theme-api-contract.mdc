@@ -32,6 +32,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 | **slot** | Điểm mở rộng bên trong region, cho phép plugin/widget inject markup | `sidebar:before`, `footer:widget-area` |
 | **theme settings** | Key-value config do theme khai báo schema, end-user tuỳ chỉnh qua admin | `{ primaryColor: '#3b82f6', showSidebar: true }` |
 | **active theme** | Theme duy nhất đang được mount để render mọi request phía front-end | Lưu trong DB, thay đổi qua admin |
+| **path preview** | Thư mục dưới `themes/…` dùng tạm cho templates/static khi request có token hợp lệ (`hana_preview` cookie/query); không đổi active theme | `themes/dark/preview` — `theme_state.previewThemePath` + `previewToken` |
 | **menu zone** | Vùng navigation do theme khai báo, dữ liệu menu items do admin/plugin cung cấp | `primary`, `footer`, `mobile` |
 
 ### Quy tắc đặt tên trong code
@@ -123,4 +124,5 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 
 ## Last updated
 
+2026-03-29 — Documented path-based theme preview (token-gated, `themes/` root only).
 2026-03-25 — Added Required Layouts, Layout Data Contracts, Menu Zones, ThemeLayoutMap (Theme Layout Contract plan)

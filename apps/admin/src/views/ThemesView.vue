@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useThemePreview } from '../composables/useThemePreview'
 
 const router = useRouter()
+const { status: previewStatus, loading: previewLoading, refresh: refreshPreview } = useThemePreview()
 
 interface ThemeItem {
   name: string
@@ -18,9 +20,23 @@ const loading = ref(true)
 const actionLoading = ref<string | null>(null)
 const notification = ref<{ type: 'success' | 'error'; text: string } | null>(null)
 
+const previewPathInput = ref('')
+const previewNameInput = ref('')
+const previewSubdirInput = ref('preview')
+
+const previewHomeUrl = computed(() => {
+  const t = previewStatus.value?.token
+  if (!t) return ''
+  if (typeof window === 'undefined') return ''
+  const u = new URL(window.location.origin)
+  u.pathname = '/'
+  u.searchParams.set('hana_preview', t)
+  return u.toString()
+})
+
 async function loadThemes() {
   try {
-    const res = await fetch('/api/admin/themes')
+    const res = await fetch('/api/admin/themes', { credentials: 'same-origin' })
     if (res.ok) {
       themes.value = await res.json()
     }
@@ -38,6 +54,7 @@ async function loadThemes() {
   } finally {
     loading.value = false
   }
+  await refreshPreview()
 }
 
 onMounted(loadThemes)
@@ -49,10 +66,85 @@ function showNotification(type: 'success' | 'error', text: string) {
   }, 5000)
 }
 
+async function startPathPreview() {
+  const path = previewPathInput.value.trim()
+  if (!path) {
+    showNotification('error', 'Enter a preview path (e.g. themes/my-theme/preview).')
+    return
+  }
+  actionLoading.value = '__preview__'
+  try {
+    const res = await fetch('/api/admin/themes/preview', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.ok) {
+      showNotification('success', body.message ?? 'Preview enabled.')
+      await refreshPreview()
+    } else {
+      showNotification('error', body.error ?? 'Failed to enable preview.')
+    }
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+async function startNamedPreview() {
+  const name = previewNameInput.value.trim()
+  const subdir = previewSubdirInput.value.trim() || 'preview'
+  if (!name) {
+    showNotification('error', 'Enter a theme folder name.')
+    return
+  }
+  actionLoading.value = '__preview__'
+  try {
+    const res = await fetch('/api/admin/themes/preview', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, subdir }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.ok) {
+      showNotification('success', body.message ?? 'Preview enabled.')
+      await refreshPreview()
+    } else {
+      showNotification('error', body.error ?? 'Failed to enable preview.')
+    }
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+async function clearPreview() {
+  actionLoading.value = '__preview_clear__'
+  try {
+    const res = await fetch('/api/admin/themes/preview', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.ok) {
+      showNotification('success', body.message ?? 'Preview cleared.')
+      await refreshPreview()
+    } else {
+      showNotification('error', body.error ?? 'Failed to clear preview.')
+    }
+  } finally {
+    actionLoading.value = null
+  }
+}
+
 async function installTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/install`, { method: 'POST' })
+    const res = await fetch(`/api/admin/themes/${theme.name}/install`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    })
     if (res.ok) {
       theme.installed = true
     } else {
@@ -67,7 +159,10 @@ async function installTheme(theme: ThemeItem) {
 async function uninstallTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, { method: 'POST' })
+    const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    })
     if (res.ok) {
       theme.installed = false
     } else {
@@ -82,7 +177,10 @@ async function uninstallTheme(theme: ThemeItem) {
 async function activateTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/activate`, { method: 'POST' })
+    const res = await fetch(`/api/admin/themes/${theme.name}/activate`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    })
     const body = await res.json().catch(() => ({}))
 
     if (res.ok) {
@@ -115,6 +213,96 @@ async function activateTheme(theme: ThemeItem) {
     >
       {{ notification.text }}
     </div>
+
+    <section class="preview-panel" aria-label="Theme path preview">
+      <h2>Path preview</h2>
+      <p class="preview-hint">
+        Preview templates and static files from a folder under
+        <code>themes/</code> without changing the active theme. Only requests that include the
+        preview token (cookie set here, or <code>?hana_preview=</code>) use the preview path.
+      </p>
+
+      <div
+        v-if="previewStatus?.active"
+        class="preview-banner"
+        role="status"
+      >
+        <span class="preview-badge">Previewing</span>
+        <span class="preview-path">{{ previewStatus.previewThemePath }}</span>
+        <button
+          type="button"
+          class="theme-action uninstall"
+          :disabled="actionLoading === '__preview_clear__'"
+          @click="clearPreview"
+        >
+          {{ actionLoading === '__preview_clear__' ? '…' : 'Clear preview' }}
+        </button>
+        <a
+          v-if="previewHomeUrl"
+          class="preview-open-link"
+          :href="previewHomeUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open site with token
+        </a>
+      </div>
+
+      <div v-else-if="previewLoading" class="preview-loading">Loading preview status…</div>
+
+      <div class="preview-forms">
+        <div class="preview-form-block">
+          <label for="preview-path">Full path (from project root)</label>
+          <div class="preview-inline">
+            <input
+              id="preview-path"
+              v-model="previewPathInput"
+              type="text"
+              class="preview-input"
+              placeholder="themes/my-theme/preview"
+              autocomplete="off"
+            >
+            <button
+              type="button"
+              class="theme-action install"
+              :disabled="actionLoading === '__preview__'"
+              @click="startPathPreview"
+            >
+              {{ actionLoading === '__preview__' ? '…' : 'Apply' }}
+            </button>
+          </div>
+        </div>
+        <div class="preview-form-block">
+          <label>Or build from theme name + subfolder</label>
+          <div class="preview-inline preview-inline-triple">
+            <input
+              v-model="previewNameInput"
+              type="text"
+              class="preview-input"
+              placeholder="theme folder name"
+              aria-label="Theme folder name"
+              autocomplete="off"
+            >
+            <input
+              v-model="previewSubdirInput"
+              type="text"
+              class="preview-input preview-input-narrow"
+              placeholder="subdir"
+              aria-label="Subfolder under theme"
+              autocomplete="off"
+            >
+            <button
+              type="button"
+              class="theme-action install"
+              :disabled="actionLoading === '__preview__'"
+              @click="startNamedPreview"
+            >
+              {{ actionLoading === '__preview__' ? '…' : 'Apply' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div v-if="loading" class="loading">Loading themes...</div>
 
@@ -330,5 +518,109 @@ async function activateTheme(theme: ThemeItem) {
   background: #fce4ec;
   color: #c62828;
   border: 1px solid #ef9a9a;
+}
+
+.preview-panel {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.preview-panel h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.preview-hint {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.preview-hint code {
+  font-size: 0.78rem;
+  background: #eee;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.preview-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  background: #fff8e1;
+  border: 1px solid #ffcc80;
+  border-radius: 8px;
+}
+
+.preview-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #ff9800;
+  color: #fff;
+}
+
+.preview-path {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: #333;
+  flex: 1;
+  min-width: 12rem;
+}
+
+.preview-open-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1565c0;
+}
+
+.preview-loading {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.preview-forms {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.preview-form-block label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 0.35rem;
+}
+
+.preview-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.preview-inline-triple .preview-input-narrow {
+  max-width: 8rem;
+}
+
+.preview-input {
+  flex: 1;
+  min-width: 10rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85rem;
 }
 </style>

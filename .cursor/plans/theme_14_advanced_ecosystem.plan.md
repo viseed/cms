@@ -13,7 +13,7 @@ Mở rộng Theme system thành ecosystem trưởng thành sau khi foundation, a
 
 ## Depends on
 
-- [theme_12_preview_rollback.plan.md](theme_12_preview_rollback.plan.md)
+- [theme_12_preview.plan.md](theme_12_preview.plan.md)
 - [theme_13_extension_points.plan.md](theme_13_extension_points.plan.md)
 
 ## Scope

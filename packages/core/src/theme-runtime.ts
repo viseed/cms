@@ -4,10 +4,19 @@ import { Eta } from 'eta'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
 import type { HanaCMS } from './hana-cms'
 
+export interface ThemeRenderOptions {
+  /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
+  templateRoot?: string
+}
+
 export interface ThemeRuntime {
   theme: CMSTheme
   eta: Eta
-  renderLayout(layoutKey: string, context: Omit<LayoutContext, 'data'> & { data: Record<string, unknown> }): Promise<string>
+  renderLayout(
+    layoutKey: string,
+    context: Omit<LayoutContext, 'data'> & { data: Record<string, unknown> },
+    options?: ThemeRenderOptions,
+  ): Promise<string>
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }
 }
 
@@ -15,14 +24,24 @@ export function createThemeRuntime(
   theme: CMSTheme,
   cms: HanaCMS,
 ): ThemeRuntime {
-  const templateDir = resolveTemplateDir(theme)
-  const eta = new Eta({ views: templateDir, cache: true })
+  const defaultTemplateDir = resolveTemplateDir(theme)
+  const defaultEta = new Eta({ views: defaultTemplateDir, cache: true })
+  const etaByRoot = new Map<string, Eta>()
+
+  function etaForRoot(root: string): Eta {
+    let instance = etaByRoot.get(root)
+    if (!instance) {
+      instance = new Eta({ views: root, cache: true })
+      etaByRoot.set(root, instance)
+    }
+    return instance
+  }
 
   return {
     theme,
-    eta,
+    eta: defaultEta,
 
-    async renderLayout(layoutKey, context) {
+    async renderLayout(layoutKey, context, options?) {
       const layout = theme.layouts[layoutKey]
       if (!layout) {
         throw new Error(`Theme "${theme.name}" does not have layout "${layoutKey}"`)
@@ -41,6 +60,9 @@ export function createThemeRuntime(
         request: context.request,
       }
 
+      const templateRoot = options?.templateRoot ?? defaultTemplateDir
+      const eta = options?.templateRoot ? etaForRoot(templateRoot) : defaultEta
+
       const html = eta.render(layout.template, {
         ...finalContext,
         assets: buildAssetTags(theme.assets),
@@ -53,6 +75,24 @@ export function createThemeRuntime(
       return buildAssetTags(theme.assets)
     },
   }
+}
+
+/** Resolve template directory for a theme package rooted at `absThemeRoot` (e.g. `…/themes/my-theme`). */
+export function resolveTemplateDirFromAbsoluteRoot(absThemeRoot: string): string {
+  const withTemplates = resolve(absThemeRoot, 'templates')
+  const candidates = [withTemplates, absThemeRoot]
+
+  for (const dir of candidates) {
+    if (existsSync(dir)) return dir
+  }
+
+  return withTemplates
+}
+
+/** Static assets directory for a theme root, if it exists. */
+export function resolveThemeStaticDirFromRoot(absThemeRoot: string): string | null {
+  const d = resolve(absThemeRoot, 'static')
+  return existsSync(d) ? d : null
 }
 
 function resolveTemplateDir(theme: CMSTheme): string {
