@@ -2,10 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": [
-        "$TURBO_EXTENDS$",
-        "$TURBO_ROOT$/packages/core/dist/admin/**"
-      ]
+      "outputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/packages/core/dist/admin/**"]
     }
   }
 }

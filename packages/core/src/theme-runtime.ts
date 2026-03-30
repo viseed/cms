@@ -1,7 +1,7 @@
-import { resolve } from 'node:path'
 import { existsSync } from 'node:fs'
-import { Eta } from 'eta'
+import { resolve } from 'node:path'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
+import { Eta } from 'eta'
 import type { HanaCMS } from './hana-cms'
 
 export interface ThemeRenderOptions {
@@ -20,10 +20,7 @@ export interface ThemeRuntime {
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }
 }
 
-export function createThemeRuntime(
-  theme: CMSTheme,
-  cms: HanaCMS,
-): ThemeRuntime {
+export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
   const defaultEta = new Eta({ views: defaultTemplateDir, cache: true })
   const etaByRoot = new Map<string, Eta>()
@@ -63,10 +60,11 @@ export function createThemeRuntime(
       const templateRoot = options?.templateRoot ?? defaultTemplateDir
       const eta = options?.templateRoot ? etaForRoot(templateRoot) : defaultEta
 
-      const html = eta.render(layout.template, {
-        ...finalContext,
-        assets: buildAssetTags(theme.assets),
-      }) ?? ''
+      const html =
+        eta.render(layout.template, {
+          ...finalContext,
+          assets: buildAssetTags(theme.assets),
+        }) ?? ''
 
       return html
     },

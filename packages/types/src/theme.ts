@@ -1,17 +1,15 @@
 import type { HanaCMS } from './cms'
+import type { ThemeExtensionManifest } from './theme-extension-points'
 import type {
   RequiredLayoutKey,
   ThemeLayoutKey,
   ThemeMenuDeclaration,
   ThemeMenuItem,
 } from './theme-layout'
-import type { ThemeExtensionManifest } from './theme-extension-points'
 import type { ThemeSettingsSchema, ThemeSettingsValue } from './theme-settings'
 
-export type { ThemeMenuItem }
-
 // Re-export so consumers can import ThemeSettingsValue from '@hana/types' directly.
-export type { ThemeSettingsSchema, ThemeSettingsValue }
+export type { ThemeMenuItem, ThemeSettingsSchema, ThemeSettingsValue }
 
 export interface LayoutContext<TData = Record<string, unknown>> {
   data: TData
@@ -36,10 +34,9 @@ export interface ThemeAssets {
  * Typed layout map: all required keys must be present.
  * Optional and custom string keys are allowed but not enforced.
  */
-export type ThemeLayoutMap =
-  & Record<RequiredLayoutKey, ThemeLayoutEntry>
-  & Partial<Record<Exclude<ThemeLayoutKey, RequiredLayoutKey>, ThemeLayoutEntry>>
-  & Record<string, ThemeLayoutEntry>
+export type ThemeLayoutMap = Record<RequiredLayoutKey, ThemeLayoutEntry> &
+  Partial<Record<Exclude<ThemeLayoutKey, RequiredLayoutKey>, ThemeLayoutEntry>> &
+  Record<string, ThemeLayoutEntry>
 
 export interface CMSTheme {
   name: string

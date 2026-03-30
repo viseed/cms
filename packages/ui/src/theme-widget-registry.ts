@@ -11,7 +11,10 @@ function getSourceMap(source: string): Map<string, ThemeExtensionWidgetRegistrat
   return inner
 }
 
-function sortWidgets(a: ThemeExtensionWidgetRegistration, b: ThemeExtensionWidgetRegistration): number {
+function sortWidgets(
+  a: ThemeExtensionWidgetRegistration,
+  b: ThemeExtensionWidgetRegistration,
+): number {
   const pa = a.priority ?? 0
   const pb = b.priority ?? 0
   if (pa !== pb) return pa - pb

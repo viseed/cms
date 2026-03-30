@@ -3,14 +3,9 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [
-    ["@hana/core", "@hana/types", "@hana/schema", "@hana/validator", "@hana/registry"]
-  ],
+  "linked": [["@hana/core", "@hana/types", "@hana/schema", "@hana/validator", "@hana/registry"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@hana/admin",
-    "@hana/docs"
-  ]
+  "ignore": ["@hana/admin", "@hana/docs"]
 }

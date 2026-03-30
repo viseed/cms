@@ -8,7 +8,5 @@
     "declarationMap": false,
     "outDir": "dist"
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

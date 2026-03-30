@@ -8,9 +8,7 @@ const props = defineProps<{
   values: Record<string, unknown>
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:values', values: Record<string, unknown>): void
-}>()
+const emit = defineEmits<(e: 'update:values', values: Record<string, unknown>) => void>()
 
 function updateField(fieldKey: string, value: unknown) {
   emit('update:values', { ...props.values, [fieldKey]: value })

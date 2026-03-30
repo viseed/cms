@@ -11,10 +11,7 @@ export class HookRegistry {
     this.hooks.set(name, handlers)
   }
 
-  async run<K extends CMSHookName>(
-    name: K,
-    ...args: Parameters<CMSPluginHooks[K]>
-  ): Promise<void> {
+  async run<K extends CMSHookName>(name: K, ...args: Parameters<CMSPluginHooks[K]>): Promise<void> {
     const handlers = this.hooks.get(name) ?? []
     for (const handler of handlers) {
       await (handler as (...a: unknown[]) => unknown)(...args)
@@ -41,7 +38,12 @@ export class HookRegistry {
       }
     }
 
-    return mutableArgs[lastIdx] as Parameters<CMSPluginHooks[K]> extends [...infer _Init, infer Last] ? Last : never
+    return mutableArgs[lastIdx] as Parameters<CMSPluginHooks[K]> extends [
+      ...infer _Init,
+      infer Last,
+    ]
+      ? Last
+      : never
   }
 
   clear(): void {

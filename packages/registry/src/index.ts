@@ -1,6 +1,6 @@
+export { verifyBundleIntegrity } from './integrity'
 export {
   PluginRegistryClient,
-  ThemeRegistryClient,
   type RegistryClientOptions,
+  ThemeRegistryClient,
 } from './registry-client'
-export { verifyBundleIntegrity } from './integrity'

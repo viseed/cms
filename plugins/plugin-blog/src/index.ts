@@ -1,6 +1,6 @@
 import type { CMSPlugin } from '@hana/types'
-import { blogSchema } from './schema'
 import { setupBlogRoutes } from './routes'
+import { blogSchema } from './schema'
 
 export function blogPlugin(): CMSPlugin {
   return {
@@ -11,4 +11,4 @@ export function blogPlugin(): CMSPlugin {
   }
 }
 
-export { blogSchema, posts, categories } from './schema'
+export { blogSchema, categories, posts } from './schema'

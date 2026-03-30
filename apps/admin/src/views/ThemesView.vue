@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useThemePreview } from '../composables/useThemePreview'
 
 const router = useRouter()
-const { status: previewStatus, loading: previewLoading, refresh: refreshPreview } = useThemePreview()
+const {
+  status: previewStatus,
+  loading: previewLoading,
+  refresh: refreshPreview,
+} = useThemePreview()
 
 interface ThemeItem {
   name: string

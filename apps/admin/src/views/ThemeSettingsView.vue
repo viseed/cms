@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import type { ThemeSettingsSchema } from '@hana/types'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import SettingsSection from '../components/theme-settings/SettingsSection.vue'
 
 const route = useRoute()

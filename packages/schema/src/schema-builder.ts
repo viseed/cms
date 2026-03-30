@@ -3,9 +3,7 @@
  * Drizzle schemas are plain JS objects, so merging is a simple spread operation.
  * Throws on key conflicts to prevent silent overwrites.
  */
-export function mergeSchemas(
-  ...schemas: Array<Record<string, unknown>>
-): Record<string, unknown> {
+export function mergeSchemas(...schemas: Array<Record<string, unknown>>): Record<string, unknown> {
   const merged: Record<string, unknown> = {}
 
   for (const schema of schemas) {

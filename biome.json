@@ -36,12 +36,6 @@
     }
   },
   "files": {
-    "includes": [
-      "**",
-      "!node_modules/",
-      "!dist/",
-      "!.turbo/",
-      "!**/*.min.js"
-    ]
+    "includes": ["**", "!node_modules/", "!dist/", "!.turbo/", "!**/*.min.js"]
   }
 }

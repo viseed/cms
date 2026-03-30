@@ -8,7 +8,9 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "bunup && tsc -p tsconfig.build.json",
     "test": "bun test"

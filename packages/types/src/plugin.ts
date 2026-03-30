@@ -1,6 +1,6 @@
 import type { Hono } from 'hono'
-import type { ComponentRegistry } from './component-registry'
 import type { HanaCMS } from './cms'
+import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
 export interface CMSPlugin {
@@ -16,7 +16,10 @@ export interface CMSPluginHooks {
   'cms:ready': (app: Hono) => void | Promise<void>
   'admin:register': (registry: ComponentRegistry) => void
   'theme:mount': (theme: CMSTheme) => void | Promise<void>
-  'theme:beforeRender': (layoutKey: string, data: Record<string, unknown>) => Record<string, unknown> | Promise<Record<string, unknown>>
+  'theme:beforeRender': (
+    layoutKey: string,
+    data: Record<string, unknown>,
+  ) => Record<string, unknown> | Promise<Record<string, unknown>>
   /**
    * Fired when an admin explicitly activates a theme via the API.
    * Plugins can use this to re-register components or clean up theme-specific state.

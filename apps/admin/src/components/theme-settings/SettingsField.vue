@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import type {
   ThemeSettingsField,
   ThemeSettingsLinkItem,
   ThemeSettingsSelectField,
 } from '@hana/types'
+import { computed } from 'vue'
 
 const props = defineProps<{
   field: ThemeSettingsField
   modelValue: unknown
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: unknown): void
-}>()
+const emit = defineEmits<(e: 'update:modelValue', value: unknown) => void>()
 
 const fieldId = computed(() => `field-${props.field.key}`)
 

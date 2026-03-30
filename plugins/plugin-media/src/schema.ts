@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const mediaFiles = sqliteTable('media_files', {
   id: text('id').primaryKey(),

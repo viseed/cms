@@ -4,12 +4,12 @@ export default defineWorkspace(
   [
     { name: 'types', root: 'packages/types' },
     { name: 'validator', root: 'packages/validator' },
-    { 
+    {
       name: 'schema',
       root: 'packages/schema',
       config: {
         dts: false,
-      }
+      },
     },
     {
       name: 'core',

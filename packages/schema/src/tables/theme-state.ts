@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 import type { ThemeSettingsValue } from '@hana/types'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const themeState = sqliteTable('hana_theme_state', {
   id: integer('id').primaryKey({ autoIncrement: true }),

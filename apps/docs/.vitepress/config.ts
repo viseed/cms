@@ -38,8 +38,6 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/hana-cms/hana' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/hana-cms/hana' }],
   },
 })

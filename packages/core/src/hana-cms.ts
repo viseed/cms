@@ -1,12 +1,12 @@
-import { resolve } from 'node:path'
 import { randomBytes, randomUUID } from 'node:crypto'
-import type { CMSConfig, CMSPlugin, CMSTheme, ThemeLayoutMap, RequiredLayoutKey } from '@hana/types'
+import { resolve } from 'node:path'
+import { installedThemes, themeState } from '@hana/schema'
+import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey, ThemeLayoutMap } from '@hana/types'
 import { eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { Hono } from 'hono'
-import { getCookie, setCookie } from 'hono/cookie'
 import { serveStatic } from 'hono/bun'
-import { installedThemes, themeState } from '@hana/schema'
+import { getCookie, setCookie } from 'hono/cookie'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
 import {
@@ -696,7 +696,9 @@ export class HanaCMS {
     this.app.get(adminPath, serveStatic({ path: adminIndex }))
     this.app.get(`${adminPath}/*`, serveStatic({ path: adminIndex }))
 
-    console.log(`Admin UI serving at http://localhost:${this.config.server?.port ?? 3000}${adminPath}`)
+    console.log(
+      `Admin UI serving at http://localhost:${this.config.server?.port ?? 3000}${adminPath}`,
+    )
   }
 }
 

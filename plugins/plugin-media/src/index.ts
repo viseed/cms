@@ -1,6 +1,6 @@
 import type { CMSPlugin } from '@hana/types'
-import { mediaSchema } from './schema'
 import { setupMediaRoutes } from './routes'
+import { mediaSchema } from './schema'
 
 export interface MediaPluginOptions {
   uploadDir?: string
@@ -15,5 +15,5 @@ export function mediaPlugin(options?: MediaPluginOptions): CMSPlugin {
   }
 }
 
-export { mediaSchema, mediaFiles } from './schema'
+export { mediaFiles, mediaSchema } from './schema'
 export { LocalStorageAdapter, type StorageAdapter } from './storage'

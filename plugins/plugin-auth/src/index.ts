@@ -1,6 +1,6 @@
 import type { CMSPlugin } from '@hana/types'
-import { authSchema } from './schema'
 import { setupAuthRoutes } from './routes'
+import { authSchema } from './schema'
 
 export function authPlugin(): CMSPlugin {
   return {
