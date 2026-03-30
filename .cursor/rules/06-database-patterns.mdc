@@ -25,11 +25,14 @@ SQLite được tối ưu với: `PRAGMA journal_mode = WAL` (set tự động k
 ### Core Tables (`packages/schema/`)
 
 ```
-users              → base user table
-sessions           → user sessions
-installed_plugins  → danh sách plugins đã cài (community plugins)
-installed_themes   → danh sách themes đã cài (metadata, integrity, version)
-theme_state        → active theme, settings snapshot, path preview (`previewThemePath` + `previewToken`)
+sites              → site registry (slug, status, config)
+site_domains       → domain mapping cho site (primary/verified)
+users              → platform user identity (global)
+user_site_roles    → role assignment theo site
+sessions           → user sessions (site-scoped qua `site_id`)
+installed_plugins  → plugins đã cài theo site
+installed_themes   → themes đã cài theo site
+theme_state        → active theme + settings theo site (`site_id`)
 ```
 
 ### Plugin Tables
@@ -84,6 +87,18 @@ export const blogPosts = sqliteTable('blog_posts', {
 }))
 ```
 
+## Multi-site Tenancy Convention (Phase 2)
+
+- Các bảng mang trạng thái theo site **bắt buộc** có `site_id`:
+  - `sessions`, `installed_plugins`, `installed_themes`, `theme_state`, plugin content tables.
+- Với field từng là global unique (ví dụ `name`, `slug`), chuyển sang composite unique theo site:
+  - `unique(site_id, name)` hoặc `unique(site_id, slug)`.
+- `users` giữ global identity; phân quyền theo site đặt ở `user_site_roles`.
+- Backward compatibility cho single-site:
+  - bootstrap `site_id = 'default'` để backfill dữ liệu cũ trước khi enforce đầy đủ runtime tenancy.
+- Ưu tiên index cho hot path multi-tenant:
+  - `(site_id, slug)`, `(site_id, name)`, `(site_id, active_theme_name)`.
+
 ## Lấy DB Instance trong Plugin
 
 ```typescript
@@ -115,4 +130,5 @@ Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
 
 ## Last updated
 
+2026-03-30 — Added multisite tenancy model (`sites`, `site_domains`, `user_site_roles`) and `site_id` scoping conventions
 2026-03-22 — Added installed_themes and theme_state core tables

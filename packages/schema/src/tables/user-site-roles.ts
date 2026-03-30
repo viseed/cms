@@ -2,24 +2,22 @@ import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core
 import { sites } from './sites'
 import { users } from './users'
 
-export const sessions = sqliteTable(
-  'hana_sessions',
+export const userSiteRoles = sqliteTable(
+  'hana_user_site_roles',
   {
     id: text('id').primaryKey(),
-    siteId: text('site_id')
-      .notNull()
-      .default('default')
-      .references(() => sites.id, { onDelete: 'cascade' }),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    token: text('token').notNull(),
-    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+    siteId: text('site_id')
+      .notNull()
+      .references(() => sites.id, { onDelete: 'cascade' }),
+    role: text('role', { enum: ['admin', 'site_admin', 'site_content_writer'] }).notNull(),
     createdAt: integer('created_at', { mode: 'timestamp' })
       .notNull()
       .$defaultFn(() => new Date()),
   },
   (table) => ({
-    siteTokenUnique: uniqueIndex('hana_sessions_site_token_unique').on(table.siteId, table.token),
+    userSiteUnique: uniqueIndex('hana_user_site_roles_user_site_unique').on(table.userId, table.siteId),
   }),
 )
