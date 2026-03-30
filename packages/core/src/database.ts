@@ -93,32 +93,49 @@ function ensureSiteIdColumn(sqlite: Database, tableName: string) {
   }
 }
 
-function ensureMultisiteSiteScope(sqlite: Database) {
-  ensureSiteIdColumn(sqlite, 'hana_sessions')
-  ensureSiteIdColumn(sqlite, 'hana_installed_plugins')
-  ensureSiteIdColumn(sqlite, 'hana_installed_themes')
-  ensureSiteIdColumn(sqlite, 'hana_theme_state')
+function tableExists(sqlite: Database, tableName: string): boolean {
+  const row = sqlite
+    .prepare("SELECT name FROM sqlite_master WHERE type IN ('table', 'view') AND name = ? LIMIT 1")
+    .get(tableName) as { name?: string } | null
+  return Boolean(row?.name)
+}
 
-  sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS hana_sessions_site_token_unique
-      ON hana_sessions(site_id, token);
-  `)
-  sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_plugins_site_name_unique
-      ON hana_installed_plugins(site_id, name);
-  `)
-  sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_themes_site_name_unique
-      ON hana_installed_themes(site_id, name);
-  `)
-  sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_unique
-      ON hana_theme_state(site_id);
-  `)
-  sqlite.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_theme_unique
-      ON hana_theme_state(site_id, active_theme_name);
-  `)
+function ensureMultisiteSiteScope(sqlite: Database) {
+  if (tableExists(sqlite, 'hana_sessions')) {
+    ensureSiteIdColumn(sqlite, 'hana_sessions')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS hana_sessions_site_token_unique
+        ON hana_sessions(site_id, token);
+    `)
+  }
+
+  if (tableExists(sqlite, 'hana_installed_plugins')) {
+    ensureSiteIdColumn(sqlite, 'hana_installed_plugins')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_plugins_site_name_unique
+        ON hana_installed_plugins(site_id, name);
+    `)
+  }
+
+  if (tableExists(sqlite, 'hana_installed_themes')) {
+    ensureSiteIdColumn(sqlite, 'hana_installed_themes')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_themes_site_name_unique
+        ON hana_installed_themes(site_id, name);
+    `)
+  }
+
+  if (tableExists(sqlite, 'hana_theme_state')) {
+    ensureSiteIdColumn(sqlite, 'hana_theme_state')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_unique
+        ON hana_theme_state(site_id);
+    `)
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_theme_unique
+        ON hana_theme_state(site_id, active_theme_name);
+    `)
+  }
 }
 
 function ensureThemeStatePreviewColumns(sqlite: Database) {

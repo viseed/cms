@@ -1,33 +1,31 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
 import { installedThemes, themeState } from '@hana/schema'
-import {
-  checkPermission,
-  PERMISSION_CATALOG,
-  resolvePermissionsForRoles,
-  SINGLE_SITE_CONTEXT,
-  toAuthContextPayload,
-} from '@hana/types'
 import type {
   CMSConfig,
   CMSPlugin,
   CMSRouteContextHelpers,
+  CMSTheme,
   Permission,
-  RBACRole,
   RequestContext,
   RequiredLayoutKey,
-  RoleAssignment,
-  SiteContext,
-  CMSTheme,
   ThemeLayoutMap,
 } from '@hana/types'
+import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { eq } from 'drizzle-orm'
-import type { Context } from 'hono'
+import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { getCookie, setCookie } from 'hono/cookie'
+import {
+  AdminPolicyRegistry,
+  getRequestContext,
+  resolveSessionActorContext,
+  setRequestContext,
+} from './admin-auth-policy'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
+import { resolveSiteContextByHost } from './site-resolver'
 import {
   buildPreviewPathFromParts,
   normalizeThemePreviewRelativePath,
@@ -85,7 +83,7 @@ export class HanaCMS {
   async launch(): Promise<Hono> {
     this.db = createDatabase(
       this.config.db,
-      this.plugins.filter((p) => p.schema).map((p) => p.schema!),
+      this.plugins.flatMap((plugin) => (plugin.schema ? [plugin.schema] : [])),
     )
 
     await this.hooks.run('cms:init', this as never)
@@ -273,17 +271,89 @@ export class HanaCMS {
 
   private setupAdminApi(): void {
     const adminApi = new Hono()
+    const policyRegistry = new AdminPolicyRegistry()
 
-    adminApi.get('/auth/context', (c) => {
+    adminApi.use('*', async (c, next) => {
+      const db = this.getDatabase()
+      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
+
+      if (!siteResolution.site) {
+        return c.json(
+          {
+            error: siteResolution.error ?? 'Unable to resolve site from Host header.',
+          },
+          400,
+        )
+      }
+
+      const sessionResolution = await resolveSessionActorContext(db, c, siteResolution.site)
+      if (!sessionResolution.ok || !sessionResolution.value) {
+        const statusCode = sessionResolution.status === 403 ? 403 : 401
+        return c.json({ error: sessionResolution.error ?? 'Unauthorized' }, statusCode)
+      }
+
+      const requestContext: RequestContext = {
+        site: siteResolution.site,
+        actor: sessionResolution.value.actor,
+        permissions: sessionResolution.value.permissions,
+      }
+
+      setRequestContext(c, requestContext)
+
+      const routePath = c.req.path.startsWith('/api/admin')
+        ? c.req.path.slice('/api/admin'.length) || '/'
+        : c.req.path
+      const policyEntry = policyRegistry.resolve(c.req.method, routePath)
+      if (!policyEntry) {
+        return c.json(
+          {
+            error: `No policy mapping for admin route "${c.req.method} ${routePath}".`,
+          },
+          403,
+        )
+      }
+
+      if (!requestContext.permissions.includes(policyEntry.policy.permission)) {
+        return c.json(
+          {
+            error: `Forbidden: missing permission "${policyEntry.policy.permission}".`,
+          },
+          403,
+        )
+      }
+
+      await next()
+    })
+
+    const registerAdminRoute = (
+      method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+      routePath: string,
+      permission: Permission,
+      handler: Handler,
+    ) => {
+      policyRegistry.register(method, routePath, { permission })
+      switch (method) {
+        case 'GET':
+          adminApi.get(routePath, handler)
+          break
+        case 'POST':
+          adminApi.post(routePath, handler)
+          break
+        case 'PUT':
+          adminApi.put(routePath, handler)
+          break
+        case 'DELETE':
+          adminApi.delete(routePath, handler)
+          break
+      }
+    }
+
+    registerAdminRoute('GET', '/auth/context', 'site.content.read', (c) => {
       const requestContext = this.resolveRequestContext(c)
       return c.json(toAuthContextPayload(requestContext))
     })
 
-    adminApi.get('/plugins', (c) => {
-      if (!this.hasPermission(c, 'platform.sites.read')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('GET', '/plugins', 'platform.sites.read', (c) => {
       const plugins = this.plugins.map((plugin) => ({
         name: plugin.name,
         version: plugin.version,
@@ -295,11 +365,7 @@ export class HanaCMS {
       return c.json(plugins)
     })
 
-    adminApi.get('/themes', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.read')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('GET', '/themes', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
       const dbRecords = await db.select().from(installedThemes).all()
       const configTheme = this.config.theme
@@ -329,21 +395,13 @@ export class HanaCMS {
       return c.json(catalog)
     })
 
-    adminApi.get('/themes/active', (c) => {
-      if (!this.hasPermission(c, 'platform.sites.read')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('GET', '/themes/active', 'platform.sites.read', (c) => {
       const theme = this.config.theme
       if (!theme) return c.json(null)
       return c.json(this.describeTheme(theme, true))
     })
 
-    adminApi.get('/themes/preview', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.read')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('GET', '/themes/preview', 'platform.sites.read', async (c) => {
       const theme = this.config.theme
       if (!theme) {
         return c.json({
@@ -371,11 +429,7 @@ export class HanaCMS {
       })
     })
 
-    adminApi.post('/themes/preview', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/themes/preview', 'platform.sites.manage', async (c) => {
       const theme = this.config.theme
       if (!theme) {
         return c.json({ error: 'No theme is loaded in this process.' }, 400)
@@ -457,28 +511,17 @@ export class HanaCMS {
       })
     })
 
-    adminApi.delete('/themes/preview', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('DELETE', '/themes/preview', 'platform.sites.manage', async (c) => {
       return this.clearThemePreviewState(c)
     })
 
-    adminApi.post('/themes/preview/clear', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/themes/preview/clear', 'platform.sites.manage', async (c) => {
       return this.clearThemePreviewState(c)
     })
 
-    adminApi.post('/themes/:name/install', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/themes/:name/install', 'platform.sites.manage', async (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
       const existing = await db
@@ -507,12 +550,9 @@ export class HanaCMS {
       })
     })
 
-    adminApi.post('/themes/:name/uninstall', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/themes/:name/uninstall', 'platform.sites.manage', async (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
       const activeTheme = this.config.theme
@@ -542,12 +582,9 @@ export class HanaCMS {
       })
     })
 
-    adminApi.post('/themes/:name/activate', async (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/themes/:name/activate', 'platform.sites.manage', async (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
       // Validate: theme must be installed in DB
@@ -628,12 +665,9 @@ export class HanaCMS {
       })
     })
 
-    adminApi.get('/themes/:name/settings', async (c) => {
-      if (!this.hasPermission(c, 'site.content.read')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('GET', '/themes/:name/settings', 'site.content.read', async (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const theme = this.config.theme
 
       if (!theme || theme.name !== name) {
@@ -653,12 +687,9 @@ export class HanaCMS {
       })
     })
 
-    adminApi.put('/themes/:name/settings', async (c) => {
-      if (!this.hasPermission(c, 'site.content.write')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('PUT', '/themes/:name/settings', 'site.content.write', async (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const theme = this.config.theme
 
       if (!theme || theme.name !== name) {
@@ -700,12 +731,9 @@ export class HanaCMS {
       return c.json({ message: 'Settings saved.', values })
     })
 
-    adminApi.post('/plugins/:name/install', (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/plugins/:name/install', 'platform.sites.manage', (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
       return c.json({
         message: `Plugin "${name}" installation is not implemented yet.`,
@@ -714,12 +742,9 @@ export class HanaCMS {
       })
     })
 
-    adminApi.post('/plugins/:name/uninstall', (c) => {
-      if (!this.hasPermission(c, 'platform.sites.manage')) {
-        return c.json({ error: 'Forbidden' }, 403)
-      }
-
+    registerAdminRoute('POST', '/plugins/:name/uninstall', 'platform.sites.manage', (c) => {
       const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
       return c.json({
         message: `Plugin "${name}" uninstallation is not implemented yet.`,
@@ -789,76 +814,21 @@ export class HanaCMS {
   }
 
   private resolveRequestContext(c: Context): RequestContext {
-    const site = this.resolveSiteContext(c)
-    const actor = this.resolveActorContext(c, site.id)
-    const permissions = actor
-      ? resolvePermissionsForRoles(actor.roleAssignments)
-      : [...PERMISSION_CATALOG]
+    const requestContext = getRequestContext(c)
+    if (requestContext) {
+      return requestContext
+    }
 
     return {
-      site,
-      actor,
-      permissions,
+      site: { ...SINGLE_SITE_CONTEXT },
+      actor: null,
+      permissions: [],
     }
   }
 
   private hasPermission(c: Context, permission: Permission): boolean {
     const context = this.resolveRequestContext(c)
-    return checkPermission({ context, permission })
-  }
-
-  private resolveSiteContext(c: Context): SiteContext {
-    const siteId = c.req.header('x-hana-site-id') ?? SINGLE_SITE_CONTEXT.id
-    const siteSlug = c.req.header('x-hana-site-slug') ?? SINGLE_SITE_CONTEXT.slug
-    const siteName = c.req.header('x-hana-site-name') ?? SINGLE_SITE_CONTEXT.name
-
-    return {
-      id: siteId,
-      slug: siteSlug,
-      name: siteName,
-      isDefault: siteId === SINGLE_SITE_CONTEXT.id,
-    }
-  }
-
-  private resolveActorContext(c: Context, siteId: string) {
-    const userId = c.req.header('x-hana-user-id')
-    const roleHeaders = c.req.header('x-hana-roles')
-    const singleRole = c.req.header('x-hana-role')
-    const roles = this.parseRoles(roleHeaders ?? singleRole)
-
-    if (!userId) {
-      return null
-    }
-
-    const roleAssignments: Array<RoleAssignment> = roles.map((role) => ({
-      role,
-      siteId: role === 'admin' ? undefined : siteId,
-    }))
-
-    return {
-      id: userId,
-      email: c.req.header('x-hana-user-email') ?? undefined,
-      name: c.req.header('x-hana-user-name') ?? undefined,
-      roleAssignments,
-    }
-  }
-
-  private parseRoles(rawRoleHeader: string | undefined): Array<RBACRole> {
-    if (!rawRoleHeader) {
-      return ['admin']
-    }
-
-    const availableRoles: Array<RBACRole> = ['admin', 'site_admin', 'site_content_writer']
-    const parsedRoles = rawRoleHeader
-      .split(',')
-      .map((role) => role.trim())
-      .filter((role): role is RBACRole => availableRoles.includes(role as RBACRole))
-
-    if (parsedRoles.length === 0) {
-      return ['admin']
-    }
-
-    return parsedRoles
+    return context.permissions.includes(permission)
   }
 }
 
