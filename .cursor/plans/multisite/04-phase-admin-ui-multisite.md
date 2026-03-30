@@ -13,7 +13,7 @@ Deliver one admin application that can manage multiple sites with strict role-ba
 - `apps/admin/src/App.vue`
 - `apps/admin/src/layouts/AdminLayout.vue`
 - `apps/admin/src/views/*` (themes, plugins, settings, content areas)
-- New composables/stores for auth + site context
+- New composables/stores for admin auth + site context
 
 ## UX Rules
 - `admin`
@@ -52,7 +52,7 @@ Deliver one admin application that can manage multiple sites with strict role-ba
 - Re-check `.cursor/rules/00-meta-rule.mdc` completion checklist.
 
 ## Implementation Checklist
-- Add auth and permission store/composable.
+- Add admin auth and permission store/composable.
 - Add site list and active-site store/composable.
 - Apply route-level and navigation-level permission checks.
 - Add site management views for platform admin.

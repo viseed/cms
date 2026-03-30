@@ -12,7 +12,6 @@ Define stable contracts for site-aware requests and authorization so all later p
 - `packages/types/src/cms.ts`
 - `packages/types/src/plugin.ts`
 - `packages/core/src/hana-cms.ts`
-- `plugins/plugin-auth/src/routes.ts`
 
 ## Design Output
 - New shared types:
@@ -28,7 +27,7 @@ Define stable contracts for site-aware requests and authorization so all later p
   - Platform-scoped actions and site-scoped actions must be separated explicitly.
 
 ## API Contract Changes
-- Add a canonical auth endpoint payload for UI:
+- Add a canonical admin auth endpoint payload for UI (served from core):
   - Current user identity.
   - Role assignments.
   - Current site and list of accessible sites.
@@ -60,4 +59,4 @@ Define stable contracts for site-aware requests and authorization so all later p
 - Finalize role and permission vocabulary.
 - Add site-aware request context types.
 - Add compatibility defaults for single-site mode.
-- Document contract usage points in core and plugin auth entry points.
+- Document contract usage points in core admin auth and admin guard entry points.

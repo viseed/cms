@@ -22,8 +22,8 @@ export function setupAuthRoutes(app: Hono): void {
   })
 
   auth.get('/me', async (c) => {
-    // TODO: implement session-based user retrieval
-    return c.json({ message: 'Current user endpoint' })
+    // TODO: implement site-user session based retrieval (separate from admin auth in core)
+    return c.json({ message: 'Current site user endpoint' })
   })
 
   app.route('/api/auth', auth)

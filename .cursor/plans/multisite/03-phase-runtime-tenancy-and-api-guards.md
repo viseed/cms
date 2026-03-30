@@ -5,13 +5,12 @@ Resolve current site per request and enforce RBAC on all admin and site-sensitiv
 
 ## Scope
 - Host-based site resolution middleware.
-- Auth/session middleware integration.
+- Admin auth/session middleware integration (core-managed).
 - Permission guards for admin API and site-scoped operations.
 
 ## Target Files
 - `packages/core/src/hana-cms.ts`
 - `packages/core/src/database.ts` (only if runtime query helper updates are needed)
-- `plugins/plugin-auth/src/routes.ts`
 - New auth/policy helper modules under `packages/core/src/`
 
 ## Runtime Flow
@@ -50,6 +49,7 @@ Resolve current site per request and enforce RBAC on all admin and site-sensitiv
 ## Out of Scope
 - Full admin UI role rendering changes.
 - Plugin schema migrations.
+- `plugins/plugin-auth` site-user authentication flows (separate concern from admin auth).
 
 ## Rules to Update in This Phase
 - Update `.cursor/rules/05-plugin-api-contract.mdc` if request context passed to plugin hooks changes.

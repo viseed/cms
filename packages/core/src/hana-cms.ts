@@ -1,7 +1,26 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
 import { installedThemes, themeState } from '@hana/schema'
-import type { CMSConfig, CMSPlugin, CMSTheme, RequiredLayoutKey, ThemeLayoutMap } from '@hana/types'
+import {
+  checkPermission,
+  PERMISSION_CATALOG,
+  resolvePermissionsForRoles,
+  SINGLE_SITE_CONTEXT,
+  toAuthContextPayload,
+} from '@hana/types'
+import type {
+  CMSConfig,
+  CMSPlugin,
+  CMSRouteContextHelpers,
+  Permission,
+  RBACRole,
+  RequestContext,
+  RequiredLayoutKey,
+  RoleAssignment,
+  SiteContext,
+  CMSTheme,
+  ThemeLayoutMap,
+} from '@hana/types'
 import { eq } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { Hono } from 'hono'
@@ -73,7 +92,7 @@ export class HanaCMS {
 
     for (const plugin of this.plugins) {
       if (plugin.routes) {
-        plugin.routes(this.app)
+        plugin.routes(this.app, this.createRouteContextHelpers())
       }
     }
 
@@ -255,7 +274,16 @@ export class HanaCMS {
   private setupAdminApi(): void {
     const adminApi = new Hono()
 
+    adminApi.get('/auth/context', (c) => {
+      const requestContext = this.resolveRequestContext(c)
+      return c.json(toAuthContextPayload(requestContext))
+    })
+
     adminApi.get('/plugins', (c) => {
+      if (!this.hasPermission(c, 'platform.sites.read')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const plugins = this.plugins.map((plugin) => ({
         name: plugin.name,
         version: plugin.version,
@@ -268,6 +296,10 @@ export class HanaCMS {
     })
 
     adminApi.get('/themes', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.read')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const db = this.getDatabase()
       const dbRecords = await db.select().from(installedThemes).all()
       const configTheme = this.config.theme
@@ -298,12 +330,20 @@ export class HanaCMS {
     })
 
     adminApi.get('/themes/active', (c) => {
+      if (!this.hasPermission(c, 'platform.sites.read')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const theme = this.config.theme
       if (!theme) return c.json(null)
       return c.json(this.describeTheme(theme, true))
     })
 
     adminApi.get('/themes/preview', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.read')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const theme = this.config.theme
       if (!theme) {
         return c.json({
@@ -332,6 +372,10 @@ export class HanaCMS {
     })
 
     adminApi.post('/themes/preview', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const theme = this.config.theme
       if (!theme) {
         return c.json({ error: 'No theme is loaded in this process.' }, 400)
@@ -414,14 +458,26 @@ export class HanaCMS {
     })
 
     adminApi.delete('/themes/preview', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       return this.clearThemePreviewState(c)
     })
 
     adminApi.post('/themes/preview/clear', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       return this.clearThemePreviewState(c)
     })
 
     adminApi.post('/themes/:name/install', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
       const db = this.getDatabase()
 
@@ -452,6 +508,10 @@ export class HanaCMS {
     })
 
     adminApi.post('/themes/:name/uninstall', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
       const db = this.getDatabase()
 
@@ -483,6 +543,10 @@ export class HanaCMS {
     })
 
     adminApi.post('/themes/:name/activate', async (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
       const db = this.getDatabase()
 
@@ -565,6 +629,10 @@ export class HanaCMS {
     })
 
     adminApi.get('/themes/:name/settings', async (c) => {
+      if (!this.hasPermission(c, 'site.content.read')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
       const theme = this.config.theme
 
@@ -586,6 +654,10 @@ export class HanaCMS {
     })
 
     adminApi.put('/themes/:name/settings', async (c) => {
+      if (!this.hasPermission(c, 'site.content.write')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
       const theme = this.config.theme
 
@@ -629,6 +701,10 @@ export class HanaCMS {
     })
 
     adminApi.post('/plugins/:name/install', (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
 
       return c.json({
@@ -639,6 +715,10 @@ export class HanaCMS {
     })
 
     adminApi.post('/plugins/:name/uninstall', (c) => {
+      if (!this.hasPermission(c, 'platform.sites.manage')) {
+        return c.json({ error: 'Forbidden' }, 403)
+      }
+
       const name = c.req.param('name')
 
       return c.json({
@@ -699,6 +779,86 @@ export class HanaCMS {
     console.log(
       `Admin UI serving at http://localhost:${this.config.server?.port ?? 3000}${adminPath}`,
     )
+  }
+
+  private createRouteContextHelpers(): CMSRouteContextHelpers {
+    return {
+      resolveRequestContext: (context) => this.resolveRequestContext(context),
+      hasPermission: (context, permission) => this.hasPermission(context, permission),
+    }
+  }
+
+  private resolveRequestContext(c: Context): RequestContext {
+    const site = this.resolveSiteContext(c)
+    const actor = this.resolveActorContext(c, site.id)
+    const permissions = actor
+      ? resolvePermissionsForRoles(actor.roleAssignments)
+      : [...PERMISSION_CATALOG]
+
+    return {
+      site,
+      actor,
+      permissions,
+    }
+  }
+
+  private hasPermission(c: Context, permission: Permission): boolean {
+    const context = this.resolveRequestContext(c)
+    return checkPermission({ context, permission })
+  }
+
+  private resolveSiteContext(c: Context): SiteContext {
+    const siteId = c.req.header('x-hana-site-id') ?? SINGLE_SITE_CONTEXT.id
+    const siteSlug = c.req.header('x-hana-site-slug') ?? SINGLE_SITE_CONTEXT.slug
+    const siteName = c.req.header('x-hana-site-name') ?? SINGLE_SITE_CONTEXT.name
+
+    return {
+      id: siteId,
+      slug: siteSlug,
+      name: siteName,
+      isDefault: siteId === SINGLE_SITE_CONTEXT.id,
+    }
+  }
+
+  private resolveActorContext(c: Context, siteId: string) {
+    const userId = c.req.header('x-hana-user-id')
+    const roleHeaders = c.req.header('x-hana-roles')
+    const singleRole = c.req.header('x-hana-role')
+    const roles = this.parseRoles(roleHeaders ?? singleRole)
+
+    if (!userId) {
+      return null
+    }
+
+    const roleAssignments: Array<RoleAssignment> = roles.map((role) => ({
+      role,
+      siteId: role === 'admin' ? undefined : siteId,
+    }))
+
+    return {
+      id: userId,
+      email: c.req.header('x-hana-user-email') ?? undefined,
+      name: c.req.header('x-hana-user-name') ?? undefined,
+      roleAssignments,
+    }
+  }
+
+  private parseRoles(rawRoleHeader: string | undefined): Array<RBACRole> {
+    if (!rawRoleHeader) {
+      return ['admin']
+    }
+
+    const availableRoles: Array<RBACRole> = ['admin', 'site_admin', 'site_content_writer']
+    const parsedRoles = rawRoleHeader
+      .split(',')
+      .map((role) => role.trim())
+      .filter((role): role is RBACRole => availableRoles.includes(role as RBACRole))
+
+    if (parsedRoles.length === 0) {
+      return ['admin']
+    }
+
+    return parsedRoles
   }
 }
 

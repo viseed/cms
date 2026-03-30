@@ -18,7 +18,9 @@ interface CMSPlugin {
   version: string   // required — semver (vd: "1.0.0")
   schema?: Record<string, unknown>    // Drizzle table objects từ plugin
   hooks?: Partial<CMSPluginHooks>     // lifecycle hooks
-  routes?: (app: Hono) => void        // đăng ký Hono routes
+  routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
+  // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
+  // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
 }
 
 interface CMSPluginHooks {
@@ -38,7 +40,7 @@ interface CMSPluginHooks {
 2. cms.launch()
    ├─ createDatabase()          → merge schemas từ core + tất cả plugins
    ├─ hooks.run('cms:init')     → mỗi plugin nhận HanaCMS instance (setup DB, services)
-   ├─ plugin.routes(app)        → đăng ký Hono routes cho từng plugin
+   ├─ plugin.routes(app, helpers) → đăng ký Hono routes cho từng plugin với request-context helpers
    ├─ mountTheme()              → nếu config có theme:
    │   ├─ createThemeRuntime()  → khởi tạo Eta engine, resolve template dir
    │   ├─ setupThemeStaticAssets() → serve /theme/static/* nếu staticDir có
@@ -80,8 +82,11 @@ export const schema = { posts }
 
 ```typescript
 // ✅ Đúng
-export function routes(app: Hono): void {
+export function routes(app: Hono, helpers: CMSRouteContextHelpers): void {
   app.get('/blog/posts', async (c) => {
+    if (!helpers.hasPermission(c, 'site.content.read')) {
+      return c.json({ error: 'Forbidden' }, 403)
+    }
     // lấy db qua context hoặc dependency injection
     return c.json({ posts: [] })
   })
@@ -139,4 +144,5 @@ createCMS({
 
 ## Last updated
 
+2026-03-30 — Added `CMSRouteContextHelpers` for site-aware request context + permission checks
 2026-03-26 — Added `theme:activate` hook (Theme Activation Lifecycle)

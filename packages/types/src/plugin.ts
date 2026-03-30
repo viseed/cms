@@ -1,14 +1,19 @@
-import type { Hono } from 'hono'
-import type { HanaCMS } from './cms'
+import type { Context, Hono } from 'hono'
+import type { HanaCMS, Permission, RequestContext } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
+
+export interface CMSRouteContextHelpers {
+  resolveRequestContext: (context: Context) => RequestContext
+  hasPermission: (context: Context, permission: Permission) => boolean
+}
 
 export interface CMSPlugin {
   name: string
   version: string
   schema?: Record<string, unknown>
   hooks?: Partial<CMSPluginHooks>
-  routes?: (app: Hono) => void
+  routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
 }
 
 export interface CMSPluginHooks {
