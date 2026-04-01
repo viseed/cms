@@ -125,6 +125,12 @@ export interface DatabaseConfig {
 export interface AdminConfig {
   path?: string
   enabled?: boolean
+  bootstrapAdmin?: {
+    email: string
+    password: string
+    name?: string
+    siteId?: string
+  }
 }
 
 export interface CMSConfig {

@@ -11,6 +11,18 @@ const DEFAULT_SITE_NAME = 'Default Site'
 
 function ensureMultisiteFoundation(sqlite: Database) {
   sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS hana_users (
+      id text PRIMARY KEY NOT NULL,
+      email text NOT NULL UNIQUE,
+      name text NOT NULL,
+      password_hash text NOT NULL,
+      role text NOT NULL DEFAULT 'viewer',
+      created_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
+      updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
+    );
+  `)
+
+  sqlite.exec(`
     CREATE TABLE IF NOT EXISTS hana_sites (
       id text PRIMARY KEY NOT NULL,
       name text NOT NULL,
@@ -69,6 +81,22 @@ function ensureMultisiteFoundation(sqlite: Database) {
   sqlite.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS hana_user_site_roles_user_site_unique
       ON hana_user_site_roles(user_id, site_id);
+  `)
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS hana_sessions (
+      id text PRIMARY KEY NOT NULL,
+      site_id text NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE,
+      user_id text NOT NULL REFERENCES hana_users(id) ON DELETE CASCADE,
+      token text NOT NULL,
+      expires_at integer NOT NULL,
+      created_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
+    );
+  `)
+
+  sqlite.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS hana_sessions_site_token_unique
+      ON hana_sessions(site_id, token);
   `)
 }
 

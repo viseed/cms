@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { adminFetch } from '../lib/admin-api'
 
 interface PluginItem {
   name: string
@@ -14,7 +15,7 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await fetch('/api/admin/plugins')
+    const res = await adminFetch('/api/admin/plugins')
     if (res.ok) {
       plugins.value = await res.json()
     }
@@ -50,10 +51,10 @@ onMounted(async () => {
 
 async function togglePlugin(plugin: PluginItem) {
   if (plugin.installed) {
-    await fetch(`/api/admin/plugins/${plugin.name}/uninstall`, { method: 'POST' })
+    await adminFetch(`/api/admin/plugins/${plugin.name}/uninstall`, { method: 'POST' })
     plugin.installed = false
   } else {
-    await fetch(`/api/admin/plugins/${plugin.name}/install`, { method: 'POST' })
+    await adminFetch(`/api/admin/plugins/${plugin.name}/install`, { method: 'POST' })
     plugin.installed = true
   }
 }

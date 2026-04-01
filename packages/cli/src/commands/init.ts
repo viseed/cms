@@ -30,6 +30,16 @@ const cms = createCMS({
     driver: 'sqlite',
     url: './data.db',
   },
+  admin: {
+    bootstrapAdmin:
+      process.env.HANA_ADMIN_EMAIL && process.env.HANA_ADMIN_PASSWORD
+        ? {
+            email: process.env.HANA_ADMIN_EMAIL,
+            password: process.env.HANA_ADMIN_PASSWORD,
+            name: process.env.HANA_ADMIN_NAME ?? 'Administrator',
+          }
+        : undefined,
+  },
 })
 
 cms.use(authPlugin())
@@ -73,5 +83,9 @@ export async function initProject(projectName: string): Promise<void> {
   console.log(`\nNext steps:`)
   console.log(`  cd ${projectName}`)
   console.log(`  bun install`)
+  console.log(`  # Dev default admin is auto-seeded on first run:`)
+  console.log(`  # email: admin@local.dev`)
+  console.log(`  # password: 12345678`)
+  console.log(`  # Optional override: HANA_ADMIN_EMAIL / HANA_ADMIN_PASSWORD / HANA_ADMIN_NAME`)
   console.log(`  bun run dev`)
 }

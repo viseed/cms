@@ -74,7 +74,7 @@ function compileRoutePath(routePath: string): RegExp {
   return new RegExp(`^${escaped}$`)
 }
 
-function getSessionToken(c: Context): string | null {
+export function getSessionToken(c: Context): string | null {
   const authHeader = c.req.header('authorization')
   if (authHeader?.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.slice(7).trim()

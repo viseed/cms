@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { randomUUID } from 'node:crypto'
 import { sessions, siteDomains, userSiteRoles, users } from '@hana/schema'
+import { eq } from 'drizzle-orm'
 import type { DatabaseInstance } from './database'
 import { createCMS } from './hana-cms'
 
@@ -222,5 +223,115 @@ describe('admin runtime tenancy and guards', () => {
     await expect(response.json()).resolves.toEqual({
       error: 'No policy mapping for admin route "GET /not-registered".',
     })
+  })
+
+  test('supports admin login endpoint in core auth flow', async () => {
+    const cms = createCMS({
+      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      admin: { enabled: false },
+    })
+    const app = await cms.launch()
+    const db = cms.getDatabase()
+    ensureAdminAuthTables(db)
+
+    const userId = randomUUID()
+    const password = 'super-secure-password'
+    const passwordHash = await Bun.password.hash(password)
+
+    await db.insert(users).values({
+      id: userId,
+      email: 'login@hana.dev',
+      name: 'Login User',
+      passwordHash,
+      role: 'admin',
+    })
+    await db.insert(userSiteRoles).values({
+      id: randomUUID(),
+      userId,
+      siteId: DEFAULT_SITE_ID,
+      role: 'admin',
+    })
+
+    const loginResponse = await app.request('http://localhost/api/admin/auth/login', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: 'login@hana.dev',
+        password,
+      }),
+    })
+
+    expect(loginResponse.status).toBe(200)
+    const sessionCookie = loginResponse.headers.get('set-cookie')
+    expect(sessionCookie?.includes('hana_admin_session=')).toBe(true)
+
+    const contextResponse = await app.request('http://localhost/api/admin/auth/context', {
+      headers: {
+        cookie: sessionCookie ?? '',
+      },
+    })
+
+    expect(contextResponse.status).toBe(200)
+    const payload = await contextResponse.json()
+    expect(payload.currentUser?.email).toBe('login@hana.dev')
+  })
+
+  test('bootstraps initial admin when configured on first launch', async () => {
+    const cms = createCMS({
+      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      admin: {
+        enabled: false,
+        bootstrapAdmin: {
+          email: 'bootstrap@hana.dev',
+          password: 'bootstrap-password',
+          name: 'Bootstrap Admin',
+        },
+      },
+    })
+    await cms.launch()
+
+    const db = cms.getDatabase()
+    const adminUser = await db.select().from(users).where(eq(users.email, 'bootstrap@hana.dev')).get()
+    expect(adminUser?.name).toBe('Bootstrap Admin')
+    expect(Boolean(adminUser?.passwordHash)).toBe(true)
+
+    if (!adminUser) {
+      throw new Error('Expected bootstrap admin to be created')
+    }
+
+    const adminRole = await db
+      .select()
+      .from(userSiteRoles)
+      .where(eq(userSiteRoles.userId, adminUser.id))
+      .get()
+    expect(adminRole?.role).toBe('admin')
+    expect(adminRole?.siteId).toBe(DEFAULT_SITE_ID)
+  })
+
+  test('seeds default dev admin automatically when no users exist', async () => {
+    const previousEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+
+    try {
+      const cms = createCMS({
+        db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+        admin: { enabled: false },
+      })
+      await cms.launch()
+
+      const db = cms.getDatabase()
+      const defaultAdmin = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, 'admin@local.dev'))
+        .get()
+
+      expect(defaultAdmin?.name).toBe('Local Admin')
+      expect(Boolean(defaultAdmin?.passwordHash)).toBe(true)
+    } finally {
+      process.env.NODE_ENV = previousEnv
+    }
   })
 })

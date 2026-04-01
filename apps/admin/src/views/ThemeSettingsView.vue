@@ -3,6 +3,7 @@ import type { ThemeSettingsSchema } from '@hana/types'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SettingsSection from '../components/theme-settings/SettingsSection.vue'
+import { adminFetch } from '../lib/admin-api'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,7 +21,7 @@ const saveSuccess = ref(false)
 
 onMounted(async () => {
   try {
-    const res = await fetch(`/api/admin/themes/${themeName.value}/settings`)
+    const res = await adminFetch(`/api/admin/themes/${themeName.value}/settings`)
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`)
@@ -70,7 +71,7 @@ async function saveSettings() {
   saveSuccess.value = false
 
   try {
-    const res = await fetch(`/api/admin/themes/${themeName.value}/settings`, {
+    const res = await adminFetch(`/api/admin/themes/${themeName.value}/settings`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ values: { ...flatValues } }),

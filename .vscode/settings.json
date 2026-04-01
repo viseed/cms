@@ -3,5 +3,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
-  }
+  },
+  "editor.fontFamily": "MonoLisa, JetBrains Mono, Consolas, 'Courier New', monospace"
 }

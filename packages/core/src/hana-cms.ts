@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
-import { installedThemes, themeState } from '@hana/schema'
+import { installedThemes, sessions, sites, themeState, userSiteRoles, users } from '@hana/schema'
 import type {
   CMSConfig,
   CMSPlugin,
@@ -12,6 +12,7 @@ import type {
   ThemeLayoutMap,
 } from '@hana/types'
 import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
+import { loginSchema } from '@hana/validator'
 import { eq } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
@@ -20,6 +21,7 @@ import { getCookie, setCookie } from 'hono/cookie'
 import {
   AdminPolicyRegistry,
   getRequestContext,
+  getSessionToken,
   resolveSessionActorContext,
   setRequestContext,
 } from './admin-auth-policy'
@@ -45,6 +47,34 @@ const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
   category: '/category/:slug',
   archive: '/archive',
   '404': '/404',
+}
+
+const PUBLIC_ADMIN_AUTH_ROUTES = new Set(['POST /auth/login', 'POST /auth/logout'])
+const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
+const DEV_BOOTSTRAP_ADMIN_EMAIL = 'admin'
+const DEV_BOOTSTRAP_ADMIN_PASSWORD = '12345678'
+const DEV_BOOTSTRAP_ADMIN_NAME = 'Local Admin'
+
+function normalizeLegacyRole(
+  role: string | null | undefined,
+): 'admin' | 'site_admin' | 'site_content_writer' | null {
+  if (!role) {
+    return null
+  }
+
+  if (role === 'admin') {
+    return 'admin'
+  }
+
+  if (role === 'editor') {
+    return 'site_admin'
+  }
+
+  if (role === 'viewer') {
+    return 'site_content_writer'
+  }
+
+  return null
 }
 
 export class HanaCMS {
@@ -85,6 +115,8 @@ export class HanaCMS {
       this.config.db,
       this.plugins.flatMap((plugin) => (plugin.schema ? [plugin.schema] : [])),
     )
+
+    await this.ensureBootstrapAdmin()
 
     await this.hooks.run('cms:init', this as never)
 
@@ -269,6 +301,72 @@ export class HanaCMS {
     }
   }
 
+  private async ensureBootstrapAdmin(): Promise<void> {
+    const configuredBootstrapAdmin = this.config.admin?.bootstrapAdmin
+    const isDevelopment = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+    const defaultBootstrapAdmin =
+      isDevelopment && !configuredBootstrapAdmin
+        ? {
+            email: process.env.HANA_ADMIN_EMAIL?.trim() || DEV_BOOTSTRAP_ADMIN_EMAIL,
+            password: process.env.HANA_ADMIN_PASSWORD || DEV_BOOTSTRAP_ADMIN_PASSWORD,
+            name: process.env.HANA_ADMIN_NAME?.trim() || DEV_BOOTSTRAP_ADMIN_NAME,
+            siteId: process.env.HANA_ADMIN_SITE_ID?.trim() || SINGLE_SITE_CONTEXT.id,
+          }
+        : null
+    const bootstrapAdmin = configuredBootstrapAdmin ?? defaultBootstrapAdmin
+
+    if (!bootstrapAdmin) {
+      return
+    }
+
+    const email = bootstrapAdmin.email.trim().toLowerCase()
+    const password = bootstrapAdmin.password
+    const name = bootstrapAdmin.name?.trim() || 'Administrator'
+    const siteId = bootstrapAdmin.siteId?.trim() || SINGLE_SITE_CONTEXT.id
+
+    if (!email) {
+      throw new Error('admin.bootstrapAdmin.email is required.')
+    }
+
+    if (password.length < 8) {
+      throw new Error('admin.bootstrapAdmin.password must be at least 8 characters.')
+    }
+
+    const db = this.getDatabase()
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).get()
+    if (existingUser) {
+      return
+    }
+
+    const hasAnyUser = await db.select({ id: users.id }).from(users).limit(1).get()
+    if (hasAnyUser) {
+      return
+    }
+
+    const targetSite = await db.select().from(sites).where(eq(sites.id, siteId)).get()
+    if (!targetSite) {
+      throw new Error(`admin.bootstrapAdmin.siteId "${siteId}" does not exist.`)
+    }
+
+    const passwordHash = await Bun.password.hash(password)
+    const userId = randomUUID()
+
+    await db.insert(users).values({
+      id: userId,
+      email,
+      name,
+      passwordHash,
+      role: 'admin',
+    })
+
+    await db.insert(userSiteRoles).values({
+      id: randomUUID(),
+      userId,
+      siteId,
+      role: 'admin',
+    })
+  }
+
   private setupAdminApi(): void {
     const adminApi = new Hono()
     const policyRegistry = new AdminPolicyRegistry()
@@ -286,6 +384,21 @@ export class HanaCMS {
         )
       }
 
+      const routePath = c.req.path.startsWith('/api/admin')
+        ? c.req.path.slice('/api/admin'.length) || '/'
+        : c.req.path
+      const routeKey = `${c.req.method.toUpperCase()} ${routePath}`
+      const isPublicAuthRoute = PUBLIC_ADMIN_AUTH_ROUTES.has(routeKey)
+      if (isPublicAuthRoute) {
+        setRequestContext(c, {
+          site: siteResolution.site,
+          actor: null,
+          permissions: [],
+        })
+        await next()
+        return
+      }
+
       const sessionResolution = await resolveSessionActorContext(db, c, siteResolution.site)
       if (!sessionResolution.ok || !sessionResolution.value) {
         const statusCode = sessionResolution.status === 403 ? 403 : 401
@@ -299,10 +412,6 @@ export class HanaCMS {
       }
 
       setRequestContext(c, requestContext)
-
-      const routePath = c.req.path.startsWith('/api/admin')
-        ? c.req.path.slice('/api/admin'.length) || '/'
-        : c.req.path
       const policyEntry = policyRegistry.resolve(c.req.method, routePath)
       if (!policyEntry) {
         return c.json(
@@ -324,6 +433,27 @@ export class HanaCMS {
 
       await next()
     })
+
+    const registerPublicAdminRoute = (
+      method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+      routePath: string,
+      handler: Handler,
+    ) => {
+      switch (method) {
+        case 'GET':
+          adminApi.get(routePath, handler)
+          break
+        case 'POST':
+          adminApi.post(routePath, handler)
+          break
+        case 'PUT':
+          adminApi.put(routePath, handler)
+          break
+        case 'DELETE':
+          adminApi.delete(routePath, handler)
+          break
+      }
+    }
 
     const registerAdminRoute = (
       method: 'GET' | 'POST' | 'PUT' | 'DELETE',
@@ -347,6 +477,113 @@ export class HanaCMS {
           break
       }
     }
+
+    registerPublicAdminRoute('POST', '/auth/login', async (c) => {
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      const parsed = loginSchema.safeParse(body)
+      if (!parsed.success) {
+        return c.json({ error: 'Invalid login payload.' }, 400)
+      }
+
+      const requestContext = this.resolveRequestContext(c)
+      const site = requestContext.site
+      const db = this.getDatabase()
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, parsed.data.email.trim().toLowerCase()))
+        .get()
+
+      if (!user) {
+        return c.json({ error: 'Invalid email or password.' }, 401)
+      }
+
+      const passwordOk = await Bun.password.verify(parsed.data.password, user.passwordHash)
+      if (!passwordOk) {
+        return c.json({ error: 'Invalid email or password.' }, 401)
+      }
+
+      const roleRows = await db
+        .select({
+          role: userSiteRoles.role,
+          siteId: userSiteRoles.siteId,
+        })
+        .from(userSiteRoles)
+        .where(eq(userSiteRoles.userId, user.id))
+        .all()
+
+      const legacyRole = normalizeLegacyRole(user.role)
+      const hasSiteAccess =
+        roleRows.some((row) => row.role === 'admin' || row.siteId === site.id) ||
+        legacyRole === 'admin' ||
+        (legacyRole !== null && legacyRole !== 'admin' && site.id === SINGLE_SITE_CONTEXT.id)
+
+      if (!hasSiteAccess) {
+        return c.json({ error: `User has no access to site "${site.slug}".` }, 403)
+      }
+
+      const token = randomBytes(32).toString('hex')
+      await db.insert(sessions).values({
+        id: randomUUID(),
+        siteId: site.id,
+        userId: user.id,
+        token,
+        expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS),
+      })
+
+      setCookie(c, 'hana_admin_session', token, {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'Lax',
+        secure: c.req.url.startsWith('https://'),
+        maxAge: ADMIN_SESSION_TTL_MS / 1000,
+      })
+
+      return c.json({ message: 'Logged in.' })
+    })
+
+    registerPublicAdminRoute('POST', '/auth/logout', async (c) => {
+      const db = this.getDatabase()
+      const requestContext = this.resolveRequestContext(c)
+      const token = getSessionToken(c)
+      if (token) {
+        const rows = await db
+          .select({
+            id: sessions.id,
+            siteId: sessions.siteId,
+          })
+          .from(sessions)
+          .where(eq(sessions.token, token))
+          .all()
+
+        for (const row of rows) {
+          const sameSite = row.siteId === requestContext.site.id
+          const hasSiteRole = requestContext.actor?.roleAssignments.some(
+            (assignment) => assignment.role === 'admin' || assignment.siteId === row.siteId,
+          )
+
+          if (sameSite || hasSiteRole) {
+            await db.delete(sessions).where(eq(sessions.id, row.id))
+          }
+        }
+      }
+
+      setCookie(c, 'hana_admin_session', '', {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'Lax',
+        secure: c.req.url.startsWith('https://'),
+        maxAge: 0,
+      })
+
+      return c.json({ message: 'Logged out.' })
+    })
 
     registerAdminRoute('GET', '/auth/context', 'site.content.read', (c) => {
       const requestContext = this.resolveRequestContext(c)

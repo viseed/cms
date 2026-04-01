@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { adminFetch } from '../lib/admin-api'
 
 export interface ThemePreviewStatus {
   active: boolean
@@ -13,7 +14,7 @@ export function useThemePreview() {
   async function refresh() {
     loading.value = true
     try {
-      const res = await fetch('/api/admin/themes/preview', { credentials: 'same-origin' })
+      const res = await adminFetch('/api/admin/themes/preview')
       if (res.ok) {
         status.value = await res.json()
       }

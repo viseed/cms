@@ -1,11 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminLayout from './layouts/AdminLayout.vue'
+import { useAdminSiteContext } from './composables/useAdminSiteContext'
+
+const { activeSiteId } = useAdminSiteContext()
+const route = useRoute()
+
+const routeViewKey = computed(() => activeSiteId.value)
+const useAdminLayout = computed(() => route.path !== '/login')
 </script>
 
 <template>
-  <AdminLayout>
-    <router-view />
+  <AdminLayout v-if="useAdminLayout">
+    <router-view :key="routeViewKey" />
   </AdminLayout>
+  <router-view v-else />
 </template>
 
 <style>

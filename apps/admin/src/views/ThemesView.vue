@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useThemePreview } from '../composables/useThemePreview'
+import { adminFetch } from '../lib/admin-api'
 
 const router = useRouter()
 const {
@@ -40,7 +41,7 @@ const previewHomeUrl = computed(() => {
 
 async function loadThemes() {
   try {
-    const res = await fetch('/api/admin/themes', { credentials: 'same-origin' })
+    const res = await adminFetch('/api/admin/themes')
     if (res.ok) {
       themes.value = await res.json()
     }
@@ -78,9 +79,8 @@ async function startPathPreview() {
   }
   actionLoading.value = '__preview__'
   try {
-    const res = await fetch('/api/admin/themes/preview', {
+    const res = await adminFetch('/api/admin/themes/preview', {
       method: 'POST',
-      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path }),
     })
@@ -105,9 +105,8 @@ async function startNamedPreview() {
   }
   actionLoading.value = '__preview__'
   try {
-    const res = await fetch('/api/admin/themes/preview', {
+    const res = await adminFetch('/api/admin/themes/preview', {
       method: 'POST',
-      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, subdir }),
     })
@@ -126,9 +125,8 @@ async function startNamedPreview() {
 async function clearPreview() {
   actionLoading.value = '__preview_clear__'
   try {
-    const res = await fetch('/api/admin/themes/preview', {
+    const res = await adminFetch('/api/admin/themes/preview', {
       method: 'DELETE',
-      credentials: 'same-origin',
     })
     const body = await res.json().catch(() => ({}))
     if (res.ok) {
@@ -145,9 +143,8 @@ async function clearPreview() {
 async function installTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/install`, {
+    const res = await adminFetch(`/api/admin/themes/${theme.name}/install`, {
       method: 'POST',
-      credentials: 'same-origin',
     })
     if (res.ok) {
       theme.installed = true
@@ -163,9 +160,8 @@ async function installTheme(theme: ThemeItem) {
 async function uninstallTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/uninstall`, {
+    const res = await adminFetch(`/api/admin/themes/${theme.name}/uninstall`, {
       method: 'POST',
-      credentials: 'same-origin',
     })
     if (res.ok) {
       theme.installed = false
@@ -181,9 +177,8 @@ async function uninstallTheme(theme: ThemeItem) {
 async function activateTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
-    const res = await fetch(`/api/admin/themes/${theme.name}/activate`, {
+    const res = await adminFetch(`/api/admin/themes/${theme.name}/activate`, {
       method: 'POST',
-      credentials: 'same-origin',
     })
     const body = await res.json().catch(() => ({}))
 
