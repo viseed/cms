@@ -16,7 +16,7 @@ function ensureMultisiteFoundation(sqlite: Database) {
       email text NOT NULL UNIQUE,
       name text NOT NULL,
       password_hash text NOT NULL,
-      role text NOT NULL DEFAULT 'viewer',
+      role text NOT NULL DEFAULT 'site_content_writer',
       created_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
       updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
     );
@@ -96,8 +96,19 @@ function ensureMultisiteFoundation(sqlite: Database) {
 
   sqlite.exec(`
     CREATE UNIQUE INDEX IF NOT EXISTS hana_sessions_site_token_unique
-      ON hana_sessions(site_id, token);
+      ON hana_sessions(site_id, token    );
   `)
+}
+
+/** Map removed legacy `hana_users.role` values to current RBAC vocabulary. */
+function migrateHanaUsersRoleLabels(sqlite: Database) {
+  if (!tableExists(sqlite, 'hana_users')) return
+  try {
+    sqlite.exec(`UPDATE hana_users SET role = 'site_admin' WHERE role = 'editor'`)
+    sqlite.exec(`UPDATE hana_users SET role = 'site_content_writer' WHERE role = 'viewer'`)
+  } catch {
+    // Best-effort for corrupted or locked DBs
+  }
 }
 
 function ensureSiteIdColumn(sqlite: Database, tableName: string) {
@@ -192,6 +203,7 @@ export function createDatabase(
     const sqlite = new Database(config.url)
     sqlite.exec('PRAGMA journal_mode = WAL;')
     ensureMultisiteFoundation(sqlite)
+    migrateHanaUsersRoleLabels(sqlite)
     ensureMultisiteSiteScope(sqlite)
     ensureThemeStatePreviewColumns(sqlite)
     return drizzle(sqlite, { schema: finalSchema })

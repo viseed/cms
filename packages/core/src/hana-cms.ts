@@ -51,30 +51,23 @@ const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
 
 const PUBLIC_ADMIN_AUTH_ROUTES = new Set(['POST /auth/login', 'POST /auth/logout'])
 const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
-const DEV_BOOTSTRAP_ADMIN_EMAIL = 'admin'
+const DEV_BOOTSTRAP_ADMIN_EMAIL = 'admin@local.dev'
 const DEV_BOOTSTRAP_ADMIN_PASSWORD = '12345678'
 const DEV_BOOTSTRAP_ADMIN_NAME = 'Local Admin'
 
-function normalizeLegacyRole(
+const USERS_TABLE_ROLES = new Set<'admin' | 'site_admin' | 'site_content_writer'>([
+  'admin',
+  'site_admin',
+  'site_content_writer',
+])
+
+function parseUsersTableRole(
   role: string | null | undefined,
 ): 'admin' | 'site_admin' | 'site_content_writer' | null {
-  if (!role) {
+  if (!role || !USERS_TABLE_ROLES.has(role as 'admin' | 'site_admin' | 'site_content_writer')) {
     return null
   }
-
-  if (role === 'admin') {
-    return 'admin'
-  }
-
-  if (role === 'editor') {
-    return 'site_admin'
-  }
-
-  if (role === 'viewer') {
-    return 'site_content_writer'
-  }
-
-  return null
+  return role as 'admin' | 'site_admin' | 'site_content_writer'
 }
 
 export class HanaCMS {
@@ -518,11 +511,14 @@ export class HanaCMS {
         .where(eq(userSiteRoles.userId, user.id))
         .all()
 
-      const legacyRole = normalizeLegacyRole(user.role)
+      const usersTableRole = parseUsersTableRole(user.role)
+      const usersTableGrantsDefaultSite =
+        site.id === SINGLE_SITE_CONTEXT.id &&
+        (usersTableRole === 'site_admin' || usersTableRole === 'site_content_writer')
       const hasSiteAccess =
         roleRows.some((row) => row.role === 'admin' || row.siteId === site.id) ||
-        legacyRole === 'admin' ||
-        (legacyRole !== null && legacyRole !== 'admin' && site.id === SINGLE_SITE_CONTEXT.id)
+        usersTableRole === 'admin' ||
+        usersTableGrantsDefaultSite
 
       if (!hasSiteAccess) {
         return c.json({ error: `User has no access to site "${site.slug}".` }, 403)

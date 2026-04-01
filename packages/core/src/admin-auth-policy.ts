@@ -96,24 +96,17 @@ export function getSessionToken(c: Context): string | null {
   return null
 }
 
-function normalizeLegacyRole(role: string | null | undefined): RBACRole | null {
-  if (!role) {
+const USERS_TABLE_ROLES: ReadonlySet<RBACRole> = new Set([
+  'admin',
+  'site_admin',
+  'site_content_writer',
+])
+
+function parseUsersTableRole(role: string | null | undefined): RBACRole | null {
+  if (!role || !USERS_TABLE_ROLES.has(role as RBACRole)) {
     return null
   }
-
-  if (role === 'admin') {
-    return 'admin'
-  }
-
-  if (role === 'editor') {
-    return 'site_admin'
-  }
-
-  if (role === 'viewer') {
-    return 'site_content_writer'
-  }
-
-  return null
+  return role as RBACRole
 }
 
 function dedupeRoleAssignments(
@@ -198,11 +191,11 @@ export async function resolveSessionActorContext(
     siteId: row.role === 'admin' ? undefined : row.siteId,
   }))
 
-  const legacyRole = normalizeLegacyRole(user.role)
+  const usersTableRole = parseUsersTableRole(user.role)
   const assignments = dedupeRoleAssignments([
     ...explicitAssignments,
-    ...(legacyRole
-      ? [{ role: legacyRole, siteId: legacyRole === 'admin' ? undefined : site.id }]
+    ...(usersTableRole
+      ? [{ role: usersTableRole, siteId: usersTableRole === 'admin' ? undefined : site.id }]
       : []),
   ])
 

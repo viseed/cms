@@ -5,9 +5,9 @@ export const users = sqliteTable('hana_users', {
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
   passwordHash: text('password_hash').notNull(),
-  role: text('role', { enum: ['admin', 'editor', 'viewer'] })
+  role: text('role', { enum: ['admin', 'site_admin', 'site_content_writer'] })
     .notNull()
-    .default('viewer'),
+    .default('site_content_writer'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .$defaultFn(() => new Date()),

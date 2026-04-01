@@ -16,7 +16,7 @@ function ensureAdminAuthTables(db: DatabaseInstance) {
       email text NOT NULL UNIQUE,
       name text NOT NULL,
       password_hash text NOT NULL,
-      role text NOT NULL DEFAULT 'viewer',
+      role text NOT NULL DEFAULT 'site_content_writer',
       created_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
       updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
     );
@@ -112,7 +112,7 @@ describe('admin runtime tenancy and guards', () => {
       email: 'writer@hana.dev',
       name: 'Writer',
       passwordHash: 'hashed',
-      role: 'viewer',
+      role: 'site_content_writer',
     })
     await db.insert(userSiteRoles).values({
       id: randomUUID(),
