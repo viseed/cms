@@ -7,7 +7,7 @@ export function blogPlugin(): CMSPlugin {
     name: 'blog',
     version: '0.1.0',
     schema: blogSchema,
-    routes: setupBlogRoutes,
+    routes: (app, helpers) => setupBlogRoutes(app, helpers),
   }
 }
 

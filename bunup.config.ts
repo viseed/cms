@@ -3,7 +3,13 @@ import { defineWorkspace } from 'bunup'
 export default defineWorkspace(
   [
     { name: 'types', root: 'packages/types' },
-    { name: 'validator', root: 'packages/validator' },
+    {
+      name: 'validator', 
+      root: 'packages/validator',
+      config: {
+        dts: false,
+      },
+    },
     {
       name: 'schema',
       root: 'packages/schema',

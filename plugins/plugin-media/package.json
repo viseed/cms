@@ -22,6 +22,7 @@
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*"
+    "@hana/config": "workspace:*",
+    "@hana/core": "workspace:*"
   }
 }

@@ -2,9 +2,9 @@ import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export interface StorageAdapter {
-  save(filename: string, data: ArrayBuffer): Promise<string>
+  save(filename: string, data: ArrayBuffer, siteId: string): Promise<string>
   delete(path: string): Promise<void>
-  getUrl(path: string): string
+  getUrl(path: string, siteId: string): string
 }
 
 export class LocalStorageAdapter implements StorageAdapter {
@@ -14,9 +14,10 @@ export class LocalStorageAdapter implements StorageAdapter {
     this.uploadDir = uploadDir
   }
 
-  async save(filename: string, data: ArrayBuffer): Promise<string> {
-    await mkdir(this.uploadDir, { recursive: true })
-    const filePath = join(this.uploadDir, filename)
+  async save(filename: string, data: ArrayBuffer, siteId: string): Promise<string> {
+    const dir = join(this.uploadDir, siteId)
+    await mkdir(dir, { recursive: true })
+    const filePath = join(dir, filename)
     await Bun.write(filePath, data)
     return filePath
   }
@@ -26,7 +27,8 @@ export class LocalStorageAdapter implements StorageAdapter {
     await unlink(path)
   }
 
-  getUrl(path: string): string {
-    return `/uploads/${path.split(/[\\/]/).pop()}`
+  getUrl(path: string, siteId: string): string {
+    const basename = path.split(/[\\/]/).pop()
+    return `/uploads/${siteId}/${basename}`
   }
 }

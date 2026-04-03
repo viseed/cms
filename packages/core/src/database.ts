@@ -175,6 +175,26 @@ function ensureMultisiteSiteScope(sqlite: Database) {
         ON hana_theme_state(site_id, active_theme_name);
     `)
   }
+
+  if (tableExists(sqlite, 'blog_posts')) {
+    ensureSiteIdColumn(sqlite, 'blog_posts')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS blog_posts_site_slug_unique
+        ON blog_posts(site_id, slug);
+    `)
+  }
+
+  if (tableExists(sqlite, 'blog_categories')) {
+    ensureSiteIdColumn(sqlite, 'blog_categories')
+    sqlite.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS blog_categories_site_slug_unique
+        ON blog_categories(site_id, slug);
+    `)
+  }
+
+  if (tableExists(sqlite, 'media_files')) {
+    ensureSiteIdColumn(sqlite, 'media_files')
+  }
 }
 
 function ensureThemeStatePreviewColumns(sqlite: Database) {

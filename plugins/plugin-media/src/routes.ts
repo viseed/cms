@@ -1,18 +1,28 @@
+import type { CMSRouteContextHelpers } from '@hana/types'
 import { mediaQuerySchema } from '@hana/validator'
 import { Hono } from 'hono'
 import { LocalStorageAdapter, type StorageAdapter } from './storage'
 
-export function setupMediaRoutes(app: Hono, storage?: StorageAdapter): void {
+export interface MediaRouteOptions {
+  storage?: StorageAdapter
+}
+
+export function setupMediaRoutes(
+  app: Hono,
+  helpers: CMSRouteContextHelpers,
+  options?: MediaRouteOptions,
+): void {
   const media = new Hono()
-  const adapter = storage ?? new LocalStorageAdapter()
+  const adapter = options?.storage ?? new LocalStorageAdapter()
 
   media.get('/', async (c) => {
     const query = mediaQuerySchema.safeParse(c.req.query())
     if (!query.success) {
       return c.json({ error: 'Invalid query', details: query.error.flatten() }, 400)
     }
-    // TODO: implement DB query with pagination
-    return c.json({ files: [], pagination: query.data })
+    const { site } = helpers.resolveRequestContext(c)
+    // TODO: implement DB query with .where(eq(mediaFiles.siteId, site.id))
+    return c.json({ files: [], pagination: query.data, siteId: site.id })
   })
 
   media.post('/upload', async (c) => {
@@ -23,11 +33,12 @@ export function setupMediaRoutes(app: Hono, storage?: StorageAdapter): void {
       return c.json({ error: 'No file provided' }, 400)
     }
 
+    const { site } = helpers.resolveRequestContext(c)
     const uniqueName = `${Date.now()}-${file.name}`
     const buffer = await file.arrayBuffer()
-    const path = await adapter.save(uniqueName, buffer)
+    const path = await adapter.save(uniqueName, buffer, site.id)
 
-    // TODO: insert record into DB
+    // TODO: insert record into DB with siteId: site.id
     return c.json(
       {
         message: 'File uploaded',
@@ -37,7 +48,8 @@ export function setupMediaRoutes(app: Hono, storage?: StorageAdapter): void {
           mimeType: file.type,
           size: file.size,
           path,
-          url: adapter.getUrl(path),
+          url: adapter.getUrl(path, site.id),
+          siteId: site.id,
         },
       },
       201,
@@ -46,8 +58,9 @@ export function setupMediaRoutes(app: Hono, storage?: StorageAdapter): void {
 
   media.delete('/:id', async (c) => {
     const id = c.req.param('id')
-    // TODO: look up file in DB, delete from storage and DB
-    return c.json({ message: 'File deleted', id })
+    const { site } = helpers.resolveRequestContext(c)
+    // TODO: look up file in DB with .where(and(eq(mediaFiles.siteId, site.id), eq(mediaFiles.id, id)))
+    return c.json({ message: 'File deleted', id, siteId: site.id })
   })
 
   app.route('/api/media', media)

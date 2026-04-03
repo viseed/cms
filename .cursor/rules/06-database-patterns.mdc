@@ -49,6 +49,28 @@ const categories = sqliteTable('blog_categories', ...) // prefix: blog_
 const posts = sqliteTable('posts', ...)
 ```
 
+- **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@hana/schema`):
+
+```typescript
+// ✅ Đúng — plugin content table with site_id
+export const posts = sqliteTable(
+  'blog_posts',
+  {
+    id: text('id').primaryKey(),
+    siteId: text('site_id').notNull().default('default'),
+    slug: text('slug').notNull(),
+    // ...
+  },
+  (table) => ({
+    siteSlugUnique: uniqueIndex('blog_posts_site_slug_unique').on(table.siteId, table.slug),
+  }),
+)
+
+// ❌ Sai — không import @hana/schema trong plugin (vi phạm dependency rules)
+import { sites } from '@hana/schema'
+siteId: text('site_id').references(() => sites.id)  // ❌
+```
+
 ### Schema Merge Flow
 
 ```
@@ -130,5 +152,6 @@ Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
 
 ## Last updated
 
+2026-04-03 — Added plugin content table `site_id` convention (plain text, no `.references()`, site-scoped unique indexes)
 2026-03-30 — Added multisite tenancy model (`sites`, `site_domains`, `user_site_roles`) and `site_id` scoping conventions
 2026-03-22 — Added installed_themes and theme_state core tables
