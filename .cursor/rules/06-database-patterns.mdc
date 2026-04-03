@@ -1,6 +1,6 @@
 ---
 description: Database patterns — Drizzle ORM conventions, schema design, driver support
-globs: ["packages/schema/**", "packages/core/src/database.ts", "plugins/**"]
+globs: ["packages/schema/**", "packages/core/src/database.ts", "packages/core/src/database-bootstrap.ts", "packages/core/src/libsql-connection.ts", "plugins/**"]
 alwaysApply: false
 ---
 
@@ -8,17 +8,32 @@ alwaysApply: false
 
 > **Khi thêm DB driver mới hoặc thay đổi schema patterns → cập nhật file này.**
 
-## Driver Support (hiện tại)
+## Driver support — hai nhóm (Drizzle)
+
+Schema trong repo hiện dùng **`drizzle-orm/sqlite-core`** (`sqliteTable`, …). Điều này **không** áp dụng trực tiếp cho adapter Postgres/MySQL; muốn hai engine đó cần **`pgTable` / `mysqlTable`** (hoặc chiến lược multi-dialect riêng).
+
+### Nhóm A — SQLite dialect (một schema hiện tại)
 
 | Driver | Status | Config |
 |---|---|---|
-| `sqlite` | ✅ Production-ready | `{ driver: 'sqlite', url: './data.db' }` |
-| `turso` | 🔜 Planned | `{ driver: 'turso', url: 'libsql://...', authToken: '...' }` |
-| `postgres` | 🔜 Planned | `{ driver: 'postgres', url: 'postgresql://...' }` |
+| `sqlite` | ✅ Wired | Local only: `{ driver: 'sqlite', url: './data.db' }` hoặc `:memory:` — runtime **`@libsql/client` + `drizzle-orm/libsql`** (URL chuẩn hóa `file:`). |
+| `turso` | ✅ Wired | `{ driver: 'turso', url: 'libsql://...', authToken: '...' }` — remote bắt buộc `authToken`; `file:` không cần. Cùng stack libSQL với `sqlite`. |
 
-Source: `packages/core/src/database.ts` — thêm driver mới ở hàm `createDatabase()`
+- **Không còn `drizzle-orm/bun-sqlite`** trong factory: dev và prod cùng engine libSQL, cùng `database-bootstrap.ts`.
+- `PRAGMA journal_mode = WAL` — best-effort sau khi mở client (local file thường áp dụng; remote có thể bỏ qua).
 
-SQLite được tối ưu với: `PRAGMA journal_mode = WAL` (set tự động khi khởi tạo)
+### Nhóm B — Server SQL (config sẵn, schema chưa)
+
+| Driver | Status | Config |
+|---|---|---|
+| `postgres` | 🔜 Cần dialect + factory | `{ driver: 'postgres', url: 'postgresql://...' }` |
+| `mysql` | 🔜 Cần dialect + factory | `{ driver: 'mysql', url: 'mysql://...' }` |
+
+`DatabaseConfig` đã cho phép các giá trị trên để deploy chỉ đổi env khi team triển khai lớp schema B; `createDatabase()` phải báo lỗi rõ nếu chưa implement.
+
+Source: `packages/core/src/database.ts` — `export async function createDatabase()` (bootstrap libSQL là async; luôn `await` khi gọi trực tiếp).
+
+URL resolution: `packages/core/src/libsql-connection.ts` (`toLibsqlLocalUrl`, `resolveLibsqlConnection`). `:memory:` → `file::memory:?cache=private` (in-memory tách theo client; `cache=shared` chỉ khi config URL tường minh).
 
 ## Schema Architecture
 
@@ -75,7 +90,7 @@ siteId: text('site_id').references(() => sites.id)  // ❌
 
 ```
 HanaCMS.launch()
-  └─ createDatabase(config, pluginSchemas)
+  └─ await createDatabase(config, pluginSchemas)
        └─ mergeSchemas(coreSchema, ...pluginSchemas)
             ├─ Throw nếu có key trùng nhau
             └─ Return merged schema object → pass vào drizzle()
@@ -124,8 +139,8 @@ export const blogPosts = sqliteTable('blog_posts', {
 ## Lấy DB Instance trong Plugin
 
 ```typescript
-// ✅ Đúng — nhận qua cms:init hook
-let db: ReturnType<typeof import('@hana/core').createDatabase>
+// ✅ Đúng — nhận qua cms:init hook (createDatabase là async; instance lấy từ cms)
+let db: Awaited<ReturnType<typeof import('@hana/core').createDatabase>>
 
 export const hooks = {
   'cms:init': async (cms) => {
@@ -152,6 +167,9 @@ Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
 
 ## Last updated
 
+2026-04-03 — `sqlite` + `turso` đều qua `@libsql/client` + `drizzle-orm/libsql` (bỏ `bun-sqlite` trong factory)
+2026-04-03 — Turso/libSQL wired; `createDatabase` async; bootstrap dùng chung `database-bootstrap.ts`
+2026-04-03 — Driver matrix: nhóm A (sqlite/turso) vs nhóm B (postgres/mysql); caveat schema dialect
 2026-04-03 — Added plugin content table `site_id` convention (plain text, no `.references()`, site-scoped unique indexes)
 2026-03-30 — Added multisite tenancy model (`sites`, `site_domains`, `user_site_roles`) and `site_id` scoping conventions
 2026-03-22 — Added installed_themes and theme_state core tables

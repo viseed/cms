@@ -5,9 +5,9 @@
 ```typescript
 interface CMSConfig {
   db: {
-    driver: 'sqlite' | 'turso' | 'postgres'
+    driver: 'sqlite' | 'turso' | 'postgres' | 'mysql'
     url: string
-    authToken?: string  // For Turso
+    authToken?: string  // For Turso / libSQL remote
   }
   admin?: {
     path?: string       // Default: '/admin'
@@ -22,7 +22,9 @@ interface CMSConfig {
 
 ## Database Drivers
 
-### SQLite (default)
+### SQLite (default, local)
+
+Uses **`@libsql/client`** under the hood (same as Turso), with `url` as a local path or `:memory:`. Relative paths are resolved with `path.resolve`; `:memory:` maps to **`file::memory:?cache=private`** (one isolated in-memory DB per client, libSQL’s supported form). **Do not** use remote `libsql://` URLs here — use `driver: 'turso'` and `authToken`.
 
 ```typescript
 const cms = createCMS({
@@ -30,7 +32,11 @@ const cms = createCMS({
 })
 ```
 
-### Turso (coming soon)
+### Turso / libSQL remote
+
+Multi-instance production. Same Drizzle `sqlite-core` schema and same libSQL client stack as local `sqlite`. **Remote URLs** (`libsql://`, `https://`, `wss://`, `http://`) require `authToken`; **`file:`** URLs do not.
+
+`createDatabase` is **async** — use `await createDatabase(...)` if you call it outside `HanaCMS.launch()`.
 
 ```typescript
 const cms = createCMS({
@@ -41,3 +47,7 @@ const cms = createCMS({
   },
 })
 ```
+
+### Postgres / MySQL (config only until dialect work lands)
+
+`driver: 'postgres' | 'mysql'` is reserved on `DatabaseConfig` so you can point env at the right engine early. Core still ships **sqlite-core** tables; swapping only the URL is **not** enough — Postgres and MySQL need `pgTable` / `mysqlTable` (or an explicit multi-dialect strategy) before `createDatabase()` can connect. Until then, starting the CMS with these drivers will error with a clear message.

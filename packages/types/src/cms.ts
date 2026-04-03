@@ -116,9 +116,15 @@ export function toAuthContextPayload(context: RequestContext): AuthContextPayloa
   }
 }
 
+/**
+ * `sqlite` + `turso` share the same Drizzle sqlite-core schema and both use the libSQL client at runtime.
+ * Use `sqlite` for local file or `:memory:` only; use `turso` for remote Turso (and optional `file:` if you prefer that driver name).
+ * `postgres` + `mysql` need a separate Drizzle dialect (pgTable / mysqlTable) before they can work.
+ */
 export interface DatabaseConfig {
-  driver: 'sqlite' | 'turso' | 'postgres'
+  driver: 'sqlite' | 'turso' | 'postgres' | 'mysql'
   url: string
+  /** Required for remote Turso / libSQL when `driver` is `turso` (and URL is remote). */
   authToken?: string
 }
 

@@ -18,6 +18,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.2",
     "@hana/schema": "workspace:*",
     "@hana/types": "workspace:*",
     "@hana/validator": "workspace:*",

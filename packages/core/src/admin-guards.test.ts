@@ -8,9 +8,9 @@ import { createCMS } from './hana-cms'
 const DEFAULT_SITE_ID = 'default'
 const SQLITE_MEMORY_DB = ':memory:'
 
-function ensureAdminAuthTables(db: DatabaseInstance) {
-  const sqlite = (db as unknown as { $client: { exec: (query: string) => void } }).$client
-  sqlite.exec(`
+async function ensureAdminAuthTables(db: DatabaseInstance) {
+  const client = (db as unknown as { $client: { execute: (sql: string) => Promise<unknown> } }).$client
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS hana_users (
       id text PRIMARY KEY NOT NULL,
       email text NOT NULL UNIQUE,
@@ -21,7 +21,7 @@ function ensureAdminAuthTables(db: DatabaseInstance) {
       updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
     );
   `)
-  sqlite.exec(`
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS hana_sessions (
       id text PRIMARY KEY NOT NULL,
       site_id text NOT NULL DEFAULT 'default',
@@ -31,7 +31,7 @@ function ensureAdminAuthTables(db: DatabaseInstance) {
       created_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
     );
   `)
-  sqlite.exec(`
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS hana_user_site_roles (
       id text PRIMARY KEY NOT NULL,
       user_id text NOT NULL,
@@ -65,7 +65,7 @@ describe('admin runtime tenancy and guards', () => {
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    ensureAdminAuthTables(db)
+    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
@@ -102,7 +102,7 @@ describe('admin runtime tenancy and guards', () => {
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    ensureAdminAuthTables(db)
+    await ensureAdminAuthTables(db)
 
     const writerUserId = randomUUID()
     const writerToken = `token-${randomUUID()}`
@@ -147,7 +147,7 @@ describe('admin runtime tenancy and guards', () => {
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    ensureAdminAuthTables(db)
+    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
@@ -187,7 +187,7 @@ describe('admin runtime tenancy and guards', () => {
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    ensureAdminAuthTables(db)
+    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
@@ -232,7 +232,7 @@ describe('admin runtime tenancy and guards', () => {
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    ensureAdminAuthTables(db)
+    await ensureAdminAuthTables(db)
 
     const userId = randomUUID()
     const password = 'super-secure-password'
@@ -274,7 +274,7 @@ describe('admin runtime tenancy and guards', () => {
     })
 
     expect(contextResponse.status).toBe(200)
-    const payload = await contextResponse.json()
+    const payload = (await contextResponse.json()) as { currentUser?: { email?: string } }
     expect(payload.currentUser?.email).toBe('login@hana.dev')
   })
 

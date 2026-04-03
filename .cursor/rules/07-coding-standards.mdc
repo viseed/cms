@@ -55,7 +55,7 @@ import type { Hono } from 'hono'
 
 // ✅ Import value khi cần runtime
 import { Hono } from 'hono'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { drizzle } from 'drizzle-orm/libsql'
 ```
 
 ### Error handling

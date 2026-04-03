@@ -104,7 +104,7 @@ export class HanaCMS {
   }
 
   async launch(): Promise<Hono> {
-    this.db = createDatabase(
+    this.db = await createDatabase(
       this.config.db,
       this.plugins.flatMap((plugin) => (plugin.schema ? [plugin.schema] : [])),
     )
