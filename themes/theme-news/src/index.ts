@@ -1,6 +1,9 @@
-import { resolve, dirname } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { CMSTheme } from '@hana/types'
+import { newsCompanionPlugin } from './companion-plugin'
+
+export { newsCompanionPlugin }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -10,6 +13,7 @@ export function newsTheme(): CMSTheme {
     version: '0.1.0',
     templateRoot: resolve(__dirname, '../templates'),
     staticRoot: resolve(__dirname, '../static'),
+    companionPlugin: newsCompanionPlugin(),
     layouts: {
       home: { template: 'home.eta' },
       post: { template: 'post.eta' },
@@ -19,45 +23,51 @@ export function newsTheme(): CMSTheme {
     },
     menuZones: ['primary', 'footer'],
     settingsSchema: {
+      version: '1.0.0',
       sections: [
         {
           key: 'general',
-          label: 'General',
+          title: 'General',
           fields: [
-            { key: 'siteTitle', label: 'Site Title', type: 'text', defaultValue: 'Hana News' },
-            { key: 'siteDescription', label: 'Site Description', type: 'textarea', defaultValue: 'A modern news site powered by Hana CMS' },
-            { key: 'brandColor', label: 'Brand Color', type: 'color', defaultValue: '#1a56db' },
+            { key: 'siteTitle', label: 'Site Title', type: 'text', default: 'Hana News' },
+            {
+              key: 'siteDescription',
+              label: 'Site Description',
+              type: 'textarea',
+              default: 'A modern news site powered by Hana CMS',
+            },
+            { key: 'brandColor', label: 'Brand Color', type: 'color', default: '#1a56db' },
           ],
         },
         {
           key: 'hero',
-          label: 'Hero Section',
+          title: 'Hero Section',
           fields: [
-            { key: 'showHero', label: 'Show Hero Section', type: 'boolean', defaultValue: true },
+            { key: 'showHero', label: 'Show Hero Section', type: 'boolean', default: true },
           ],
         },
         {
           key: 'sidebar',
-          label: 'Sidebar',
+          title: 'Sidebar',
           fields: [
-            { key: 'showSidebar', label: 'Show Sidebar', type: 'boolean', defaultValue: true },
+            { key: 'showSidebar', label: 'Show Sidebar', type: 'boolean', default: true },
           ],
         },
         {
           key: 'footer',
-          label: 'Footer',
+          title: 'Footer',
           fields: [
             {
               key: 'socialLinks',
               label: 'Social Links',
               type: 'link_list',
-              defaultValue: [],
+              default: [],
             },
             {
               key: 'footerLinks',
               label: 'Footer Links',
               type: 'link_list',
-              defaultValue: [],
+              default: [],
             },
           ],
         },

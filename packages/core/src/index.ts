@@ -18,6 +18,7 @@ export type {
 export { createDatabase, type DatabaseInstance } from './database'
 export { createCMS, HanaCMS } from './hana-cms'
 export { HookRegistry } from './hook-registry'
+export { PluginRouteRegistry } from './plugin-route-registry'
 export {
   createThemeRuntime,
   resolveTemplateDirFromAbsoluteRoot,

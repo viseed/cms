@@ -54,10 +54,10 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 
 ### Theme KHÔNG được ❌
 
-- Import từ bất kỳ `plugins/*` package nào.
-- Đăng ký Hono routes riêng.
-- Khai báo Drizzle schema tables (ngoài core `installed_themes` do `@hana/schema` quản lý).
-- Chạy business logic (validation, auth, data mutation).
+- Import từ bất kỳ `plugins/*` package nào (companion plugin là ngoại lệ — nằm trong theme package).
+- Đăng ký Hono routes riêng (dùng `companionPlugin` thay thế).
+- Khai báo Drizzle schema tables trực tiếp (dùng `companionPlugin.schema` thay thế).
+- Chạy business logic trực tiếp (dùng `companionPlugin` thay thế).
 
 ### Theme ĐƯỢC phép ✅
 
@@ -66,6 +66,8 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 - Khai báo settings schema (JSON Schema hoặc Zod — chốt ở plan 09).
 - Export optional `data()` hook để extend/override data context trước khi render.
 - Include static assets (CSS, images, fonts).
+- Khai báo `companionPlugin?: CMSPlugin` — full plugin auto-managed theo theme lifecycle.
+- Khai báo `routePattern` per layout entry để override default route pattern.
 
 ### Plugin tương tác với Theme qua
 
@@ -148,6 +150,32 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 - Output là HTML string — SEO-friendly, zero client JS mặc định.
 - Client-side interactivity (Vue/React) là **plugin concern**, không phải theme/core.
 
+## Companion Plugin
+
+A theme can bundle a `companionPlugin?: CMSPlugin` — a full `CMSPlugin` (schema, routes, hooks, lifecycle) that is tightly coupled to the theme.
+
+### Behavior
+
+- **Schema**: Companion plugin schemas are migrated at startup alongside regular plugin schemas. Switching themes does NOT affect table existence.
+- **Routes**: Auto-activated when theme activates, auto-deactivated when theme deactivates. Managed by `PluginRouteRegistry`.
+- **Hooks**: Companion plugin hooks are registered into `HookRegistry` when the theme activates.
+- **Lifecycle**: `onEnable(cms)` called when theme activates; `onDisable(cms)` called when theme deactivates.
+- **Package location**: Companion plugin code lives **inside the theme package** (e.g., `themes/theme-ecommerce/src/companion-plugin.ts`), NOT published as a separate npm package.
+
+### routePattern Override
+
+`ThemeLayoutEntry.routePattern?: string` allows a theme to override the default route for a layout key:
+
+```typescript
+layouts: {
+  home:    { template: 'home.eta' },                                    // uses default '/'
+  product: { template: 'product.eta', routePattern: '/product/:slug' }, // custom route
+  cart:    { template: 'cart.eta', routePattern: '/cart' },              // custom route
+}
+```
+
+Custom route patterns from ALL registered themes are mounted at startup. The handler dynamically resolves the active theme via `resolveThemeForRequest()`.
+
 ## Non-goals (MVP)
 
 - Theme marketplace / CDN distribution.
@@ -158,6 +186,7 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 
 ## Last updated
 
+2026-04-10 — Added `companionPlugin`, `routePattern` override, `PluginRouteRegistry` integration.
 2026-04-10 — Theme registry, hot-swap, `templateRoot`/`staticRoot`, name-based preview, `theme:beforeRender` requestContext, `runWaterfallAt`.
 2026-03-29 — Widget vocabulary: `ThemeExtensionWidget*`, `ThemeExtensionSlotId` as `string`, `themeWidgetRegistry` (`theme-widget-registry.ts`).
 2026-03-29 — Documented path-based theme preview (token-gated, `themes/` root only).

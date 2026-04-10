@@ -64,13 +64,14 @@ alwaysApply: true
 ## Entry Points Quan Trọng
 
 ```
-packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap
+packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle
 packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
+packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase()
-packages/types/src/plugin.ts        → CMSPlugin interface, CMSPluginHooks, ThemeRenderRequestContext
+packages/types/src/plugin.ts        → CMSPlugin, PluginLifecycle, CMSPluginHooks (plugin:enabled/disabled)
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
-packages/types/src/theme.ts         → CMSTheme (templateRoot, staticRoot)
+packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
 packages/schema/src/schema-builder.ts → mergeSchemas()
 packages/registry/src/registry-client.ts → PluginRegistryClient
 packages/registry/src/integrity.ts  → verifyBundle()

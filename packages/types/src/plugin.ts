@@ -15,12 +15,20 @@ export interface CMSRouteContextHelpers {
   hasPermission: (context: Context, permission: Permission) => boolean
 }
 
+export interface PluginLifecycle {
+  onInstall?: (db: unknown) => void | Promise<void>
+  onUninstall?: (db: unknown) => void | Promise<void>
+  onEnable?: (cms: HanaCMS) => void | Promise<void>
+  onDisable?: (cms: HanaCMS) => void | Promise<void>
+}
+
 export interface CMSPlugin {
   name: string
   version: string
   schema?: Record<string, unknown>
   hooks?: Partial<CMSPluginHooks>
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
+  lifecycle?: PluginLifecycle
 }
 
 export interface CMSPluginHooks {
@@ -39,6 +47,8 @@ export interface CMSPluginHooks {
    * A server restart is typically required before the new theme takes effect at runtime.
    */
   'theme:activate': (theme: CMSTheme, previousTheme?: CMSTheme) => void | Promise<void>
+  'plugin:enabled': (pluginName: string) => void | Promise<void>
+  'plugin:disabled': (pluginName: string) => void | Promise<void>
 }
 
 export type PluginFactory = (options?: Record<string, unknown>) => CMSPlugin

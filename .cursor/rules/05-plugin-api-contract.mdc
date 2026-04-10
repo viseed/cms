@@ -13,12 +13,20 @@ alwaysApply: false
 
 ```typescript
 // packages/types/src/plugin.ts
+interface PluginLifecycle {
+  onInstall?:   (db: unknown) => void | Promise<void>
+  onUninstall?: (db: unknown) => void | Promise<void>
+  onEnable?:    (cms: HanaCMS) => void | Promise<void>
+  onDisable?:   (cms: HanaCMS) => void | Promise<void>
+}
+
 interface CMSPlugin {
   name: string      // required — unique identifier, dùng kebab-case
   version: string   // required — semver (vd: "1.0.0")
   schema?: Record<string, unknown>    // Drizzle table objects từ plugin
   hooks?: Partial<CMSPluginHooks>     // lifecycle hooks
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
+  lifecycle?: PluginLifecycle         // install/uninstall/enable/disable callbacks
   // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
   // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
 }
@@ -30,6 +38,8 @@ interface CMSPluginHooks {
   'theme:mount':         (theme: CMSTheme) => void | Promise<void>
   'theme:beforeRender':  (layoutKey: string, data: Record<string, unknown>) => Record<string, unknown> | Promise<Record<string, unknown>>
   'theme:activate':      (theme: CMSTheme, previousTheme?: CMSTheme) => void | Promise<void>
+  'plugin:enabled':      (pluginName: string) => void | Promise<void>
+  'plugin:disabled':     (pluginName: string) => void | Promise<void>
 }
 ```
 
@@ -38,23 +48,25 @@ interface CMSPluginHooks {
 ```
 1. createCMS(config)            → HanaCMS constructor, đăng ký tất cả plugins
 2. cms.launch()
-   ├─ createDatabase()          → merge schemas từ core + tất cả plugins
+   ├─ registerThemes()          → xây dựng themeRegistry + themeRuntimes
+   ├─ createDatabase()          → merge schemas từ core + plugins + companionPlugin schemas
    ├─ hooks.run('cms:init')     → mỗi plugin nhận HanaCMS instance (setup DB, services)
-   ├─ plugin.routes(app, helpers) → đăng ký Hono routes cho từng plugin với request-context helpers
-   ├─ mountTheme()              → nếu config có theme:
-   │   ├─ createThemeRuntime()  → khởi tạo Eta engine, resolve template dir
-   │   ├─ setupThemeStaticAssets() → serve /theme/static/* nếu staticDir có
-   │   ├─ setupThemeRoutes()    → đăng ký routes cho mỗi layout (/, /post/:slug, ...)
+   ├─ PluginRouteRegistry       → đăng ký sub-routers cho plugins + companionPlugins
+   ├─ syncPluginActiveStateFromDb() → activate plugins có enabled=1 trong DB
+   ├─ app.use('*', registry.middleware()) → single middleware dispatch tới active plugins
+   ├─ resolveActiveTheme()      → nếu có theme registry:
+   │   ├─ mountThemeRoutes()    → đăng ký routes cho mỗi layout (hỗ trợ routePattern override)
+   │   ├─ activate companionPlugin → nếu active theme có companionPlugin
    │   └─ hooks.run('theme:mount') → plugins nhận CMSTheme instance
-   ├─ setupAdminApi()           → đăng ký /api/admin routes
+   ├─ setupAdminApi()           → đăng ký /api/admin routes (bao gồm plugin enable/disable)
    ├─ setupAdminServing()       → serve admin SPA
    └─ hooks.run('cms:ready')    → app đã có routes, chuẩn bị nhận request
 3. admin:register               → được gọi khi Admin UI khởi tạo ComponentRegistry
 4. theme:beforeRender           → mỗi request tới theme route, trước khi Eta render
 5. theme:activate               → khi admin gọi POST /api/admin/themes/:name/activate;
-                                   `theme` là theme sắp active, `previousTheme` là theme đang chạy.
-                                   Dùng để re-register components hay clean up state.
-                                   Restart vẫn cần thiết để theme thực sự mount vào runtime.
+                                   Cũng toggle companionPlugin (deactivate old, activate new).
+6. plugin:enabled               → sau khi plugin được activate (bao gồm companionPlugin)
+7. plugin:disabled              → sau khi plugin bị deactivate
 ```
 
 ## Quy tắc viết Plugin
@@ -142,7 +154,28 @@ createCMS({
 | Dependencies | full npm deps | self-bundled, không external deps |
 | Ví dụ | `@hana/plugin-auth` | third-party từ registry |
 
+### Plugin Hot-swap (Runtime Enable/Disable)
+
+Plugins can be enabled/disabled at runtime without restarting the server:
+
+```
+POST /api/admin/plugins/:name/install   → lifecycle.onInstall(db) + DB record
+POST /api/admin/plugins/:name/uninstall → lifecycle.onUninstall(db) + delete DB record
+POST /api/admin/plugins/:name/enable    → lifecycle.onEnable(cms) + activate routes + DB enabled=1
+POST /api/admin/plugins/:name/disable   → lifecycle.onDisable(cms) + deactivate routes + DB enabled=0
+GET  /api/admin/plugins                 → list installed plugins with enabled status
+```
+
+`PluginRouteRegistry` wraps each plugin in its own sub-router. Only active plugins receive requests.
+
+### Companion Plugins (Theme-bound)
+
+A theme can declare `companionPlugin?: CMSPlugin` — a full plugin (schema + routes + hooks + lifecycle) that auto-activates when the theme activates and auto-deactivates when the theme deactivates.
+
+Companion plugin schemas are always migrated at startup. Only routes are toggled.
+
 ## Last updated
 
+2026-04-10 — Added `PluginLifecycle`, `plugin:enabled`/`plugin:disabled` hooks, `PluginRouteRegistry`, companion plugins, admin API for enable/disable
 2026-03-30 — Added `CMSRouteContextHelpers` for site-aware request context + permission checks
 2026-03-26 — Added `theme:activate` hook (Theme Activation Lifecycle)

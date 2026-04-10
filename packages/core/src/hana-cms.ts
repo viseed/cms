@@ -1,6 +1,14 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
-import { installedThemes, sessions, sites, themeState, userSiteRoles, users } from '@hana/schema'
+import {
+  installedPlugins,
+  installedThemes,
+  sessions,
+  sites,
+  themeState,
+  userSiteRoles,
+  users,
+} from '@hana/schema'
 import type {
   CMSConfig,
   CMSPlugin,
@@ -26,6 +34,7 @@ import {
 } from './admin-auth-policy'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
+import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
 import {
   buildPreviewPathFromParts,
@@ -86,6 +95,7 @@ export class HanaCMS {
   private themeRegistry = new Map<string, CMSTheme>()
   private themeRuntimes = new Map<string, ThemeRuntime>()
   private activeThemeName: string | null = null
+  private pluginRegistry = new PluginRouteRegistry()
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -113,28 +123,43 @@ export class HanaCMS {
   }
 
   async launch(): Promise<Hono> {
-    this.db = await createDatabase(
-      this.config.db,
-      this.plugins.flatMap((plugin) => (plugin.schema ? [plugin.schema] : [])),
-    )
+    this.registerThemes()
+
+    const allSchemas = [
+      ...this.plugins.flatMap((p) => (p.schema ? [p.schema] : [])),
+      ...Array.from(this.themeRegistry.values()).flatMap((t) =>
+        t.companionPlugin?.schema ? [t.companionPlugin.schema] : [],
+      ),
+    ]
+
+    this.db = await createDatabase(this.config.db, allSchemas)
 
     await this.ensureBootstrapAdmin()
 
     await this.hooks.run('cms:init', this as never)
 
+    const helpers = this.createRouteContextHelpers()
     for (const plugin of this.plugins) {
-      if (plugin.routes) {
-        plugin.routes(this.app, this.createRouteContextHelpers())
+      this.pluginRegistry.register(plugin, helpers)
+    }
+    for (const theme of this.themeRegistry.values()) {
+      if (theme.companionPlugin) {
+        this.pluginRegistry.register(theme.companionPlugin, helpers)
       }
     }
+    await this.syncPluginActiveStateFromDb()
+    this.app.use('*', this.pluginRegistry.middleware())
 
-    this.registerThemes()
     await this.resolveActiveTheme()
 
     if (this.activeThemeName) {
       this.mountThemeRoutes()
       const activeTheme = this.themeRegistry.get(this.activeThemeName)
       if (activeTheme) {
+        if (activeTheme.companionPlugin) {
+          this.pluginRegistry.activate(activeTheme.companionPlugin.name)
+          await this.registerPluginHooks(activeTheme.companionPlugin)
+        }
         await this.hooks.run('theme:mount', activeTheme)
       }
     }
@@ -229,6 +254,33 @@ export class HanaCMS {
     }
   }
 
+  private async syncPluginActiveStateFromDb(): Promise<void> {
+    const db = this.getDatabase()
+    const rows = await db.select().from(installedPlugins).all()
+
+    for (const row of rows) {
+      if (row.enabled && this.pluginRegistry.isInstalled(row.name)) {
+        this.pluginRegistry.activate(row.name)
+      }
+    }
+
+    for (const plugin of this.plugins) {
+      const dbRecord = rows.find((r) => r.name === plugin.name)
+      if (!dbRecord) {
+        this.pluginRegistry.activate(plugin.name)
+      }
+    }
+  }
+
+  private async registerPluginHooks(plugin: CMSPlugin): Promise<void> {
+    if (!plugin.hooks) return
+    for (const [hookName, handler] of Object.entries(plugin.hooks)) {
+      if (handler) {
+        this.hooks.register(hookName as Parameters<HookRegistry['register']>[0], handler)
+      }
+    }
+  }
+
   private async resolveThemeForRequest(c: Context): Promise<ResolvedTheme | null> {
     if (!this.activeThemeName) return null
     const activeTheme = this.themeRegistry.get(this.activeThemeName)
@@ -319,56 +371,91 @@ export class HanaCMS {
       })(c, next)
     })
 
-    for (const [layoutKey, routePath] of Object.entries(DEFAULT_LAYOUT_ROUTES)) {
-      this.app.get(routePath, async (c) => {
-        const resolved = await this.resolveThemeForRequest(c)
-        if (!resolved) return c.text('No active theme', 404)
+    const registeredRoutes = new Set<string>()
 
-        const { theme, runtime, templateRootOverride } = resolved
-        if (!theme.layouts[layoutKey]) {
-          return c.notFound()
+    for (const theme of this.themeRegistry.values()) {
+      for (const [layoutKey, layoutEntry] of Object.entries(theme.layouts)) {
+        const routes: string[] = []
+        const defaultRoute = DEFAULT_LAYOUT_ROUTES[layoutKey]
+        if (defaultRoute) routes.push(defaultRoute)
+        if (layoutEntry.routePattern && layoutEntry.routePattern !== defaultRoute) {
+          routes.push(layoutEntry.routePattern)
         }
 
-        const requestParams = c.req.param() as Record<string, string>
-        const requestQuery = c.req.query()
-        const defaultData: Record<string, unknown> = {
-          params: requestParams,
-          query: requestQuery,
-          path: c.req.path,
-        }
+        for (const routePath of routes) {
+          if (!routePath) continue
+          if (registeredRoutes.has(routePath)) continue
+          registeredRoutes.add(routePath)
 
-        const renderRequestContext = {
-          params: requestParams,
-          url: c.req.url,
-          query: requestQuery,
-          path: c.req.path,
-        }
+          this.app.get(routePath, async (c) => {
+            const resolved = await this.resolveThemeForRequest(c)
+            if (!resolved) return c.text('No active theme', 404)
 
-        const data = (await this.hooks.runWaterfallAt(
-          'theme:beforeRender',
-          1,
-          layoutKey,
-          defaultData,
-          renderRequestContext,
-        )) as Record<string, unknown>
+            const { theme: activeTheme, runtime, templateRootOverride } = resolved
 
-        const html = await runtime.renderLayout(
-          layoutKey,
-          {
-            data,
-            settings: {},
-            menus: {},
-            request: {
+            const resolvedLayoutKey = this.resolveLayoutKeyForRoute(
+              activeTheme,
+              c.req.path,
+              routePath,
+            )
+            if (!resolvedLayoutKey || !activeTheme.layouts[resolvedLayoutKey]) {
+              return c.notFound()
+            }
+
+            const requestParams = c.req.param() as Record<string, string>
+            const requestQuery = c.req.query()
+            const defaultData: Record<string, unknown> = {
+              params: requestParams,
+              query: requestQuery,
+              path: c.req.path,
+            }
+
+            const renderRequestContext = {
+              params: requestParams,
               url: c.req.url,
-              params: c.req.param() as Record<string, string>,
-            },
-          },
-          templateRootOverride ? { templateRoot: templateRootOverride } : undefined,
-        )
+              query: requestQuery,
+              path: c.req.path,
+            }
 
-        return c.html(html)
-      })
+            const data = (await this.hooks.runWaterfallAt(
+              'theme:beforeRender',
+              1,
+              resolvedLayoutKey,
+              defaultData,
+              renderRequestContext,
+            )) as Record<string, unknown>
+
+            const html = await runtime.renderLayout(
+              resolvedLayoutKey,
+              {
+                data,
+                settings: {},
+                menus: {},
+                request: {
+                  url: c.req.url,
+                  params: c.req.param() as Record<string, string>,
+                },
+              },
+              templateRootOverride ? { templateRoot: templateRootOverride } : undefined,
+            )
+
+            return c.html(html)
+          })
+        }
+      }
     }
+  }
+
+  private resolveLayoutKeyForRoute(
+    theme: CMSTheme,
+    _requestPath: string,
+    routePattern: string,
+  ): string | null {
+    for (const [layoutKey, layoutEntry] of Object.entries(theme.layouts)) {
+      const entryPattern = layoutEntry.routePattern ?? DEFAULT_LAYOUT_ROUTES[layoutKey]
+      if (entryPattern === routePattern) return layoutKey
+    }
+    return null
   }
 
   private async ensureBootstrapAdmin(): Promise<void> {
@@ -669,6 +756,7 @@ export class HanaCMS {
         version: plugin.version,
         description: `${plugin.name} plugin`,
         installed: true,
+        enabled: this.pluginRegistry.isActive(plugin.name),
         type: 'official' as const,
       }))
 
@@ -937,6 +1025,12 @@ export class HanaCMS {
         ? this.themeRegistry.get(this.activeThemeName)
         : undefined
 
+      if (previousTheme?.companionPlugin) {
+        this.pluginRegistry.deactivate(previousTheme.companionPlugin.name)
+        await previousTheme.companionPlugin.lifecycle?.onDisable?.(this as never)
+        await this.hooks.run('plugin:disabled', previousTheme.companionPlugin.name)
+      }
+
       const existingRow = await db
         .select()
         .from(themeState)
@@ -953,6 +1047,18 @@ export class HanaCMS {
       }
 
       this.activeThemeName = name
+
+      if (registeredTheme.companionPlugin) {
+        const companion = registeredTheme.companionPlugin
+        const helpers = this.createRouteContextHelpers()
+        if (!this.pluginRegistry.isInstalled(companion.name)) {
+          this.pluginRegistry.register(companion, helpers)
+        }
+        await companion.lifecycle?.onEnable?.(this as never)
+        this.pluginRegistry.activate(companion.name)
+        await this.registerPluginHooks(companion)
+        await this.hooks.run('plugin:enabled', companion.name)
+      }
 
       await this.hooks.run('theme:activate', registeredTheme, previousTheme)
 
@@ -1029,25 +1135,136 @@ export class HanaCMS {
       return c.json({ message: 'Settings saved.', values })
     })
 
-    registerAdminRoute('POST', '/plugins/:name/install', 'platform.sites.manage', (c) => {
+    registerAdminRoute('POST', '/plugins/:name/install', 'platform.sites.manage', async (c) => {
       const name = c.req.param('name')
       if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
+      const db = this.getDatabase()
+      const existing = await db
+        .select()
+        .from(installedPlugins)
+        .where(eq(installedPlugins.name, name))
+        .get()
+
+      if (existing) {
+        return c.json({ error: `Plugin "${name}" is already installed.` }, 409)
+      }
+
+      const plugin = this.plugins.find((p) => p.name === name)
+      if (plugin?.lifecycle?.onInstall) {
+        await plugin.lifecycle.onInstall(db)
+      }
+
+      await db.insert(installedPlugins).values({
+        id: randomUUID(),
+        name,
+        version: plugin?.version ?? '0.0.0',
+        type: 'official',
+        enabled: true,
+      })
+
+      if (plugin) {
+        this.pluginRegistry.activate(name)
+      }
+
       return c.json({
-        message: `Plugin "${name}" installation is not implemented yet.`,
+        message: `Plugin "${name}" installed successfully.`,
         plugin: name,
-        requiresRestart: true,
       })
     })
 
-    registerAdminRoute('POST', '/plugins/:name/uninstall', 'platform.sites.manage', (c) => {
+    registerAdminRoute('POST', '/plugins/:name/uninstall', 'platform.sites.manage', async (c) => {
       const name = c.req.param('name')
       if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
+      const db = this.getDatabase()
+      const existing = await db
+        .select()
+        .from(installedPlugins)
+        .where(eq(installedPlugins.name, name))
+        .get()
+
+      if (!existing) {
+        return c.json({ error: `Plugin "${name}" is not installed.` }, 404)
+      }
+
+      const plugin = this.plugins.find((p) => p.name === name)
+      if (plugin?.lifecycle?.onUninstall) {
+        await plugin.lifecycle.onUninstall(db)
+      }
+
+      this.pluginRegistry.deactivate(name)
+      await db.delete(installedPlugins).where(eq(installedPlugins.name, name))
+
       return c.json({
-        message: `Plugin "${name}" uninstallation is not implemented yet.`,
+        message: `Plugin "${name}" uninstalled successfully.`,
         plugin: name,
-        requiresRestart: true,
+      })
+    })
+
+    registerAdminRoute('POST', '/plugins/:name/enable', 'platform.sites.manage', async (c) => {
+      const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
+
+      if (!this.pluginRegistry.isInstalled(name)) {
+        return c.json({ error: `Plugin "${name}" is not registered.` }, 404)
+      }
+
+      if (this.pluginRegistry.isActive(name)) {
+        return c.json({ error: `Plugin "${name}" is already enabled.` }, 409)
+      }
+
+      const plugin = this.plugins.find((p) => p.name === name)
+      if (plugin?.lifecycle?.onEnable) {
+        await plugin.lifecycle.onEnable(this as never)
+      }
+
+      this.pluginRegistry.activate(name)
+
+      const db = this.getDatabase()
+      await db
+        .update(installedPlugins)
+        .set({ enabled: true, updatedAt: new Date() })
+        .where(eq(installedPlugins.name, name))
+
+      await this.hooks.run('plugin:enabled', name)
+
+      return c.json({
+        message: `Plugin "${name}" enabled.`,
+        plugin: name,
+      })
+    })
+
+    registerAdminRoute('POST', '/plugins/:name/disable', 'platform.sites.manage', async (c) => {
+      const name = c.req.param('name')
+      if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
+
+      if (!this.pluginRegistry.isInstalled(name)) {
+        return c.json({ error: `Plugin "${name}" is not registered.` }, 404)
+      }
+
+      if (!this.pluginRegistry.isActive(name)) {
+        return c.json({ error: `Plugin "${name}" is already disabled.` }, 409)
+      }
+
+      const plugin = this.plugins.find((p) => p.name === name)
+      if (plugin?.lifecycle?.onDisable) {
+        await plugin.lifecycle.onDisable(this as never)
+      }
+
+      this.pluginRegistry.deactivate(name)
+
+      const db = this.getDatabase()
+      await db
+        .update(installedPlugins)
+        .set({ enabled: false, updatedAt: new Date() })
+        .where(eq(installedPlugins.name, name))
+
+      await this.hooks.run('plugin:disabled', name)
+
+      return c.json({
+        message: `Plugin "${name}" disabled.`,
+        plugin: name,
       })
     })
 

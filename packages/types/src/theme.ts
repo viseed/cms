@@ -1,4 +1,5 @@
 import type { HanaCMS } from './cms'
+import type { CMSPlugin } from './plugin'
 import type { ThemeExtensionManifest } from './theme-extension-points'
 import type {
   RequiredLayoutKey,
@@ -20,6 +21,7 @@ export interface LayoutContext<TData = Record<string, unknown>> {
 
 export interface ThemeLayoutEntry<TData = Record<string, unknown>> {
   template: string
+  routePattern?: string
   data?: (defaultData: TData, cms: HanaCMS) => TData | Promise<TData>
 }
 
@@ -56,6 +58,7 @@ export interface CMSTheme {
   settingsSchema?: ThemeSettingsSchema
   assets?: ThemeAssets
   hooks?: Partial<CMSThemeHooks>
+  companionPlugin?: CMSPlugin
 }
 
 export interface CMSThemeHooks {
