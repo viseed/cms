@@ -94,6 +94,10 @@ export function resolveThemeStaticDirFromRoot(absThemeRoot: string): string | nu
 }
 
 function resolveTemplateDir(theme: CMSTheme): string {
+  if (theme.templateRoot) {
+    return theme.templateRoot
+  }
+
   const fallback = resolve(process.cwd(), 'themes', theme.name, 'templates')
   const candidates = [
     fallback,

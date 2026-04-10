@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= it.data.page ? it.data.page.title + ' — ' : '' %><%= it.settings.siteTitle || 'Hana News' %></title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+  <% if (it.settings.brandColor) { %>
+    <style>:root { --brand: <%= it.settings.brandColor %>; }</style>
+  <% } %>
+</head>
+<body>
+  <%~ include('partials/header', it) %>
+
+  <main class="container">
+    <% if (it.data.page) { %>
+      <article class="page-content">
+        <h1><%= it.data.page.title %></h1>
+        <div class="page-body">
+          <%~ it.data.page.body || '' %>
+        </div>
+      </article>
+    <% } else { %>
+      <div class="not-found">
+        <h1>Page not found</h1>
+        <p>The page you are looking for does not exist.</p>
+        <a href="/" class="btn">Back to Home</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%~ include('partials/footer', it) %>
+</body>
+</html>

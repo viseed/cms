@@ -30,7 +30,9 @@ alwaysApply: true
 
 plugins/*       ←── @hana/types, @hana/core, @hana/ui  (KHÔNG import từ nhau)
 
-apps/*          ←── bất kỳ package nào (apps là leaf node)
+themes/*        ←── @hana/types  (CHỈ import types, KHÔNG import core/schema/plugin)
+
+apps/*          ←── bất kỳ package nào, themes/* (apps là leaf node)
 ```
 
 ## Quy tắc cứng
@@ -64,6 +66,13 @@ import { HanaCMS } from '@hana/core'    // ❌ circular
 
 // @hana/core import từ @hana/ui
 import { ComponentRegistry } from '@hana/ui'  // ❌ circular
+
+// Theme import từ @hana/core hoặc @hana/schema
+import { HanaCMS } from '@hana/core'    // ❌
+import { themeState } from '@hana/schema' // ❌
+
+// Theme import từ plugin
+import { blogPlugin } from '@hana/plugin-blog' // ❌
 ```
 
 ## Import Type-Only
@@ -93,4 +102,5 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
 
 ## Last updated
 
+2026-04-10 — Added `themes/*` dependency rule (only `@hana/types`)
 2026-03-21 — Initial creation

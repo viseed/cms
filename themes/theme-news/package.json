@@ -1,0 +1,26 @@
+{
+  "name": "@hana/theme-news",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "static"
+  ],
+  "scripts": {
+    "build": "bunup",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@hana/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@hana/config": "workspace:*"
+  }
+}

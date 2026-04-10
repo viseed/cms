@@ -13,9 +13,11 @@ export const themeState = sqliteTable(
     activeThemeName: text('active_theme_name').notNull(),
     /** Flat key→value map of resolved theme settings (sectionKey.fieldKey → value). */
     settings: text('settings', { mode: 'json' }).$type<ThemeSettingsValue>(),
+    /** Registry theme name for preview (preferred over previewThemePath). */
+    previewThemeName: text('preview_theme_name'),
     /**
      * Relative preview root under cwd, e.g. `themes/dark/preview`.
-     * Applied only when request presents matching `previewToken` (cookie or query).
+     * Fallback when theme is not in registry. Applied only when request presents matching `previewToken`.
      */
     previewThemePath: text('preview_theme_path'),
     /** Opaque token; preview applies iff cookie `hana_preview` or `?hana_preview=` matches. */

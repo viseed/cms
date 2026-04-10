@@ -30,6 +30,16 @@ alwaysApply: true
 | `plugins/plugin-auth` | `@hana/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
 | `plugins/plugin-blog` | `@hana/plugin-blog` | Posts/categories schema + CRUD REST routes |
 | `plugins/plugin-media` | `@hana/plugin-media` | File upload schema + routes (local storage adapter) |
+| `plugins/plugin-pages` | `@hana/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection |
+
+## Themes (`themes/`)
+
+> Themes là **built-in default themes** — đã đăng ký sẵn trong registry, user dùng ngay không cần cài thêm.
+> Một thời điểm chỉ có 1 theme active, nhưng registry giữ nhiều themes để hot-swap.
+
+| Theme | Npm scope | Mô tả |
+|---|---|---|
+| `themes/theme-news` | `@hana/theme-news` | Editorial news theme — Eta templates, settings schema, static assets. Factory `newsTheme()` |
 
 ## Apps (`apps/`)
 
@@ -48,21 +58,27 @@ alwaysApply: true
 - Một thời điểm chỉ có **đúng 1 theme active**.
 - Theme **không** đăng ký routes hay schema tables riêng — chỉ cung cấp `.eta` templates, static assets, và optional `data()` hook.
 - Types cho theme nằm trong `@hana/types`, persistence trong `@hana/schema`, runtime mounting trong `@hana/core`.
+- `CMSConfig.themes[]` đăng ký nhiều theme; `CMSConfig.defaultTheme` chỉ định fallback.
+- Hot-swap: activate theme khác qua admin API không cần restart server.
 
 ## Entry Points Quan Trọng
 
 ```
-packages/core/src/hana-cms.ts       → HanaCMS class, createCMS()
-packages/core/src/hook-registry.ts  → HookRegistry class
+packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap
+packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
+packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase()
-packages/types/src/plugin.ts        → CMSPlugin interface, CMSPluginHooks
-packages/types/src/cms.ts           → CMSConfig, DatabaseConfig, AdminConfig
+packages/types/src/plugin.ts        → CMSPlugin interface, CMSPluginHooks, ThemeRenderRequestContext
+packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
+packages/types/src/theme.ts         → CMSTheme (templateRoot, staticRoot)
 packages/schema/src/schema-builder.ts → mergeSchemas()
 packages/registry/src/registry-client.ts → PluginRegistryClient
 packages/registry/src/integrity.ts  → verifyBundle()
+themes/theme-news/src/index.ts      → newsTheme() factory
 ```
 
 ## Last updated
 
+2026-04-10 — Added `@hana/theme-news`, `@hana/plugin-pages`, `Themes (themes/)` section. Updated entry points for theme registry/hot-swap.
 2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.
 2026-03-22 — Added Theme System section

@@ -1,0 +1,12 @@
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo"><%= it.settings.siteTitle || 'Hana News' %></a>
+    <nav class="site-nav">
+      <% if (it.menus && it.menus.primary) { %>
+        <% for (const item of it.menus.primary) { %>
+          <a href="<%= item.url %>" class="nav-link"><%= item.label %></a>
+        <% } %>
+      <% } %>
+    </nav>
+  </div>
+</header>

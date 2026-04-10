@@ -41,6 +41,10 @@ export type ThemeLayoutMap = Record<RequiredLayoutKey, ThemeLayoutEntry> &
 export interface CMSTheme {
   name: string
   version: string
+  /** Absolute path to the directory containing .eta template files. Falls back to cwd-based resolution if not set. */
+  templateRoot?: string
+  /** Absolute path to the directory containing static assets (css, js, images). */
+  staticRoot?: string
   layouts: ThemeLayoutMap
   menuZones?: ThemeMenuDeclaration
   /**

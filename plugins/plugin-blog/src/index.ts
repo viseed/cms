@@ -1,12 +1,81 @@
-import type { CMSPlugin } from '@hana/types'
+import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
+import type { DatabaseInstance } from '@hana/core'
 import { setupBlogRoutes } from './routes'
-import { blogSchema } from './schema'
+import { blogSchema, posts, categories } from './schema'
+import { eq, desc, and } from 'drizzle-orm'
+
+let db: DatabaseInstance | null = null
 
 export function blogPlugin(): CMSPlugin {
   return {
     name: 'blog',
     version: '0.1.0',
     schema: blogSchema,
+    hooks: {
+      'cms:init': (cms) => {
+        db = cms.getDatabase() as DatabaseInstance
+      },
+      'theme:beforeRender': async (
+        layoutKey: string,
+        data: Record<string, unknown>,
+        reqCtx: ThemeRenderRequestContext,
+      ) => {
+        if (!db) return data
+
+        if (layoutKey === 'home') {
+          const latestPosts = await db
+            .select()
+            .from(posts)
+            .where(eq(posts.status, 'published'))
+            .orderBy(desc(posts.publishedAt))
+            .limit(10)
+            .all()
+
+          const allCategories = await db.select().from(categories).all()
+
+          return { ...data, posts: latestPosts, categories: allCategories }
+        }
+
+        if (layoutKey === 'post') {
+          const slug = reqCtx.params.slug
+          if (slug) {
+            const post = await db
+              .select()
+              .from(posts)
+              .where(and(eq(posts.slug, slug), eq(posts.status, 'published')))
+              .get()
+
+            return { ...data, post: post ?? null }
+          }
+        }
+
+        if (layoutKey === 'category') {
+          const slug = reqCtx.params.slug
+          if (slug) {
+            const category = await db
+              .select()
+              .from(categories)
+              .where(eq(categories.slug, slug))
+              .get()
+
+            if (category) {
+              const categoryPosts = await db
+                .select()
+                .from(posts)
+                .where(and(eq(posts.categoryId, category.id), eq(posts.status, 'published')))
+                .orderBy(desc(posts.publishedAt))
+                .all()
+
+              return { ...data, category, posts: categoryPosts }
+            }
+
+            return { ...data, category: null, posts: [] }
+          }
+        }
+
+        return data
+      },
+    },
     routes: (app, helpers) => setupBlogRoutes(app, helpers),
   }
 }

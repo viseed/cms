@@ -38,6 +38,7 @@ export type {
   CMSPlugin,
   CMSPluginHooks,
   PluginFactory,
+  ThemeRenderRequestContext,
 } from './plugin'
 
 export type {

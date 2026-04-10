@@ -143,6 +143,11 @@ export interface CMSConfig {
   db: DatabaseConfig
   admin?: AdminConfig
   plugins?: Array<CMSPlugin>
+  /** Multiple built-in themes. CMS builds a registry and resolves active theme from DB at boot. */
+  themes?: Array<CMSTheme>
+  /** Name of the default theme when DB has no active theme set. Defaults to first entry in `themes`. */
+  defaultTheme?: string
+  /** Single theme shorthand — merged into `themes` internally for backward compatibility. */
   theme?: CMSTheme
   server?: {
     port?: number
@@ -157,4 +162,5 @@ export interface HanaCMS {
   getPlugins(): Array<CMSPlugin>
   getTheme(): CMSTheme | undefined
   hasTheme(): boolean
+  getRegisteredThemes(): Array<CMSTheme>
 }

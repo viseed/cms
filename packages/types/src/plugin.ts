@@ -3,6 +3,13 @@ import type { HanaCMS, Permission, RequestContext } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
+export interface ThemeRenderRequestContext {
+  params: Record<string, string>
+  url: string
+  query: Record<string, string>
+  path: string
+}
+
 export interface CMSRouteContextHelpers {
   resolveRequestContext: (context: Context) => RequestContext
   hasPermission: (context: Context, permission: Permission) => boolean
@@ -24,6 +31,7 @@ export interface CMSPluginHooks {
   'theme:beforeRender': (
     layoutKey: string,
     data: Record<string, unknown>,
+    requestContext: ThemeRenderRequestContext,
   ) => Record<string, unknown> | Promise<Record<string, unknown>>
   /**
    * Fired when an admin explicitly activates a theme via the API.

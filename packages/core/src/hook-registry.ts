@@ -20,30 +20,32 @@ export class HookRegistry {
 
   /**
    * Run handlers in sequence, passing each handler's return value
-   * as the last argument to the next handler (waterfall pattern).
-   * Used by hooks like `theme:beforeRender` where plugins modify data.
+   * into `args[flowIndex]` for the next handler (waterfall pattern).
+   * Defaults to last argument when `flowIndex` is omitted.
    */
   async runWaterfall<K extends CMSHookName>(
     name: K,
     ...args: Parameters<CMSPluginHooks[K]>
-  ): Promise<Parameters<CMSPluginHooks[K]> extends [...infer _Init, infer Last] ? Last : never> {
+  ): Promise<unknown> {
+    return this.runWaterfallAt(name, args.length - 1, ...args)
+  }
+
+  async runWaterfallAt<K extends CMSHookName>(
+    name: K,
+    flowIndex: number,
+    ...args: Parameters<CMSPluginHooks[K]>
+  ): Promise<unknown> {
     const handlers = this.hooks.get(name) ?? []
     const mutableArgs = [...args] as unknown[]
-    const lastIdx = mutableArgs.length - 1
 
     for (const handler of handlers) {
       const result = await (handler as (...a: unknown[]) => unknown)(...mutableArgs)
       if (result !== undefined) {
-        mutableArgs[lastIdx] = result
+        mutableArgs[flowIndex] = result
       }
     }
 
-    return mutableArgs[lastIdx] as Parameters<CMSPluginHooks[K]> extends [
-      ...infer _Init,
-      infer Last,
-    ]
-      ? Last
-      : never
+    return mutableArgs[flowIndex]
   }
 
   clear(): void {

@@ -150,6 +150,79 @@ async function ensureMultisiteFoundation(ctx: BootstrapCtx) {
     CREATE UNIQUE INDEX IF NOT EXISTS hana_sessions_site_token_unique
       ON hana_sessions(site_id, token);
   `)
+
+  await ctx.exec(`
+    CREATE TABLE IF NOT EXISTS hana_installed_plugins (
+      id text PRIMARY KEY NOT NULL,
+      site_id text NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE,
+      name text NOT NULL,
+      version text NOT NULL,
+      type text NOT NULL,
+      bundle_url text,
+      integrity text,
+      enabled integer NOT NULL DEFAULT 1,
+      config text,
+      installed_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
+      updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
+    );
+  `)
+
+  await ctx.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_plugins_site_name_unique
+      ON hana_installed_plugins(site_id, name);
+  `)
+
+  await ctx.exec(`
+    CREATE TABLE IF NOT EXISTS hana_installed_themes (
+      id text PRIMARY KEY NOT NULL,
+      site_id text NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE,
+      name text NOT NULL,
+      version text NOT NULL,
+      description text,
+      author text,
+      bundle_url text NOT NULL,
+      integrity text NOT NULL,
+      required_layouts text NOT NULL,
+      screenshots text,
+      homepage text,
+      repository text,
+      tags text,
+      min_cms_version text,
+      required_plugins text,
+      compatible_plugins text,
+      enabled integer NOT NULL DEFAULT 1,
+      installed_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
+      updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
+    );
+  `)
+
+  await ctx.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS hana_installed_themes_site_name_unique
+      ON hana_installed_themes(site_id, name);
+  `)
+
+  await ctx.exec(`
+    CREATE TABLE IF NOT EXISTS hana_theme_state (
+      id integer PRIMARY KEY AUTOINCREMENT,
+      site_id text NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE,
+      active_theme_name text NOT NULL,
+      settings text,
+      preview_theme_name text,
+      preview_theme_path text,
+      preview_token text,
+      updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
+    );
+  `)
+
+  await ctx.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_unique
+      ON hana_theme_state(site_id);
+  `)
+
+  await ctx.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS hana_theme_state_site_theme_unique
+      ON hana_theme_state(site_id, active_theme_name);
+  `)
 }
 
 async function migrateHanaUsersRoleLabels(ctx: BootstrapCtx) {
@@ -244,6 +317,9 @@ async function ensureThemeStatePreviewColumns(ctx: BootstrapCtx) {
   try {
     const names = new Set(await ctx.getTableColumnNames('hana_theme_state'))
     if (names.size === 0) return
+    if (!names.has('preview_theme_name')) {
+      await ctx.exec('ALTER TABLE hana_theme_state ADD COLUMN preview_theme_name text')
+    }
     if (!names.has('preview_theme_path')) {
       await ctx.exec('ALTER TABLE hana_theme_state ADD COLUMN preview_theme_path text')
     }

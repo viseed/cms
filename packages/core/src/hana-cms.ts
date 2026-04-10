@@ -9,7 +9,6 @@ import type {
   Permission,
   RequestContext,
   RequiredLayoutKey,
-  ThemeLayoutMap,
 } from '@hana/types'
 import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { loginSchema } from '@hana/validator'
@@ -70,6 +69,13 @@ function parseUsersTableRole(
   return role as 'admin' | 'site_admin' | 'site_content_writer'
 }
 
+interface ResolvedTheme {
+  theme: CMSTheme
+  runtime: ThemeRuntime
+  templateRootOverride?: string
+  staticRootOverride?: string | null
+}
+
 export class HanaCMS {
   private app: Hono
   private plugins: CMSPlugin[] = []
@@ -77,6 +83,9 @@ export class HanaCMS {
   private db: DatabaseInstance | null = null
   private config: CMSConfig
   private themeRuntime: ThemeRuntime | null = null
+  private themeRegistry = new Map<string, CMSTheme>()
+  private themeRuntimes = new Map<string, ThemeRuntime>()
+  private activeThemeName: string | null = null
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -119,8 +128,15 @@ export class HanaCMS {
       }
     }
 
-    if (this.hasTheme()) {
-      await this.mountTheme()
+    this.registerThemes()
+    await this.resolveActiveTheme()
+
+    if (this.activeThemeName) {
+      this.mountThemeRoutes()
+      const activeTheme = this.themeRegistry.get(this.activeThemeName)
+      if (activeTheme) {
+        await this.hooks.run('theme:mount', activeTheme)
+      }
     }
 
     this.setupAdminApi()
@@ -143,11 +159,18 @@ export class HanaCMS {
   }
 
   getTheme(): CMSTheme | undefined {
+    if (this.activeThemeName) {
+      return this.themeRegistry.get(this.activeThemeName)
+    }
     return this.config.theme
   }
 
   hasTheme(): boolean {
-    return this.config.theme !== undefined
+    return this.activeThemeName !== null || this.themeRegistry.size > 0 || this.config.theme !== undefined
+  }
+
+  getRegisteredThemes(): CMSTheme[] {
+    return [...this.themeRegistry.values()]
   }
 
   getApp(): Hono {
@@ -155,32 +178,96 @@ export class HanaCMS {
   }
 
   getThemeRuntime(): ThemeRuntime | null {
+    if (this.activeThemeName) {
+      return this.themeRuntimes.get(this.activeThemeName) ?? null
+    }
     return this.themeRuntime
   }
 
-  /**
-   * When DB + request token match, returns absolute filesystem root for preview templates/static.
-   * Gated by `?hana_preview=` or `hana_preview` cookie so public traffic keeps the active theme.
-   */
-  private async getEffectivePreviewThemeRoot(c: Context): Promise<string | null> {
-    const theme = this.config.theme
-    if (!theme || !this.themeRuntime) return null
+  private registerThemes(): void {
+    const allThemes: CMSTheme[] = [...(this.config.themes ?? [])]
 
-    const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
-    if (!token) return null
+    const legacyTheme = this.config.theme
+    if (legacyTheme && !allThemes.find((t) => t.name === legacyTheme.name)) {
+      allThemes.push(legacyTheme)
+    }
+
+    for (const theme of allThemes) {
+      this.themeRegistry.set(theme.name, theme)
+      const runtime = createThemeRuntime(theme, this)
+      this.themeRuntimes.set(theme.name, runtime)
+    }
+
+    if (this.config.theme) {
+      this.themeRuntime = this.themeRuntimes.get(this.config.theme.name) ?? null
+    }
+  }
+
+  private async resolveActiveTheme(): Promise<void> {
+    if (this.themeRegistry.size === 0) return
 
     const db = this.getDatabase()
     const row = await db
       .select()
       .from(themeState)
-      .where(eq(themeState.activeThemeName, theme.name))
+      .where(eq(themeState.siteId, 'default'))
       .get()
 
-    if (!row?.previewThemePath || !row.previewToken || row.previewToken !== token) {
-      return null
+    if (row?.activeThemeName && this.themeRegistry.has(row.activeThemeName)) {
+      this.activeThemeName = row.activeThemeName
+      return
     }
 
-    return resolveValidatedPreviewRoot(process.cwd(), row.previewThemePath)
+    if (this.config.defaultTheme && this.themeRegistry.has(this.config.defaultTheme)) {
+      this.activeThemeName = this.config.defaultTheme
+      return
+    }
+
+    const firstName = [...this.themeRegistry.keys()][0]
+    if (firstName) {
+      this.activeThemeName = firstName
+    }
+  }
+
+  private async resolveThemeForRequest(c: Context): Promise<ResolvedTheme | null> {
+    if (!this.activeThemeName) return null
+    const activeTheme = this.themeRegistry.get(this.activeThemeName)
+    const activeRuntime = this.themeRuntimes.get(this.activeThemeName)
+    if (!activeTheme || !activeRuntime) return null
+
+    const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
+    if (token) {
+      const db = this.getDatabase()
+      const row = await db
+        .select()
+        .from(themeState)
+        .where(eq(themeState.siteId, 'default'))
+        .get()
+
+      if (row?.previewToken === token) {
+        if (row.previewThemeName) {
+          const previewTheme = this.themeRegistry.get(row.previewThemeName)
+          const previewRuntime = this.themeRuntimes.get(row.previewThemeName)
+          if (previewTheme && previewRuntime) {
+            return { theme: previewTheme, runtime: previewRuntime }
+          }
+        }
+
+        if (row.previewThemePath) {
+          const previewRoot = resolveValidatedPreviewRoot(process.cwd(), row.previewThemePath)
+          if (previewRoot) {
+            return {
+              theme: activeTheme,
+              runtime: activeRuntime,
+              templateRootOverride: resolveTemplateDirFromAbsoluteRoot(previewRoot),
+              staticRootOverride: resolveThemeStaticDirFromRoot(previewRoot),
+            }
+          }
+        }
+      }
+    }
+
+    return { theme: activeTheme, runtime: activeRuntime }
   }
 
   private clearThemePreviewCookie(c: Context): void {
@@ -188,92 +275,82 @@ export class HanaCMS {
   }
 
   private async clearThemePreviewState(c: Context) {
-    const theme = this.config.theme
-    if (!theme) {
-      this.clearThemePreviewCookie(c)
-      return c.json({ message: 'No theme loaded; preview cookie cleared if present.' })
-    }
-
     const db = this.getDatabase()
     const existing = await db
       .select()
       .from(themeState)
-      .where(eq(themeState.activeThemeName, theme.name))
+      .where(eq(themeState.siteId, 'default'))
       .get()
 
     if (existing) {
       await db
         .update(themeState)
         .set({
+          previewThemeName: null,
           previewThemePath: null,
           previewToken: null,
           updatedAt: new Date(),
         })
-        .where(eq(themeState.activeThemeName, theme.name))
+        .where(eq(themeState.siteId, 'default'))
     }
 
     this.clearThemePreviewCookie(c)
     return c.json({ message: 'Theme preview cleared.' })
   }
 
-  private async mountTheme(): Promise<void> {
-    const theme = this.config.theme
-    if (!theme) return
-
-    this.themeRuntime = createThemeRuntime(theme, this)
-
-    this.setupThemeStaticAssets(theme)
-    this.setupThemeRoutes(theme)
-
-    await this.hooks.run('theme:mount', theme)
+  private resolveStaticRoot(theme: CMSTheme): string | null {
+    return (
+      theme.staticRoot ??
+      (theme.assets?.staticDir ? resolve(process.cwd(), theme.assets.staticDir) : null)
+    )
   }
 
-  private setupThemeStaticAssets(theme: CMSTheme): void {
-    const defaultStaticRoot = theme.assets?.staticDir
-      ? resolve(process.cwd(), theme.assets.staticDir)
-      : null
-
+  private mountThemeRoutes(): void {
     this.app.get('/theme/static/*', async (c, next) => {
-      const previewRoot = await this.getEffectivePreviewThemeRoot(c)
-      let root: string | null = null
-      if (previewRoot) {
-        root = resolveThemeStaticDirFromRoot(previewRoot)
-      }
-      if (!root && defaultStaticRoot) {
-        root = defaultStaticRoot
-      }
-      if (!root) {
-        return c.notFound()
-      }
+      const resolved = await this.resolveThemeForRequest(c)
+      if (!resolved) return c.notFound()
+
+      const root = resolved.staticRootOverride ?? this.resolveStaticRoot(resolved.theme)
+      if (!root) return c.notFound()
 
       return serveStatic({
         root,
         rewriteRequestPath: (path) => path.replace('/theme/static', ''),
       })(c, next)
     })
-  }
 
-  private setupThemeRoutes(theme: CMSTheme): void {
-    for (const layoutKey of Object.keys(theme.layouts)) {
-      const routePath = DEFAULT_LAYOUT_ROUTES[layoutKey]
-      if (!routePath) continue
-
+    for (const [layoutKey, routePath] of Object.entries(DEFAULT_LAYOUT_ROUTES)) {
       this.app.get(routePath, async (c) => {
+        const resolved = await this.resolveThemeForRequest(c)
+        if (!resolved) return c.text('No active theme', 404)
+
+        const { theme, runtime, templateRootOverride } = resolved
+        if (!theme.layouts[layoutKey]) {
+          return c.notFound()
+        }
+
+        const requestParams = c.req.param() as Record<string, string>
+        const requestQuery = c.req.query()
         const defaultData: Record<string, unknown> = {
-          params: c.req.param() as Record<string, string>,
-          query: c.req.query(),
+          params: requestParams,
+          query: requestQuery,
           path: c.req.path,
         }
 
-        const data = await this.hooks.runWaterfall('theme:beforeRender', layoutKey, defaultData)
+        const renderRequestContext = {
+          params: requestParams,
+          url: c.req.url,
+          query: requestQuery,
+          path: c.req.path,
+        }
 
-        const runtime = this.themeRuntime
-        if (!runtime) return c.text('Theme not mounted', 500)
-
-        const previewRoot = await this.getEffectivePreviewThemeRoot(c)
-        const templateRoot = previewRoot
-          ? resolveTemplateDirFromAbsoluteRoot(previewRoot)
-          : undefined
+        const data = (await this.hooks.runWaterfallAt(
+          'theme:beforeRender',
+          1,
+          layoutKey,
+          defaultData,
+          renderRequestContext,
+        )) as Record<string, unknown>
 
         const html = await runtime.renderLayout(
           layoutKey,
@@ -286,7 +363,7 @@ export class HanaCMS {
               params: c.req.param() as Record<string, string>,
             },
           },
-          templateRoot ? { templateRoot } : undefined,
+          templateRootOverride ? { templateRoot: templateRootOverride } : undefined,
         )
 
         return c.html(html)
@@ -601,71 +678,61 @@ export class HanaCMS {
     registerAdminRoute('GET', '/themes', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
       const dbRecords = await db.select().from(installedThemes).all()
-      const configTheme = this.config.theme
+      const activeTheme = this.getTheme()
 
-      const catalog = dbRecords.map((record) => {
-        const isActive = configTheme?.name === record.name
-        const runtimeTheme = isActive ? configTheme : undefined
-        const missingRequiredLayouts = runtimeTheme
-          ? HanaCMS.REQUIRED_LAYOUTS.filter((k) => !(k in runtimeTheme.layouts))
-          : []
+      const seen = new Set<string>()
+      const catalog: ReturnType<HanaCMS['describeTheme']>[] = []
 
-        return {
+      for (const [, theme] of this.themeRegistry) {
+        seen.add(theme.name)
+        catalog.push(this.describeTheme(theme, theme.name === this.activeThemeName))
+      }
+
+      for (const record of dbRecords) {
+        if (seen.has(record.name)) continue
+        catalog.push({
           name: record.name,
           version: record.version,
           description: record.description ?? `${record.name} theme`,
           installed: true,
-          active: isActive,
-          missingRequiredLayouts,
-        }
-      })
-
-      // Include config.theme if it was never inserted into installedThemes
-      if (configTheme && !dbRecords.find((r) => r.name === configTheme.name)) {
-        catalog.push(this.describeTheme(configTheme, true))
+          active: activeTheme?.name === record.name,
+          missingRequiredLayouts: [],
+        })
       }
 
       return c.json(catalog)
     })
 
     registerAdminRoute('GET', '/themes/active', 'platform.sites.read', (c) => {
-      const theme = this.config.theme
+      const theme = this.getTheme()
       if (!theme) return c.json(null)
       return c.json(this.describeTheme(theme, true))
     })
 
     registerAdminRoute('GET', '/themes/preview', 'platform.sites.read', async (c) => {
-      const theme = this.config.theme
-      if (!theme) {
-        return c.json({
-          active: false,
-          previewThemePath: null,
-          token: null,
-        })
-      }
-
       const db = this.getDatabase()
       const row = await db
         .select()
         .from(themeState)
-        .where(eq(themeState.activeThemeName, theme.name))
+        .where(eq(themeState.siteId, 'default'))
         .get()
 
+      const previewThemeName = row?.previewThemeName ?? null
       const previewThemePath = row?.previewThemePath ?? null
       const token = row?.previewToken ?? null
-      const active = Boolean(previewThemePath && token)
+      const active = Boolean((previewThemeName || previewThemePath) && token)
 
       return c.json({
         active,
+        previewThemeName,
         previewThemePath,
         token,
       })
     })
 
     registerAdminRoute('POST', '/themes/preview', 'platform.sites.manage', async (c) => {
-      const theme = this.config.theme
-      if (!theme) {
-        return c.json({ error: 'No theme is loaded in this process.' }, 400)
+      if (this.themeRegistry.size === 0) {
+        return c.json({ error: 'No themes are registered.' }, 400)
       }
 
       let body: unknown
@@ -680,49 +747,61 @@ export class HanaCMS {
       }
 
       const b = body as Record<string, unknown>
-      let relative: string | null = null
-      if (typeof b.path === 'string') {
-        relative = normalizeThemePreviewRelativePath(b.path)
-      } else if (typeof b.name === 'string' && typeof b.subdir === 'string') {
-        relative = buildPreviewPathFromParts(b.name, b.subdir)
-      }
 
-      if (!relative) {
-        return c.json(
-          {
-            error:
-              'Invalid preview target. Use { path: "themes/<name>/<subdir>" } or { name, subdir } with safe segments.',
-          },
-          400,
-        )
-      }
+      let previewThemeName: string | null = null
+      let previewThemePath: string | null = null
 
-      if (!resolveValidatedPreviewRoot(process.cwd(), relative)) {
-        return c.json({ error: 'Invalid or disallowed preview path.' }, 400)
+      if (typeof b.themeName === 'string') {
+        if (!this.themeRegistry.has(b.themeName)) {
+          return c.json({ error: `Theme "${b.themeName}" is not registered.` }, 404)
+        }
+        previewThemeName = b.themeName
+      } else {
+        let relative: string | null = null
+        if (typeof b.path === 'string') {
+          relative = normalizeThemePreviewRelativePath(b.path)
+        } else if (typeof b.name === 'string' && typeof b.subdir === 'string') {
+          relative = buildPreviewPathFromParts(b.name, b.subdir)
+        }
+
+        if (!relative) {
+          return c.json(
+            {
+              error:
+                'Invalid preview target. Use { themeName: "<name>" } for registry themes, or { path } / { name, subdir } for path-based.',
+            },
+            400,
+          )
+        }
+
+        if (!resolveValidatedPreviewRoot(process.cwd(), relative)) {
+          return c.json({ error: 'Invalid or disallowed preview path.' }, 400)
+        }
+        previewThemePath = relative
       }
 
       const token = randomBytes(24).toString('hex')
       const db = this.getDatabase()
+      const activeTheme = this.activeThemeName ?? 'default'
       const existing = await db
         .select()
         .from(themeState)
-        .where(eq(themeState.activeThemeName, theme.name))
+        .where(eq(themeState.siteId, 'default'))
         .get()
 
+      const updatePayload = {
+        previewThemeName,
+        previewThemePath,
+        previewToken: token,
+        updatedAt: new Date(),
+      }
+
       if (existing) {
-        await db
-          .update(themeState)
-          .set({
-            previewThemePath: relative,
-            previewToken: token,
-            updatedAt: new Date(),
-          })
-          .where(eq(themeState.activeThemeName, theme.name))
+        await db.update(themeState).set(updatePayload).where(eq(themeState.siteId, 'default'))
       } else {
         await db.insert(themeState).values({
-          activeThemeName: theme.name,
-          previewThemePath: relative,
-          previewToken: token,
+          activeThemeName: activeTheme,
+          ...updatePayload,
         })
       }
 
@@ -738,7 +817,8 @@ export class HanaCMS {
 
       return c.json({
         message: 'Theme preview enabled for this browser.',
-        previewThemePath: relative,
+        previewThemeName,
+        previewThemePath,
         token,
         previewQueryExample,
       })
@@ -788,8 +868,7 @@ export class HanaCMS {
       if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
-      const activeTheme = this.config.theme
-      if (activeTheme && activeTheme.name === name) {
+      if (this.activeThemeName === name) {
         return c.json(
           { error: `Cannot uninstall theme "${name}" because it is currently active.` },
           400,
@@ -820,90 +899,76 @@ export class HanaCMS {
       if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
-      // Validate: theme must be installed in DB
-      const installedRecord = await db
-        .select()
-        .from(installedThemes)
-        .where(eq(installedThemes.name, name))
-        .get()
+      const registeredTheme = this.themeRegistry.get(name)
 
-      if (!installedRecord) {
-        return c.json({ error: `Theme "${name}" is not installed.` }, 404)
+      if (!registeredTheme) {
+        const installedRecord = await db
+          .select()
+          .from(installedThemes)
+          .where(eq(installedThemes.name, name))
+          .get()
+
+        if (!installedRecord) {
+          return c.json({ error: `Theme "${name}" is not available.` }, 404)
+        }
+
+        return c.json({
+          message: `Theme "${name}" is installed but not loaded in the registry. A restart is required.`,
+          theme: name,
+          requiresRestart: true,
+        })
       }
 
-      // Validate: not already the active runtime theme
-      const currentTheme = this.config.theme
-      if (currentTheme?.name === name) {
+      if (this.activeThemeName === name) {
         return c.json({ error: `Theme "${name}" is already the active theme.` }, 409)
       }
 
-      // Validate: required layouts — only possible when the theme object is loaded in config
-      const runtimeTheme = this.config.theme?.name === name ? this.config.theme : undefined
-      if (runtimeTheme) {
-        const missingLayouts = HanaCMS.REQUIRED_LAYOUTS.filter((k) => !(k in runtimeTheme.layouts))
-        if (missingLayouts.length > 0) {
-          return c.json(
-            { error: `Theme "${name}" is missing required layouts: ${missingLayouts.join(', ')}.` },
-            422,
-          )
-        }
+      const missingLayouts = HanaCMS.REQUIRED_LAYOUTS.filter(
+        (k) => !(k in registeredTheme.layouts),
+      )
+      if (missingLayouts.length > 0) {
+        return c.json(
+          { error: `Theme "${name}" is missing required layouts: ${missingLayouts.join(', ')}.` },
+          422,
+        )
       }
 
-      // Validate: required plugins must be loaded
-      const requiredPlugins = installedRecord.requiredPlugins ?? []
-      if (requiredPlugins.length > 0) {
-        const loadedNames = new Set(this.plugins.map((p) => p.name))
-        const missing = requiredPlugins.filter((p) => !loadedNames.has(p))
-        if (missing.length > 0) {
-          return c.json(
-            {
-              error: `Theme "${name}" requires the following plugins which are not loaded: ${missing.join(', ')}.`,
-            },
-            422,
-          )
-        }
-      }
+      const previousTheme = this.activeThemeName
+        ? this.themeRegistry.get(this.activeThemeName)
+        : undefined
 
-      // Persist: upsert a themeState row so the active choice survives restarts
       const existingRow = await db
         .select()
         .from(themeState)
-        .where(eq(themeState.activeThemeName, name))
+        .where(eq(themeState.siteId, 'default'))
         .get()
 
       if (existingRow) {
         await db
           .update(themeState)
-          .set({ updatedAt: new Date() })
-          .where(eq(themeState.activeThemeName, name))
+          .set({ activeThemeName: name, updatedAt: new Date() })
+          .where(eq(themeState.siteId, 'default'))
       } else {
         await db.insert(themeState).values({ activeThemeName: name })
       }
 
-      // Fire hook: allow plugins to react to the pending theme switch
-      const nextTheme: CMSTheme =
-        runtimeTheme ??
-        ({
-          name: installedRecord.name,
-          version: installedRecord.version,
-          layouts: {} as ThemeLayoutMap,
-        } as CMSTheme)
+      this.activeThemeName = name
 
-      await this.hooks.run('theme:activate', nextTheme, currentTheme)
+      await this.hooks.run('theme:activate', registeredTheme, previousTheme)
 
       return c.json({
-        message: `Theme "${name}" has been set as active. A restart is required for changes to take effect.`,
+        message: `Theme "${name}" is now active.`,
         theme: name,
-        requiresRestart: true,
+        requiresRestart: false,
       })
     })
 
     registerAdminRoute('GET', '/themes/:name/settings', 'site.content.read', async (c) => {
       const name = c.req.param('name')
       if (!name) return c.json({ error: 'Theme name is required.' }, 400)
-      const theme = this.config.theme
+      const theme = this.themeRegistry.get(name)
 
-      if (!theme || theme.name !== name) {
+      if (!theme) {
         return c.json({ error: `Theme "${name}" not found.` }, 404)
       }
 
@@ -911,7 +976,7 @@ export class HanaCMS {
       const row = await db
         .select()
         .from(themeState)
-        .where(eq(themeState.activeThemeName, name))
+        .where(eq(themeState.siteId, 'default'))
         .get()
 
       return c.json({
@@ -923,9 +988,9 @@ export class HanaCMS {
     registerAdminRoute('PUT', '/themes/:name/settings', 'site.content.write', async (c) => {
       const name = c.req.param('name')
       if (!name) return c.json({ error: 'Theme name is required.' }, 400)
-      const theme = this.config.theme
+      const theme = this.themeRegistry.get(name)
 
-      if (!theme || theme.name !== name) {
+      if (!theme) {
         return c.json({ error: `Theme "${name}" not found.` }, 404)
       }
 
@@ -949,14 +1014,14 @@ export class HanaCMS {
       const existing = await db
         .select()
         .from(themeState)
-        .where(eq(themeState.activeThemeName, name))
+        .where(eq(themeState.siteId, 'default'))
         .get()
 
       if (existing) {
         await db
           .update(themeState)
           .set({ settings: values, updatedAt: new Date() })
-          .where(eq(themeState.activeThemeName, name))
+          .where(eq(themeState.siteId, 'default'))
       } else {
         await db.insert(themeState).values({ activeThemeName: name, settings: values })
       }
