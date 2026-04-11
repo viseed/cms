@@ -1,7 +1,7 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
-import type { DatabaseInstance } from '@hana/core'
+import { renderBody, type DatabaseInstance } from '@hana/core'
 import { setupPagesRoutes } from './routes'
 import { pagesSchema, pages } from './schema'
 import { eq, and } from 'drizzle-orm'
@@ -50,14 +50,17 @@ export function pagesPlugin(): CMSPlugin {
               .where(and(eq(pages.slug, slug), eq(pages.status, 'published')))
               .get()
 
-            return { ...data, page: page ?? null }
+            if (page) {
+              return { ...data, page: { ...page, bodyHtml: renderBody(page.body) } }
+            }
+            return { ...data, page: null }
           }
         }
 
         return data
       },
     },
-    routes: (app, helpers) => setupPagesRoutes(app, helpers),
+    routes: (app, helpers) => setupPagesRoutes(app, helpers, () => db),
   }
 }
 

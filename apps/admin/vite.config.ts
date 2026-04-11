@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig, type Plugin } from 'vite'
 
@@ -5,6 +7,7 @@ function hanaImportMapPlugin(): Plugin {
   let isDev = false
   let vueChunkFileName = ''
   let vueRouterChunkFileName = ''
+  let cacheDir = ''
 
   return {
     name: 'hana-import-map',
@@ -12,6 +15,7 @@ function hanaImportMapPlugin(): Plugin {
 
     configResolved(config) {
       isDev = config.command === 'serve'
+      cacheDir = config.cacheDir
     },
 
     generateBundle(_options, bundle) {
@@ -31,8 +35,17 @@ function hanaImportMapPlugin(): Plugin {
         const imports: Record<string, string> = {}
 
         if (isDev) {
-          imports.vue = '/admin/node_modules/.vite/deps/vue.js'
-          imports['vue-router'] = '/admin/node_modules/.vite/deps/vue-router.js'
+          let browserHash = ''
+          try {
+            const metadataPath = join(cacheDir, 'deps', '_metadata.json')
+            const metadata = JSON.parse(readFileSync(metadataPath, 'utf-8'))
+            browserHash = metadata.browserHash ?? ''
+          } catch {
+            // metadata not yet available on first run — hash will be empty
+          }
+          const hash = browserHash ? `?v=${browserHash}` : ''
+          imports.vue = `/admin/node_modules/.vite/deps/vue.js${hash}`
+          imports['vue-router'] = `/admin/node_modules/.vite/deps/vue-router.js${hash}`
         } else {
           imports.vue = vueChunkFileName
             ? `/admin/assets/${vueChunkFileName}`

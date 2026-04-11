@@ -26,3 +26,4 @@ export {
   type ThemeRenderOptions,
   type ThemeRuntime,
 } from './theme-runtime'
+export { renderBody } from './render-body'

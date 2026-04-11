@@ -3,6 +3,7 @@ import { createRouter, createWebHistory, type Router } from 'vue-router'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { AuthContextPayload } from '@hana/types'
 import App from './App.vue'
+import ContentEditor from './components/ContentEditor.vue'
 import { adminRoutes } from './router/routes'
 import { getAuthContextPayload, useAdminAuthContext } from './composables/useAdminAuthContext'
 import { clearPluginManifestCache, fetchPluginManifest } from './composables/usePluginManifest'
@@ -125,6 +126,7 @@ router.beforeEach(async (to) => {
   await registerPluginAdminRoutes(router)
 
   const app = createApp(App)
+  app.component('ContentEditor', ContentEditor)
   app.use(router)
   app.mount('#app')
 })()

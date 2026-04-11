@@ -1,7 +1,7 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
-import type { DatabaseInstance } from '@hana/core'
+import { renderBody, type DatabaseInstance } from '@hana/core'
 import { setupBlogRoutes } from './routes'
 import { blogSchema, posts, categories } from './schema'
 import { eq, desc, and } from 'drizzle-orm'
@@ -60,9 +60,14 @@ export function blogPlugin(): CMSPlugin {
             .limit(10)
             .all()
 
+          const postsWithHtml = latestPosts.map((p) => ({
+            ...p,
+            bodyHtml: renderBody(p.body),
+          }))
+
           const allCategories = await db.select().from(categories).all()
 
-          return { ...data, posts: latestPosts, categories: allCategories }
+          return { ...data, posts: postsWithHtml, categories: allCategories }
         }
 
         if (layoutKey === 'post') {
@@ -74,7 +79,10 @@ export function blogPlugin(): CMSPlugin {
               .where(and(eq(posts.slug, slug), eq(posts.status, 'published')))
               .get()
 
-            return { ...data, post: post ?? null }
+            if (post) {
+              return { ...data, post: { ...post, bodyHtml: renderBody(post.body) } }
+            }
+            return { ...data, post: null }
           }
         }
 
@@ -95,7 +103,12 @@ export function blogPlugin(): CMSPlugin {
                 .orderBy(desc(posts.publishedAt))
                 .all()
 
-              return { ...data, category, posts: categoryPosts }
+              const postsWithHtml = categoryPosts.map((p) => ({
+                ...p,
+                bodyHtml: renderBody(p.body),
+              }))
+
+              return { ...data, category, posts: postsWithHtml }
             }
 
             return { ...data, category: null, posts: [] }
@@ -105,7 +118,7 @@ export function blogPlugin(): CMSPlugin {
         return data
       },
     },
-    routes: (app, helpers) => setupBlogRoutes(app, helpers),
+    routes: (app, helpers) => setupBlogRoutes(app, helpers, () => db),
   }
 }
 
