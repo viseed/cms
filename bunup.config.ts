@@ -4,7 +4,7 @@ export default defineWorkspace(
   [
     { name: 'types', root: 'packages/types' },
     {
-      name: 'validator', 
+      name: 'validator',
       root: 'packages/validator',
       config: {
         dts: false,
@@ -20,7 +20,7 @@ export default defineWorkspace(
     {
       name: 'core',
       root: 'packages/core',
-      config: { format: ['esm', 'cjs'] },
+      config: { format: ['esm', 'cjs'], sourcemap: 'linked' },
     },
     {
       name: 'registry',
@@ -34,7 +34,11 @@ export default defineWorkspace(
       config: { format: ['esm'] },
     },
     { name: 'plugin-auth', root: 'plugins/plugin-auth' },
-    { name: 'plugin-blog', root: 'plugins/plugin-blog' },
+    {
+      name: 'plugin-blog',
+      root: 'plugins/plugin-blog',
+      config: { sourcemap: 'linked' }
+    },
     { name: 'plugin-media', root: 'plugins/plugin-media' },
   ],
   {

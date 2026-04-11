@@ -17,7 +17,7 @@
       <article class="page-content">
         <h1><%= it.data.page.title %></h1>
         <div class="page-body">
-          <%~ it.data.page.body || '' %>
+          <%~ it.data.page.bodyHtml || '' %>
         </div>
       </article>
     <% } else { %>

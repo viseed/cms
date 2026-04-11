@@ -22,7 +22,7 @@
           </div>
         </header>
         <div class="article-body">
-          <%~ it.data.post.body || '' %>
+          <%~ it.data.post.bodyHtml || '' %>
         </div>
       </article>
     <% } else { %>
