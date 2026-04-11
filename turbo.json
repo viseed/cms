@@ -5,6 +5,13 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "build:admin": {
+      "dependsOn": ["build"],
+      "outputs": ["dist/admin/**"]
+    },
+    "clean": {
+      "cache": false
+    },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,

@@ -1,15 +1,19 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type Router } from 'vue-router'
 import type { RouteLocationNormalized } from 'vue-router'
 import type { AuthContextPayload } from '@hana/types'
 import App from './App.vue'
 import { adminRoutes } from './router/routes'
 import { getAuthContextPayload, useAdminAuthContext } from './composables/useAdminAuthContext'
+import { clearPluginManifestCache, fetchPluginManifest } from './composables/usePluginManifest'
+import GenericPluginView from './views/GenericPluginView.vue'
 
 const router = createRouter({
   history: createWebHistory('/admin/'),
   routes: adminRoutes,
 })
+
+let pluginRoutesRegistered = false
 
 function isAuthorizedForRoute(
   to: RouteLocationNormalized,
@@ -39,11 +43,58 @@ function isAuthorizedForRoute(
   return true
 }
 
+async function registerPluginAdminRoutes(r: Router) {
+  if (pluginRoutesRegistered) return
+  const manifest = await fetchPluginManifest()
+  if (manifest.plugins.length === 0) return
+
+  for (const plugin of manifest.plugins) {
+    let pluginModule: Record<string, unknown> | null = null
+    if (plugin.admin.hasBundle) {
+      try {
+        pluginModule = await import(
+          /* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js`
+        )
+      } catch (err) {
+        console.warn(`Failed to load admin bundle for plugin "${plugin.name}"`, err)
+      }
+    }
+
+    for (const item of plugin.admin.menuItems) {
+      const exportName = item.componentExport
+      const component = (exportName && pluginModule?.[exportName]) || GenericPluginView
+
+      r.addRoute({
+        path: item.path,
+        component: component as Parameters<Router['addRoute']>[0]['component'],
+        meta: {
+          requiresAuth: true,
+          requiredPermissions: item.requiredPermissions,
+          siteScoped: item.siteScoped,
+          navigation: { label: item.label, icon: item.icon },
+          order: item.order,
+          pluginName: plugin.name,
+        },
+      })
+    }
+  }
+
+  pluginRoutesRegistered = true
+}
+
 router.beforeEach(async (to) => {
   const auth = useAdminAuthContext()
   await auth.initialize()
   const context = getAuthContextPayload()
   const isAuthenticated = context?.currentUser != null
+
+  if (isAuthenticated && !pluginRoutesRegistered) {
+    clearPluginManifestCache()
+    await registerPluginAdminRoutes(router)
+    if (pluginRoutesRegistered) {
+      return to.fullPath
+    }
+  }
 
   if (to.path === '/login') {
     if (isAuthenticated) {
@@ -70,6 +121,10 @@ router.beforeEach(async (to) => {
   return true
 })
 
-const app = createApp(App)
-app.use(router)
-app.mount('#app')
+;(async () => {
+  await registerPluginAdminRoutes(router)
+
+  const app = createApp(App)
+  app.use(router)
+  app.mount('#app')
+})()

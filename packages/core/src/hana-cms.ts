@@ -763,6 +763,44 @@ export class HanaCMS {
       return c.json(plugins)
     })
 
+    registerAdminRoute('GET', '/plugin-manifest', 'site.content.read', (c) => {
+      const manifest = this.plugins
+        .filter((p) => p.admin && this.pluginRegistry.isActive(p.name))
+        .map((p) => ({
+          name: p.name,
+          version: p.version,
+          admin: {
+            menuItems: p.admin!.menuItems,
+            hasBundle: !!p.admin!.bundlePath,
+          },
+        }))
+      return c.json({ plugins: manifest })
+    })
+
+    registerAdminRoute('GET', '/plugins/:name/ui.js', 'site.content.read', async (c) => {
+      const name = c.req.param('name')
+      const plugin = this.plugins.find((p) => p.name === name)
+
+      if (!plugin?.admin?.bundlePath) {
+        return c.json({ error: 'No admin bundle for this plugin' }, 404)
+      }
+      if (!this.pluginRegistry.isActive(name)) {
+        return c.json({ error: 'Plugin is not active' }, 404)
+      }
+
+      const file = Bun.file(plugin.admin.bundlePath)
+      if (!(await file.exists())) {
+        return c.json({ error: 'Admin bundle file not found' }, 404)
+      }
+
+      return new Response(await file.arrayBuffer(), {
+        headers: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      })
+    })
+
     registerAdminRoute('GET', '/themes', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
       const dbRecords = await db.select().from(installedThemes).all()

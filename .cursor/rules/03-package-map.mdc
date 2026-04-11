@@ -28,9 +28,9 @@ alwaysApply: true
 | Plugin | Npm scope | Tính năng |
 |---|---|---|
 | `plugins/plugin-auth` | `@hana/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
-| `plugins/plugin-blog` | `@hana/plugin-blog` | Posts/categories schema + CRUD REST routes |
+| `plugins/plugin-blog` | `@hana/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
 | `plugins/plugin-media` | `@hana/plugin-media` | File upload schema + routes (local storage adapter) |
-| `plugins/plugin-pages` | `@hana/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection |
+| `plugins/plugin-pages` | `@hana/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
 
 ## Themes (`themes/`)
 
@@ -64,22 +64,25 @@ alwaysApply: true
 ## Entry Points Quan Trọng
 
 ```
-packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle
+packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle, plugin-manifest + bundle-serving APIs
 packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
 packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase()
-packages/types/src/plugin.ts        → CMSPlugin, PluginLifecycle, CMSPluginHooks (plugin:enabled/disabled)
+packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
 packages/schema/src/schema-builder.ts → mergeSchemas()
 packages/registry/src/registry-client.ts → PluginRegistryClient
 packages/registry/src/integrity.ts  → verifyBundle()
 themes/theme-news/src/index.ts      → newsTheme() factory
+apps/admin/src/main.ts              → dynamic plugin route registration via import()
+apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifest from API
 ```
 
 ## Last updated
 
+2026-04-10 — Added `PluginAdminConfig` to plugin-blog and plugin-pages. Updated entry points with admin manifest + bundle serving APIs.
 2026-04-10 — Added `@hana/theme-news`, `@hana/plugin-pages`, `Themes (themes/)` section. Updated entry points for theme registry/hot-swap.
 2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.
 2026-03-22 — Added Theme System section

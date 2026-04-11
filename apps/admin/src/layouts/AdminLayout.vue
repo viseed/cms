@@ -10,6 +10,8 @@ type NavMeta = {
   navigation?: { label: string; icon: string }
   platformOnly?: boolean
   siteScoped?: boolean
+  order?: number
+  pluginName?: string
 }
 
 const router = useRouter()
@@ -44,7 +46,7 @@ function navAllowed(meta: NavMeta): boolean {
 
 const navItems = computed(() => {
   const routes = router.getRoutes()
-  const items: Array<{ path: string; label: string; icon: string }> = []
+  const items: Array<{ path: string; label: string; icon: string; order: number }> = []
   for (const r of routes) {
     const meta = r.meta as NavMeta
     if (!meta?.navigation) continue
@@ -54,8 +56,10 @@ const navItems = computed(() => {
       path,
       label: meta.navigation.label,
       icon: meta.navigation.icon,
+      order: meta.order ?? 50,
     })
   }
+  items.sort((a, b) => a.order - b.order)
   return items
 })
 

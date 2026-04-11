@@ -1,8 +1,12 @@
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
 import type { DatabaseInstance } from '@hana/core'
 import { setupBlogRoutes } from './routes'
 import { blogSchema, posts, categories } from './schema'
 import { eq, desc, and } from 'drizzle-orm'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 let db: DatabaseInstance | null = null
 
@@ -11,6 +15,31 @@ export function blogPlugin(): CMSPlugin {
     name: 'blog',
     version: '0.1.0',
     schema: blogSchema,
+    admin: {
+      menuItems: [
+        {
+          id: 'blog-posts',
+          label: 'Posts',
+          icon: '✎',
+          path: '/blog/posts',
+          siteScoped: true,
+          requiredPermissions: ['site.content.read'],
+          order: 20,
+          componentExport: 'PostsView',
+        },
+        {
+          id: 'blog-categories',
+          label: 'Categories',
+          icon: '▤',
+          path: '/blog/categories',
+          siteScoped: true,
+          requiredPermissions: ['site.content.read'],
+          order: 21,
+          componentExport: 'CategoriesView',
+        },
+      ],
+      bundlePath: resolve(__dirname, '../dist/admin/index.js'),
+    },
     hooks: {
       'cms:init': (cms) => {
         db = cms.getDatabase() as DatabaseInstance

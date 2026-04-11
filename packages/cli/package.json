@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "bunup",
+    "clean": "rimraf dist",
     "test": "bun test"
   },
   "dependencies": {

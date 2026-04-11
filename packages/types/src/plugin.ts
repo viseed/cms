@@ -22,6 +22,26 @@ export interface PluginLifecycle {
   onDisable?: (cms: HanaCMS) => void | Promise<void>
 }
 
+export interface PluginAdminMenuItem {
+  id: string
+  label: string
+  icon: string
+  /** Admin route path, e.g. '/blog/posts' */
+  path: string
+  requiredPermissions?: Permission[]
+  siteScoped?: boolean
+  /** Lower = higher in sidebar; default 50 */
+  order?: number
+  /** Explicit export name in admin bundle; derived from path if omitted */
+  componentExport?: string
+}
+
+export interface PluginAdminConfig {
+  menuItems: PluginAdminMenuItem[]
+  /** Absolute filesystem path to compiled admin ESM bundle */
+  bundlePath?: string
+}
+
 export interface CMSPlugin {
   name: string
   version: string
@@ -29,6 +49,7 @@ export interface CMSPlugin {
   hooks?: Partial<CMSPluginHooks>
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
   lifecycle?: PluginLifecycle
+  admin?: PluginAdminConfig
 }
 
 export interface CMSPluginHooks {

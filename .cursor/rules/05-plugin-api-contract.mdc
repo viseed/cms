@@ -20,6 +20,22 @@ interface PluginLifecycle {
   onDisable?:   (cms: HanaCMS) => void | Promise<void>
 }
 
+interface PluginAdminMenuItem {
+  id: string
+  label: string
+  icon: string
+  path: string                       // admin route path, e.g. '/blog/posts'
+  requiredPermissions?: Permission[]
+  siteScoped?: boolean
+  order?: number                     // lower = higher in sidebar
+  componentExport?: string           // export name in admin bundle
+}
+
+interface PluginAdminConfig {
+  menuItems: PluginAdminMenuItem[]
+  bundlePath?: string                // absolute path to compiled admin ESM bundle
+}
+
 interface CMSPlugin {
   name: string      // required — unique identifier, dùng kebab-case
   version: string   // required — semver (vd: "1.0.0")
@@ -27,6 +43,7 @@ interface CMSPlugin {
   hooks?: Partial<CMSPluginHooks>     // lifecycle hooks
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
   lifecycle?: PluginLifecycle         // install/uninstall/enable/disable callbacks
+  admin?: PluginAdminConfig           // admin UI menu items + ESM bundle path
   // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
   // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
 }
@@ -154,6 +171,32 @@ createCMS({
 | Dependencies | full npm deps | self-bundled, không external deps |
 | Ví dụ | `@hana/plugin-auth` | third-party từ registry |
 
+### Admin UI Registration
+
+Plugins can register menu items and Vue admin views via the `admin` field:
+
+```typescript
+export function blogPlugin(): CMSPlugin {
+  return {
+    name: 'blog',
+    version: '0.1.0',
+    admin: {
+      menuItems: [
+        { id: 'blog-posts', label: 'Posts', icon: '✎', path: '/blog/posts', order: 20, componentExport: 'PostsView' },
+      ],
+      bundlePath: resolve(__dirname, '../dist/admin/index.js'),
+    },
+    // ...
+  }
+}
+```
+
+- Plugin self-builds admin Vue components as an ESM bundle (`build:admin` script using Vite library mode)
+- `vue` and `vue-router` are externalized — resolved at runtime via Import Map in admin's `index.html`
+- Core serves the bundle at `GET /api/admin/plugins/:name/ui.js`
+- Admin SPA fetches plugin manifest from `GET /api/admin/plugin-manifest`, then `import()`s bundles dynamically
+- **Admin has zero dependency on any plugin package** — all plugin UI loads at runtime
+
 ### Plugin Hot-swap (Runtime Enable/Disable)
 
 Plugins can be enabled/disabled at runtime without restarting the server:
@@ -176,6 +219,7 @@ Companion plugin schemas are always migrated at startup. Only routes are toggled
 
 ## Last updated
 
+2026-04-10 — Added `PluginAdminConfig`, `PluginAdminMenuItem`, admin UI registration via ESM dynamic import
 2026-04-10 — Added `PluginLifecycle`, `plugin:enabled`/`plugin:disabled` hooks, `PluginRouteRegistry`, companion plugins, admin API for enable/disable
 2026-03-30 — Added `CMSRouteContextHelpers` for site-aware request context + permission checks
 2026-03-26 — Added `theme:activate` hook (Theme Activation Lifecycle)

@@ -7,6 +7,8 @@ type AdminRouteMeta = {
   navigation?: { label: string; icon: string }
   platformOnly?: boolean
   siteScoped?: boolean
+  order?: number
+  pluginName?: string
 }
 
 function meta(m: AdminRouteMeta): AdminRouteMeta {
@@ -22,6 +24,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['site.content.read'],
       navigation: { label: 'Dashboard', icon: '◫' },
       siteScoped: true,
+      order: 0,
     }),
   },
   {
@@ -32,6 +35,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['site.content.read'],
       navigation: { label: 'Content', icon: '✎' },
       siteScoped: true,
+      order: 10,
     }),
   },
   {
@@ -42,6 +46,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['site.media.read'],
       navigation: { label: 'Media', icon: '⬡' },
       siteScoped: true,
+      order: 30,
     }),
   },
   {
@@ -52,6 +57,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['platform.sites.read'],
       navigation: { label: 'Plugins', icon: '⚙' },
       platformOnly: true,
+      order: 90,
     }),
   },
   {
@@ -62,6 +68,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['platform.sites.read'],
       navigation: { label: 'Themes', icon: '◈' },
       platformOnly: true,
+      order: 91,
     }),
   },
   {
@@ -81,6 +88,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['platform.sites.manage'],
       navigation: { label: 'Sites', icon: '◇' },
       platformOnly: true,
+      order: 92,
     }),
   },
   {

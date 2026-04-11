@@ -37,6 +37,8 @@ export type {
   CMSRouteContextHelpers,
   CMSPlugin,
   CMSPluginHooks,
+  PluginAdminConfig,
+  PluginAdminMenuItem,
   PluginFactory,
   PluginLifecycle,
   ThemeRenderRequestContext,
