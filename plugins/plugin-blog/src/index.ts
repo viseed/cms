@@ -1,10 +1,10 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
-import { renderBody, type DatabaseInstance } from '@hana/core'
+import { type DatabaseInstance, renderBody } from '@hana/core'
+import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
+import { and, desc, eq } from 'drizzle-orm'
 import { setupBlogRoutes } from './routes'
-import { blogSchema, posts, categories } from './schema'
-import { eq, desc, and } from 'drizzle-orm'
+import { blogSchema, categories, posts } from './schema'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -41,10 +41,10 @@ export function blogPlugin(): CMSPlugin {
       bundlePath: resolve(__dirname, '../dist/admin/index.js'),
     },
     hooks: {
-      'cms:init': (cms) => {
+      [HOOK_KEY.CMS_INIT]: (cms) => {
         db = cms.getDatabase() as DatabaseInstance
       },
-      'theme:beforeRender': async (
+      [HOOK_KEY.THEME_BEFORE_RENDER]: async (
         layoutKey: string,
         data: Record<string, unknown>,
         reqCtx: ThemeRenderRequestContext,

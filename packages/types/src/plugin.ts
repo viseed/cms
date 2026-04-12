@@ -1,5 +1,5 @@
 import type { Context, Hono } from 'hono'
-import type { HanaCMS, Permission, RequestContext } from './cms'
+import type { HanaCMS, HOOK_KEY, Permission, RequestContext } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
@@ -53,11 +53,11 @@ export interface CMSPlugin {
 }
 
 export interface CMSPluginHooks {
-  'cms:init': (cms: HanaCMS) => void | Promise<void>
-  'cms:ready': (app: Hono) => void | Promise<void>
-  'admin:register': (registry: ComponentRegistry) => void
-  'theme:mount': (theme: CMSTheme) => void | Promise<void>
-  'theme:beforeRender': (
+  [HOOK_KEY.CMS_INIT]: (cms: HanaCMS) => void | Promise<void>
+  [HOOK_KEY.CMS_READY]: (app: Hono) => void | Promise<void>
+  [HOOK_KEY.ADMIN_REGISTER]: (registry: ComponentRegistry) => void
+  [HOOK_KEY.THEME_MOUNT]: (theme: CMSTheme) => void | Promise<void>
+  [HOOK_KEY.THEME_BEFORE_RENDER]: (
     layoutKey: string,
     data: Record<string, unknown>,
     requestContext: ThemeRenderRequestContext,
@@ -67,9 +67,9 @@ export interface CMSPluginHooks {
    * Plugins can use this to re-register components or clean up theme-specific state.
    * A server restart is typically required before the new theme takes effect at runtime.
    */
-  'theme:activate': (theme: CMSTheme, previousTheme?: CMSTheme) => void | Promise<void>
-  'plugin:enabled': (pluginName: string) => void | Promise<void>
-  'plugin:disabled': (pluginName: string) => void | Promise<void>
+  [HOOK_KEY.THEME_ACTIVATE]: (theme: CMSTheme, previousTheme?: CMSTheme) => void | Promise<void>
+  [HOOK_KEY.PLUGIN_ENABLED]: (pluginName: string) => void | Promise<void>
+  [HOOK_KEY.PLUGIN_DISABLED]: (pluginName: string) => void | Promise<void>
 }
 
 export type PluginFactory = (options?: Record<string, unknown>) => CMSPlugin

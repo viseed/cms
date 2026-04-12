@@ -1,6 +1,5 @@
 import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
-  external: ['@hana/types'],
+  sourcemap: 'linked',
 })

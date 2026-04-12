@@ -1,11 +1,11 @@
-import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
+import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
 
 export function newsCompanionPlugin(): CMSPlugin {
   return {
     name: 'news-companion',
     version: '0.1.0',
     hooks: {
-      'theme:beforeRender': async (
+      [HOOK_KEY.THEME_BEFORE_RENDER]: async (
         layoutKey: string,
         data: Record<string, unknown>,
         _reqCtx: ThemeRenderRequestContext,

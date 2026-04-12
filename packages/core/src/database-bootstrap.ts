@@ -292,6 +292,14 @@ async function ensureMultisiteSiteScope(ctx: BootstrapCtx) {
     `)
   }
 
+  if (await ctx.tableExists('cms_pages')) {
+    await ensureSiteIdColumn(ctx, 'cms_pages')
+    await ctx.exec(`
+      CREATE UNIQUE INDEX IF NOT EXISTS cms_pages_site_slug_unique
+        ON cms_pages(site_id, slug);
+    `)
+  }
+
   if (await ctx.tableExists('blog_posts')) {
     await ensureSiteIdColumn(ctx, 'blog_posts')
     await ctx.exec(`

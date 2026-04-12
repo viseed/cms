@@ -1,6 +1,18 @@
 import type { CMSPlugin } from './plugin'
 import type { CMSTheme } from './theme'
 
+export const HOOK_KEY = {
+  CMS_INIT: 'cms:init',
+  CMS_READY: 'cms:ready',
+  ADMIN_REGISTER: 'admin:register',
+  THEME_MOUNT: 'theme:mount',
+  THEME_BEFORE_RENDER: 'theme:beforeRender',
+  THEME_AFTER_RENDER: 'theme:afterRender',
+  THEME_ACTIVATE: 'theme:activate',
+  PLUGIN_ENABLED: 'plugin:enabled',
+  PLUGIN_DISABLED: 'plugin:disabled',
+} as const
+
 export const PERMISSION_CATALOG = [
   'platform.sites.read',
   'platform.sites.manage',

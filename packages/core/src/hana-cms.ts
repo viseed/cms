@@ -14,11 +14,12 @@ import type {
   CMSPlugin,
   CMSRouteContextHelpers,
   CMSTheme,
+  HookName,
   Permission,
   RequestContext,
   RequiredLayoutKey,
 } from '@hana/types'
-import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
+import { HOOK_KEY, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { loginSchema } from '@hana/validator'
 import { eq } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
@@ -160,14 +161,14 @@ export class HanaCMS {
           this.pluginRegistry.activate(activeTheme.companionPlugin.name)
           await this.registerPluginHooks(activeTheme.companionPlugin)
         }
-        await this.hooks.run('theme:mount', activeTheme)
+        await this.hooks.run(HOOK_KEY.THEME_MOUNT, activeTheme)
       }
     }
 
     this.setupAdminApi()
     this.setupAdminServing()
 
-    await this.hooks.run('cms:ready', this.app)
+    await this.hooks.run(HOOK_KEY.CMS_READY, this.app)
 
     return this.app
   }
@@ -191,7 +192,11 @@ export class HanaCMS {
   }
 
   hasTheme(): boolean {
-    return this.activeThemeName !== null || this.themeRegistry.size > 0 || this.config.theme !== undefined
+    return (
+      this.activeThemeName !== null ||
+      this.themeRegistry.size > 0 ||
+      this.config.theme !== undefined
+    )
   }
 
   getRegisteredThemes(): CMSTheme[] {
@@ -232,11 +237,7 @@ export class HanaCMS {
     if (this.themeRegistry.size === 0) return
 
     const db = this.getDatabase()
-    const row = await db
-      .select()
-      .from(themeState)
-      .where(eq(themeState.siteId, 'default'))
-      .get()
+    const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
 
     if (row?.activeThemeName && this.themeRegistry.has(row.activeThemeName)) {
       this.activeThemeName = row.activeThemeName
@@ -290,11 +291,7 @@ export class HanaCMS {
     const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
     if (token) {
       const db = this.getDatabase()
-      const row = await db
-        .select()
-        .from(themeState)
-        .where(eq(themeState.siteId, 'default'))
-        .get()
+      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
 
       if (row?.previewToken === token) {
         if (row.previewThemeName) {
@@ -418,7 +415,7 @@ export class HanaCMS {
             }
 
             const data = (await this.hooks.runWaterfallAt(
-              'theme:beforeRender',
+              HOOK_KEY.THEME_BEFORE_RENDER,
               1,
               resolvedLayoutKey,
               defaultData,
@@ -778,7 +775,7 @@ export class HanaCMS {
     })
 
     registerAdminRoute('GET', '/plugins/:name/ui.js', 'site.content.read', async (c) => {
-      const name = c.req.param('name')
+      const name = c.req.param('name') || ''
       const plugin = this.plugins.find((p) => p.name === name)
 
       if (!plugin?.admin?.bundlePath) {
@@ -837,11 +834,7 @@ export class HanaCMS {
 
     registerAdminRoute('GET', '/themes/preview', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
-      const row = await db
-        .select()
-        .from(themeState)
-        .where(eq(themeState.siteId, 'default'))
-        .get()
+      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
 
       const previewThemeName = row?.previewThemeName ?? null
       const previewThemePath = row?.previewThemePath ?? null
@@ -1049,9 +1042,7 @@ export class HanaCMS {
         return c.json({ error: `Theme "${name}" is already the active theme.` }, 409)
       }
 
-      const missingLayouts = HanaCMS.REQUIRED_LAYOUTS.filter(
-        (k) => !(k in registeredTheme.layouts),
-      )
+      const missingLayouts = HanaCMS.REQUIRED_LAYOUTS.filter((k) => !(k in registeredTheme.layouts))
       if (missingLayouts.length > 0) {
         return c.json(
           { error: `Theme "${name}" is missing required layouts: ${missingLayouts.join(', ')}.` },
@@ -1066,7 +1057,7 @@ export class HanaCMS {
       if (previousTheme?.companionPlugin) {
         this.pluginRegistry.deactivate(previousTheme.companionPlugin.name)
         await previousTheme.companionPlugin.lifecycle?.onDisable?.(this as never)
-        await this.hooks.run('plugin:disabled', previousTheme.companionPlugin.name)
+        await this.hooks.run(HOOK_KEY.PLUGIN_DISABLED, previousTheme.companionPlugin.name)
       }
 
       const existingRow = await db
@@ -1095,10 +1086,10 @@ export class HanaCMS {
         await companion.lifecycle?.onEnable?.(this as never)
         this.pluginRegistry.activate(companion.name)
         await this.registerPluginHooks(companion)
-        await this.hooks.run('plugin:enabled', companion.name)
+        await this.hooks.run(HOOK_KEY.PLUGIN_ENABLED, companion.name)
       }
 
-      await this.hooks.run('theme:activate', registeredTheme, previousTheme)
+      await this.hooks.run(HOOK_KEY.THEME_ACTIVATE, registeredTheme, previousTheme)
 
       return c.json({
         message: `Theme "${name}" is now active.`,
@@ -1117,11 +1108,7 @@ export class HanaCMS {
       }
 
       const db = this.getDatabase()
-      const row = await db
-        .select()
-        .from(themeState)
-        .where(eq(themeState.siteId, 'default'))
-        .get()
+      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
 
       return c.json({
         schema: theme.settingsSchema ?? null,
@@ -1265,7 +1252,7 @@ export class HanaCMS {
         .set({ enabled: true, updatedAt: new Date() })
         .where(eq(installedPlugins.name, name))
 
-      await this.hooks.run('plugin:enabled', name)
+      await this.hooks.run(HOOK_KEY.PLUGIN_ENABLED, name)
 
       return c.json({
         message: `Plugin "${name}" enabled.`,
@@ -1298,7 +1285,7 @@ export class HanaCMS {
         .set({ enabled: false, updatedAt: new Date() })
         .where(eq(installedPlugins.name, name))
 
-      await this.hooks.run('plugin:disabled', name)
+      await this.hooks.run(HOOK_KEY.PLUGIN_DISABLED, name)
 
       return c.json({
         message: `Plugin "${name}" disabled.`,

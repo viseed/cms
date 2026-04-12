@@ -1,7 +1,8 @@
 {
   "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
-    "rootDir": "src"
+    "composite": true,
+    "rootDir": "src",
   },
   "include": ["src"]
 }

@@ -14,7 +14,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bunup --sourcemap=linked",
+    "build": "bunup",
     "clean": "rimraf dist",
     "dev": "bunup --watch",
     "test": "bun test"

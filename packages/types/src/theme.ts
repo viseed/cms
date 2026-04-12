@@ -1,4 +1,4 @@
-import type { HanaCMS } from './cms'
+import type { HanaCMS, HOOK_KEY } from './cms'
 import type { CMSPlugin } from './plugin'
 import type { ThemeExtensionManifest } from './theme-extension-points'
 import type {
@@ -62,8 +62,8 @@ export interface CMSTheme {
 }
 
 export interface CMSThemeHooks {
-  'theme:beforeRender': (context: LayoutContext) => LayoutContext | Promise<LayoutContext>
-  'theme:afterRender': (html: string) => string | Promise<string>
+  [HOOK_KEY.THEME_BEFORE_RENDER]: (context: LayoutContext) => LayoutContext | Promise<LayoutContext>
+  [HOOK_KEY.THEME_AFTER_RENDER]: (html: string) => string | Promise<string>
 }
 
 export type ThemeFactory = (options?: Record<string, unknown>) => CMSTheme

@@ -13,7 +13,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bunup --sourcemap=linked && bun run build-admin.ts",
+    "build": "bunup && bun run build-admin.ts",
     "build:admin": "bun run build-admin.ts",
     "clean": "rimraf dist",
     "test": "bun test"

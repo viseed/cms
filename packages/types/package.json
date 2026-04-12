@@ -5,7 +5,10 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "development": {
+        "types": "./src/index.ts"
+      }
     }
   },
   "files": [

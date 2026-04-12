@@ -1,10 +1,10 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { CMSPlugin, ThemeRenderRequestContext } from '@hana/types'
-import { renderBody, type DatabaseInstance } from '@hana/core'
+import { type DatabaseInstance, renderBody } from '@hana/core'
+import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
+import { and, eq } from 'drizzle-orm'
 import { setupPagesRoutes } from './routes'
-import { pagesSchema, pages } from './schema'
-import { eq, and } from 'drizzle-orm'
+import { pages, pagesSchema } from './schema'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -31,10 +31,10 @@ export function pagesPlugin(): CMSPlugin {
       bundlePath: resolve(__dirname, '../dist/admin/index.js'),
     },
     hooks: {
-      'cms:init': (cms) => {
+      [HOOK_KEY.CMS_INIT]: (cms) => {
         db = cms.getDatabase() as DatabaseInstance
       },
-      'theme:beforeRender': async (
+      [HOOK_KEY.THEME_BEFORE_RENDER]: async (
         layoutKey: string,
         data: Record<string, unknown>,
         reqCtx: ThemeRenderRequestContext,
@@ -64,4 +64,4 @@ export function pagesPlugin(): CMSPlugin {
   }
 }
 
-export { pagesSchema, pages } from './schema'
+export { pages, pagesSchema } from './schema'

@@ -1,26 +1,27 @@
 export type {
-  AdminConfig,
   ActorContext,
+  AdminConfig,
   AuthContextPayload,
+  CMSConfig,
+  DatabaseConfig,
+  HanaCMS,
   Permission,
-  PermissionCheckInput,
   PermissionChecker,
+  PermissionCheckInput,
   RBACRole,
   RequestContext,
   RoleAssignment,
   SiteContext,
-  CMSConfig,
-  DatabaseConfig,
-  HanaCMS,
 } from './cms'
 export {
   checkPermission,
+  HOOK_KEY,
   PERMISSION_CATALOG,
   ROLE_PERMISSION_MATRIX,
+  resolvePermissionsForRoles,
   SINGLE_SITE_CONTEXT,
   SITE_ADMIN_PERMISSIONS,
   SITE_CONTENT_WRITER_PERMISSIONS,
-  resolvePermissionsForRoles,
   toAuthContextPayload,
 } from './cms'
 export type {
@@ -34,9 +35,9 @@ export type {
 } from './manifest'
 export type {
   CMSHookName,
-  CMSRouteContextHelpers,
   CMSPlugin,
   CMSPluginHooks,
+  CMSRouteContextHelpers,
   PluginAdminConfig,
   PluginAdminMenuItem,
   PluginFactory,
