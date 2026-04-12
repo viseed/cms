@@ -1,8 +1,8 @@
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 import { users } from './users'
 
-export const sessions = sqliteTable(
+export const sessions = pgTable(
   'hana_sessions',
   {
     id: text('id').primaryKey(),
@@ -14,10 +14,8 @@ export const sessions = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     token: text('token').notNull(),
-    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
     siteTokenUnique: uniqueIndex('hana_sessions_site_token_unique').on(table.siteId, table.token),

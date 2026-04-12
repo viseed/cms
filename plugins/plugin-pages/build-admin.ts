@@ -1,5 +1,5 @@
-import { build } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { build } from 'vite'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 await build({

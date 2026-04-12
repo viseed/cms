@@ -42,13 +42,8 @@ export function setupBlogRoutes(
       .orderBy(orderFn)
       .limit(limit)
       .offset(offset)
-      .all()
 
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(posts)
-      .where(where)
-      .get()
+    const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(posts).where(where)
 
     return c.json({
       posts: rows,
@@ -64,11 +59,10 @@ export function setupBlogRoutes(
     console.log('slug', slug)
     const { site } = helpers.resolveRequestContext(c)
 
-    const post = await db
+    const [post] = await db
       .select()
       .from(posts)
       .where(and(eq(posts.siteId, site.id), eq(posts.slug, slug)))
-      .get()
 
     if (!post) return c.json({ error: 'Post not found' }, 404)
     return c.json({ post })
@@ -103,7 +97,7 @@ export function setupBlogRoutes(
       updatedAt: now,
     })
 
-    const created = await db.select().from(posts).where(eq(posts.id, id)).get()
+    const [created] = await db.select().from(posts).where(eq(posts.id, id))
     return c.json({ post: created }, 201)
   })
 
@@ -119,11 +113,10 @@ export function setupBlogRoutes(
     }
 
     const { site } = helpers.resolveRequestContext(c)
-    const existing = await db
+    const [existing] = await db
       .select()
       .from(posts)
       .where(and(eq(posts.id, id), eq(posts.siteId, site.id)))
-      .get()
 
     if (!existing) return c.json({ error: 'Post not found' }, 404)
 
@@ -143,7 +136,7 @@ export function setupBlogRoutes(
 
     await db.update(posts).set(updates).where(eq(posts.id, id))
 
-    const updated = await db.select().from(posts).where(eq(posts.id, id)).get()
+    const [updated] = await db.select().from(posts).where(eq(posts.id, id))
     return c.json({ post: updated })
   })
 
@@ -154,11 +147,10 @@ export function setupBlogRoutes(
     const id = c.req.param('id')
     const { site } = helpers.resolveRequestContext(c)
 
-    const existing = await db
+    const [existing] = await db
       .select()
       .from(posts)
       .where(and(eq(posts.id, id), eq(posts.siteId, site.id)))
-      .get()
 
     if (!existing) return c.json({ error: 'Post not found' }, 404)
 
@@ -171,7 +163,7 @@ export function setupBlogRoutes(
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const { site } = helpers.resolveRequestContext(c)
-    const rows = await db.select().from(categories).where(eq(categories.siteId, site.id)).all()
+    const rows = await db.select().from(categories).where(eq(categories.siteId, site.id))
 
     return c.json({ categories: rows })
   })
@@ -193,7 +185,7 @@ export function setupBlogRoutes(
       createdAt: new Date(),
     })
 
-    const created = await db.select().from(categories).where(eq(categories.id, id)).get()
+    const [created] = await db.select().from(categories).where(eq(categories.id, id))
     return c.json({ category: created }, 201)
   })
 

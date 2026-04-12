@@ -45,7 +45,7 @@ cd apps/docs && bun run dev
 
 - **Runtime**: Bun
 - **Server**: Hono
-- **Database**: Drizzle ORM (SQLite/Turso/PostgreSQL)
+- **Database**: Drizzle ORM (PostgreSQL)
 - **Frontend**: Vue 3 + Vite
 - **Build**: Bunup
 - **Lint/Format**: Biome v2

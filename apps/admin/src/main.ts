@@ -1,12 +1,12 @@
-import { createApp } from 'vue'
-import { createRouter, createWebHistory, type Router } from 'vue-router'
-import type { RouteLocationNormalized } from 'vue-router'
 import type { AuthContextPayload } from '@hana/types'
+import { createApp } from 'vue'
+import type { RouteLocationNormalized } from 'vue-router'
+import { createRouter, createWebHistory, type Router } from 'vue-router'
 import App from './App.vue'
 import ContentEditor from './components/ContentEditor.vue'
-import { adminRoutes } from './router/routes'
 import { getAuthContextPayload, useAdminAuthContext } from './composables/useAdminAuthContext'
 import { clearPluginManifestCache, fetchPluginManifest } from './composables/usePluginManifest'
+import { adminRoutes } from './router/routes'
 import GenericPluginView from './views/GenericPluginView.vue'
 
 const router = createRouter({
@@ -53,9 +53,7 @@ async function registerPluginAdminRoutes(r: Router) {
     let pluginModule: Record<string, unknown> | null = null
     if (plugin.admin.hasBundle) {
       try {
-        pluginModule = await import(
-          /* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js`
-        )
+        pluginModule = await import(/* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js`)
       } catch (err) {
         console.warn(`Failed to load admin bundle for plugin "${plugin.name}"`, err)
       }

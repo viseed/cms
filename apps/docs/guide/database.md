@@ -1,16 +1,16 @@
 # Database
 
-Hana CMS uses Drizzle ORM for type-safe database access.
+Hana CMS uses **PostgreSQL** with **Drizzle ORM** for type-safe database access.
 
 ## Schema Merging
 
-Plugins can define their own Drizzle tables. All schemas are automatically merged at startup:
+Plugins can define their own Drizzle tables using `pgTable`. All schemas are automatically merged at startup:
 
 ```typescript
 // Plugin defines its tables
 export const blogSchema = {
-  posts: sqliteTable('blog_posts', { ... }),
-  categories: sqliteTable('blog_categories', { ... }),
+  posts: pgTable('blog_posts', { ... }),
+  categories: pgTable('blog_categories', { ... }),
 }
 
 // Core merges all plugin schemas into one
@@ -23,14 +23,39 @@ The core schema includes:
 
 - `hana_users` — User accounts
 - `hana_sessions` — Auth sessions
+- `hana_sites` — Multi-site support
 - `hana_installed_plugins` — Plugin registry
+- `hana_installed_themes` — Theme registry
+- `hana_theme_state` — Active theme state
 
-## Migrations
+## Schema Management
 
-Run migrations using the CLI:
+Use the Hana CLI to manage your database schema:
 
 ```bash
-bunx hana migrate
+# Development — push schema directly to database
+bunx hanabi db push
+
+# Production — generate SQL migration files
+bunx hanabi db generate
+
+# Production — apply pending migrations
+bunx hanabi db migrate
 ```
 
-This collects schemas from all installed plugins and generates/applies Drizzle migrations.
+The CLI automatically discovers schemas from all installed `@hana/plugin-*` packages and generates a temporary barrel file for `drizzle-kit` to consume.
+
+## Custom Schemas
+
+If your application defines additional Drizzle tables beyond what plugins provide, register them in `hana.config.ts`:
+
+```typescript
+// hana.config.ts
+import { myCustomSchema } from './src/schema'
+
+export default {
+  extraSchemas: ['./src/schema.ts'],
+}
+```
+
+These will be included when running `hanabi db` commands.

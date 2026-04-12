@@ -5,9 +5,8 @@
 ```typescript
 interface CMSConfig {
   db: {
-    driver: 'sqlite' | 'turso' | 'postgres' | 'mysql'
+    driver: 'postgres'
     url: string
-    authToken?: string  // For Turso / libSQL remote
   }
   admin?: {
     path?: string       // Default: '/admin'
@@ -20,34 +19,38 @@ interface CMSConfig {
 }
 ```
 
-## Database Drivers
+## Database
 
-### SQLite (default, local)
-
-Uses **`@libsql/client`** under the hood (same as Turso), with `url` as a local path or `:memory:`. Relative paths are resolved with `path.resolve`; `:memory:` maps to **`file::memory:?cache=private`** (one isolated in-memory DB per client, libSQL’s supported form). **Do not** use remote `libsql://` URLs here — use `driver: 'turso'` and `authToken`.
-
-```typescript
-const cms = createCMS({
-  db: { driver: 'sqlite', url: './data.db' },
-})
-```
-
-### Turso / libSQL remote
-
-Multi-instance production. Same Drizzle `sqlite-core` schema and same libSQL client stack as local `sqlite`. **Remote URLs** (`libsql://`, `https://`, `wss://`, `http://`) require `authToken`; **`file:`** URLs do not.
-
-`createDatabase` is **async** — use `await createDatabase(...)` if you call it outside `HanaCMS.launch()`.
+Hana CMS uses **PostgreSQL** as its database engine, powered by **Bun's built-in SQL driver** (`bun:sql`) and **Drizzle ORM** (`drizzle-orm/bun-sql`).
 
 ```typescript
 const cms = createCMS({
   db: {
-    driver: 'turso',
-    url: 'libsql://your-db.turso.io',
-    authToken: process.env.TURSO_AUTH_TOKEN,
+    driver: 'postgres',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
 })
 ```
 
-### Postgres / MySQL (config only until dialect work lands)
+Set `DATABASE_URL` to your PostgreSQL connection string:
 
-`driver: 'postgres' | 'mysql'` is reserved on `DatabaseConfig` so you can point env at the right engine early. Core still ships **sqlite-core** tables; swapping only the URL is **not** enough — Postgres and MySQL need `pgTable` / `mysqlTable` (or an explicit multi-dialect strategy) before `createDatabase()` can connect. Until then, starting the CMS with these drivers will error with a clear message.
+```bash
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
+```
+
+## Schema Management
+
+Use the Hana CLI to manage your database schema:
+
+```bash
+# Development — push schema directly to database
+bunx hanabi db push
+
+# Production — generate SQL migration files
+bunx hanabi db generate
+
+# Production — apply pending migrations
+bunx hanabi db migrate
+```
+
+The CLI automatically discovers schemas from `@hana/schema` (core tables) and all installed `@hana/plugin-*` packages.

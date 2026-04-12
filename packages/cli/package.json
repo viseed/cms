@@ -20,7 +20,8 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hana/types": "workspace:*"
+    "@hana/types": "workspace:*",
+    "drizzle-kit": "^0.31.10"
   },
   "devDependencies": {
     "@hana/config": "workspace:*",

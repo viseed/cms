@@ -1,7 +1,7 @@
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { boolean, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 
-export const installedPlugins = sqliteTable(
+export const installedPlugins = pgTable(
   'hana_installed_plugins',
   {
     id: text('id').primaryKey(),
@@ -14,16 +14,15 @@ export const installedPlugins = sqliteTable(
     type: text('type', { enum: ['official', 'community'] }).notNull(),
     bundleUrl: text('bundle_url'),
     integrity: text('integrity'),
-    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
-    config: text('config', { mode: 'json' }),
-    installedAt: integer('installed_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    enabled: boolean('enabled').notNull().default(true),
+    config: jsonb('config'),
+    installedAt: timestamp('installed_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteNameUnique: uniqueIndex('hana_installed_plugins_site_name_unique').on(table.siteId, table.name),
+    siteNameUnique: uniqueIndex('hana_installed_plugins_site_name_unique').on(
+      table.siteId,
+      table.name,
+    ),
   }),
 )

@@ -42,16 +42,12 @@ export function newsTheme(): CMSTheme {
         {
           key: 'hero',
           title: 'Hero Section',
-          fields: [
-            { key: 'showHero', label: 'Show Hero Section', type: 'boolean', default: true },
-          ],
+          fields: [{ key: 'showHero', label: 'Show Hero Section', type: 'boolean', default: true }],
         },
         {
           key: 'sidebar',
           title: 'Sidebar',
-          fields: [
-            { key: 'showSidebar', label: 'Show Sidebar', type: 'boolean', default: true },
-          ],
+          fields: [{ key: 'showSidebar', label: 'Show Sidebar', type: 'boolean', default: true }],
         },
         {
           key: 'footer',

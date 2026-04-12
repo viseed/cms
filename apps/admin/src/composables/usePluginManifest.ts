@@ -1,5 +1,5 @@
-import { adminFetch } from '../lib/admin-api'
 import type { PluginAdminMenuItem } from '@hana/types'
+import { adminFetch } from '../lib/admin-api'
 
 export interface PluginManifestEntry {
   name: string

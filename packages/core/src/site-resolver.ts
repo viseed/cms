@@ -49,7 +49,7 @@ function normalizeHost(rawHostHeader: string | undefined): string | null {
 }
 
 async function resolveDefaultSite(db: DatabaseInstance): Promise<SiteContext> {
-  const defaultSite = await db.select().from(sites).where(eq(sites.id, DEFAULT_SITE_ID)).get()
+  const [defaultSite] = await db.select().from(sites).where(eq(sites.id, DEFAULT_SITE_ID))
 
   if (!defaultSite) {
     return { ...SINGLE_SITE_CONTEXT }
@@ -73,13 +73,12 @@ export async function resolveSiteContextByHost(
     }
   }
 
-  const domain = await db
+  const [domain] = await db
     .select({
       siteId: siteDomains.siteId,
     })
     .from(siteDomains)
     .where(eq(siteDomains.domain, normalizedHost))
-    .get()
 
   if (!domain) {
     return {
@@ -89,7 +88,7 @@ export async function resolveSiteContextByHost(
     }
   }
 
-  const site = await db.select().from(sites).where(eq(sites.id, domain.siteId)).get()
+  const [site] = await db.select().from(sites).where(eq(sites.id, domain.siteId))
 
   if (!site) {
     return {

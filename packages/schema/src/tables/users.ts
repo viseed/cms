@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const users = sqliteTable('hana_users', {
+export const users = pgTable('hana_users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
@@ -8,10 +8,6 @@ export const users = sqliteTable('hana_users', {
   role: text('role', { enum: ['admin', 'site_admin', 'site_content_writer'] })
     .notNull()
     .default('site_content_writer'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

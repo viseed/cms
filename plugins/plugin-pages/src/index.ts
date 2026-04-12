@@ -44,11 +44,10 @@ export function pagesPlugin(): CMSPlugin {
         if (layoutKey === 'page') {
           const slug = reqCtx.params.slug
           if (slug) {
-            const page = await db
+            const [page] = await db
               .select()
               .from(pages)
               .where(and(eq(pages.slug, slug), eq(pages.status, 'published')))
-              .get()
 
             if (page) {
               return { ...data, page: { ...page, bodyHtml: renderBody(page.body) } }

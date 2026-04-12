@@ -1,4 +1,3 @@
 import { defineConfig } from 'bunup'
 
-export default defineConfig({
-})
+export default defineConfig({})

@@ -1,9 +1,9 @@
-import type { CMSRouteContextHelpers } from '@hana/types'
 import type { DatabaseInstance } from '@hana/core'
+import type { CMSRouteContextHelpers } from '@hana/types'
 import { contentQuerySchema, createContentSchema, updateContentSchema } from '@hana/validator'
+import { and, eq, like, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { pages } from './schema'
-import { eq, and, like, sql } from 'drizzle-orm'
 
 export function setupPagesRoutes(
   app: Hono,
@@ -31,7 +31,8 @@ export function setupPagesRoutes(
 
     const where = conditions.length === 1 ? conditions[0] : and(...conditions)
 
-    const sortColumn = sortBy === 'title' ? pages.title : sortBy === 'updatedAt' ? pages.updatedAt : pages.createdAt
+    const sortColumn =
+      sortBy === 'title' ? pages.title : sortBy === 'updatedAt' ? pages.updatedAt : pages.createdAt
     const orderFn = sortOrder === 'asc' ? sql`${sortColumn} asc` : sql`${sortColumn} desc`
 
     const rows = await db
@@ -41,13 +42,8 @@ export function setupPagesRoutes(
       .orderBy(orderFn)
       .limit(limit)
       .offset(offset)
-      .all()
 
-    const countResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(pages)
-      .where(where)
-      .get()
+    const [countResult] = await db.select({ count: sql<number>`count(*)` }).from(pages).where(where)
 
     return c.json({
       pages: rows,
@@ -62,11 +58,10 @@ export function setupPagesRoutes(
     const slug = c.req.param('slug')
     const { site } = helpers.resolveRequestContext(c)
 
-    const page = await db
+    const [page] = await db
       .select()
       .from(pages)
       .where(and(eq(pages.siteId, site.id), eq(pages.slug, slug)))
-      .get()
 
     if (!page) return c.json({ error: 'Page not found' }, 404)
     return c.json({ page })
@@ -100,7 +95,7 @@ export function setupPagesRoutes(
       updatedAt: now,
     })
 
-    const created = await db.select().from(pages).where(eq(pages.id, id)).get()
+    const [created] = await db.select().from(pages).where(eq(pages.id, id))
     return c.json({ page: created }, 201)
   })
 
@@ -116,11 +111,10 @@ export function setupPagesRoutes(
     }
 
     const { site } = helpers.resolveRequestContext(c)
-    const existing = await db
+    const [existing] = await db
       .select()
       .from(pages)
       .where(and(eq(pages.id, id), eq(pages.siteId, site.id)))
-      .get()
 
     if (!existing) return c.json({ error: 'Page not found' }, 404)
 
@@ -139,7 +133,7 @@ export function setupPagesRoutes(
 
     await db.update(pages).set(updates).where(eq(pages.id, id))
 
-    const updated = await db.select().from(pages).where(eq(pages.id, id)).get()
+    const [updated] = await db.select().from(pages).where(eq(pages.id, id))
     return c.json({ page: updated })
   })
 
@@ -150,11 +144,10 @@ export function setupPagesRoutes(
     const id = c.req.param('id')
     const { site } = helpers.resolveRequestContext(c)
 
-    const existing = await db
+    const [existing] = await db
       .select()
       .from(pages)
       .where(and(eq(pages.id, id), eq(pages.siteId, site.id)))
-      .get()
 
     if (!existing) return c.json({ error: 'Page not found' }, 404)
 

@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - [Bun](https://bun.sh) v1.0 or later
+- [PostgreSQL](https://www.postgresql.org/) 14 or later
 
 ## Quick Start
 
@@ -12,6 +13,13 @@
 bunx @hana/cli init my-project
 cd my-project
 bun install
+
+# Set your PostgreSQL connection string
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
+
+# Push schema to database
+bunx hanabi db push
+
 bun run dev
 ```
 
@@ -21,6 +29,7 @@ bun run dev
 mkdir my-project && cd my-project
 bun init
 bun add @hana/core @hana/plugin-auth @hana/plugin-blog
+bun add -d @hana/cli
 ```
 
 Create `src/index.ts`:
@@ -32,8 +41,8 @@ import { blogPlugin } from '@hana/plugin-blog'
 
 const cms = createCMS({
   db: {
-    driver: 'sqlite',
-    url: './data.db',
+    driver: 'postgres',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
 })
 
@@ -48,9 +57,11 @@ export default {
 }
 ```
 
-Run with:
+Push schema and run:
 
 ```bash
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
+bunx hanabi db push
 bun run src/index.ts
 ```
 

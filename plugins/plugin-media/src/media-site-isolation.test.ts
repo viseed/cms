@@ -1,16 +1,16 @@
 import { describe, expect, test } from 'bun:test'
-import { join } from 'node:path'
 import { mkdtemp, readdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { createCMS } from '@hana/core'
 import { mediaPlugin } from './index'
 import { LocalStorageAdapter } from './storage'
-import { createCMS } from '@hana/core'
 
-const SQLITE_MEMORY_DB = ':memory:'
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
 
 function createMultisiteCMS() {
   return createCMS({
-    db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+    db: { driver: 'postgres', url: DATABASE_URL },
     admin: { enabled: false },
     plugins: [mediaPlugin()],
   })

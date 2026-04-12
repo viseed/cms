@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import AdminLayout from './layouts/AdminLayout.vue'
 import { useAdminSiteContext } from './composables/useAdminSiteContext'
+import AdminLayout from './layouts/AdminLayout.vue'
 
 const { activeSiteId } = useAdminSiteContext()
 const route = useRoute()

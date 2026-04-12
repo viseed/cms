@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { Permission } from '@hana/types'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import type { Permission } from '@hana/types'
 import { useAdminSiteContext } from '../composables/useAdminSiteContext'
 
 type NavMeta = {

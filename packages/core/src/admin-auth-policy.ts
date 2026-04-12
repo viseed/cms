@@ -143,11 +143,10 @@ export async function resolveSessionActorContext(
     }
   }
 
-  const session = await db
+  const [session] = await db
     .select()
     .from(sessions)
     .where(and(eq(sessions.token, token), gt(sessions.expiresAt, new Date())))
-    .get()
 
   if (!session) {
     return {
@@ -167,7 +166,7 @@ export async function resolveSessionActorContext(
     }
   }
 
-  const user = await db.select().from(users).where(eq(users.id, session.userId)).get()
+  const [user] = await db.select().from(users).where(eq(users.id, session.userId))
   if (!user) {
     return {
       ok: false,
@@ -184,7 +183,6 @@ export async function resolveSessionActorContext(
     })
     .from(userSiteRoles)
     .where(eq(userSiteRoles.userId, user.id))
-    .all()
 
   const explicitAssignments = roleRows.map((row) => ({
     role: row.role as RBACRole,

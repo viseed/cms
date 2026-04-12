@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bunup && tsc -p tsconfig.build.json",
+    "build": "bunup && rimraf tsconfig.build.tsbuildinfo && tsc -p tsconfig.build.json",
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "test": "bun test"
   },

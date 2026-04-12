@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 interface Page {
   id: string
@@ -98,9 +98,7 @@ async function savePage() {
       status: form.value.status,
     }
 
-    const url = isEditing.value
-      ? `/api/pages/${editingPage.value!.id}`
-      : '/api/pages'
+    const url = isEditing.value ? `/api/pages/${editingPage.value!.id}` : '/api/pages'
 
     const res = await fetch(url, {
       method: isEditing.value ? 'PUT' : 'POST',

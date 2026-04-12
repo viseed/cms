@@ -98,7 +98,9 @@ export const ROLE_PERMISSION_MATRIX: Record<RBACRole, ReadonlyArray<Permission>>
   site_content_writer: SITE_CONTENT_WRITER_PERMISSIONS,
 }
 
-export function resolvePermissionsForRoles(roleAssignments: Array<RoleAssignment>): Array<Permission> {
+export function resolvePermissionsForRoles(
+  roleAssignments: Array<RoleAssignment>,
+): Array<Permission> {
   const permissions = new Set<Permission>()
 
   for (const assignment of roleAssignments) {
@@ -128,16 +130,9 @@ export function toAuthContextPayload(context: RequestContext): AuthContextPayloa
   }
 }
 
-/**
- * `sqlite` + `turso` share the same Drizzle sqlite-core schema and both use the libSQL client at runtime.
- * Use `sqlite` for local file or `:memory:` only; use `turso` for remote Turso (and optional `file:` if you prefer that driver name).
- * `postgres` + `mysql` need a separate Drizzle dialect (pgTable / mysqlTable) before they can work.
- */
 export interface DatabaseConfig {
-  driver: 'sqlite' | 'turso' | 'postgres' | 'mysql'
+  driver: 'postgres'
   url: string
-  /** Required for remote Turso / libSQL when `driver` is `turso` (and URL is remote). */
-  authToken?: string
 }
 
 export interface AdminConfig {

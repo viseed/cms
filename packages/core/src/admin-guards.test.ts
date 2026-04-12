@@ -2,50 +2,15 @@ import { describe, expect, test } from 'bun:test'
 import { randomUUID } from 'node:crypto'
 import { sessions, siteDomains, userSiteRoles, users } from '@hana/schema'
 import { eq } from 'drizzle-orm'
-import type { DatabaseInstance } from './database'
 import { createCMS } from './hana-cms'
 
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
 const DEFAULT_SITE_ID = 'default'
-const SQLITE_MEMORY_DB = ':memory:'
-
-async function ensureAdminAuthTables(db: DatabaseInstance) {
-  const client = (db as unknown as { $client: { execute: (sql: string) => Promise<unknown> } }).$client
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS hana_users (
-      id text PRIMARY KEY NOT NULL,
-      email text NOT NULL UNIQUE,
-      name text NOT NULL,
-      password_hash text NOT NULL,
-      role text NOT NULL DEFAULT 'site_content_writer',
-      created_at integer NOT NULL DEFAULT (strftime('%s', 'now')),
-      updated_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
-    );
-  `)
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS hana_sessions (
-      id text PRIMARY KEY NOT NULL,
-      site_id text NOT NULL DEFAULT 'default',
-      user_id text NOT NULL,
-      token text NOT NULL,
-      expires_at integer NOT NULL,
-      created_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
-    );
-  `)
-  await client.execute(`
-    CREATE TABLE IF NOT EXISTS hana_user_site_roles (
-      id text PRIMARY KEY NOT NULL,
-      user_id text NOT NULL,
-      site_id text NOT NULL,
-      role text NOT NULL,
-      created_at integer NOT NULL DEFAULT (strftime('%s', 'now'))
-    );
-  `)
-}
 
 describe('admin runtime tenancy and guards', () => {
   test('rejects admin API requests without session token', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -60,19 +25,18 @@ describe('admin runtime tenancy and guards', () => {
 
   test('allows admin session for platform route', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
 
     await db.insert(users).values({
       id: adminUserId,
-      email: 'admin@hana.dev',
+      email: `admin-${randomUUID()}@hana.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -97,19 +61,18 @@ describe('admin runtime tenancy and guards', () => {
 
   test('forbids writer role on platform-managed routes', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    await ensureAdminAuthTables(db)
 
     const writerUserId = randomUUID()
     const writerToken = `token-${randomUUID()}`
 
     await db.insert(users).values({
       id: writerUserId,
-      email: 'writer@hana.dev',
+      email: `writer-${randomUUID()}@hana.dev`,
       name: 'Writer',
       passwordHash: 'hashed',
       role: 'site_content_writer',
@@ -142,19 +105,18 @@ describe('admin runtime tenancy and guards', () => {
 
   test('rejects unresolved host for non-fallback domains', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
 
     await db.insert(users).values({
       id: adminUserId,
-      email: 'admin@hana.dev',
+      email: `admin-${randomUUID()}@hana.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -182,19 +144,18 @@ describe('admin runtime tenancy and guards', () => {
 
   test('enforces deny-by-default for unmapped admin routes', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    await ensureAdminAuthTables(db)
 
     const adminUserId = randomUUID()
     const adminToken = `token-${randomUUID()}`
 
     await db.insert(users).values({
       id: adminUserId,
-      email: 'admin@hana.dev',
+      email: `admin-${randomUUID()}@hana.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -227,20 +188,20 @@ describe('admin runtime tenancy and guards', () => {
 
   test('supports admin login endpoint in core auth flow', async () => {
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: { enabled: false },
     })
     const app = await cms.launch()
     const db = cms.getDatabase()
-    await ensureAdminAuthTables(db)
 
     const userId = randomUUID()
     const password = 'super-secure-password'
     const passwordHash = await Bun.password.hash(password)
+    const email = `login-${randomUUID()}@hana.dev`
 
     await db.insert(users).values({
       id: userId,
-      email: 'login@hana.dev',
+      email,
       name: 'Login User',
       passwordHash,
       role: 'admin',
@@ -257,10 +218,7 @@ describe('admin runtime tenancy and guards', () => {
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify({
-        email: 'login@hana.dev',
-        password,
-      }),
+      body: JSON.stringify({ email, password }),
     })
 
     expect(loginResponse.status).toBe(200)
@@ -275,16 +233,17 @@ describe('admin runtime tenancy and guards', () => {
 
     expect(contextResponse.status).toBe(200)
     const payload = (await contextResponse.json()) as { currentUser?: { email?: string } }
-    expect(payload.currentUser?.email).toBe('login@hana.dev')
+    expect(payload.currentUser?.email).toBe(email)
   })
 
   test('bootstraps initial admin when configured on first launch', async () => {
+    const bootstrapEmail = `bootstrap-${randomUUID()}@hana.dev`
     const cms = createCMS({
-      db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+      db: { driver: 'postgres', url: DATABASE_URL },
       admin: {
         enabled: false,
         bootstrapAdmin: {
-          email: 'bootstrap@hana.dev',
+          email: bootstrapEmail,
           password: 'bootstrap-password',
           name: 'Bootstrap Admin',
         },
@@ -293,7 +252,7 @@ describe('admin runtime tenancy and guards', () => {
     await cms.launch()
 
     const db = cms.getDatabase()
-    const adminUser = await db.select().from(users).where(eq(users.email, 'bootstrap@hana.dev')).get()
+    const [adminUser] = await db.select().from(users).where(eq(users.email, bootstrapEmail))
     expect(adminUser?.name).toBe('Bootstrap Admin')
     expect(Boolean(adminUser?.passwordHash)).toBe(true)
 
@@ -301,11 +260,10 @@ describe('admin runtime tenancy and guards', () => {
       throw new Error('Expected bootstrap admin to be created')
     }
 
-    const adminRole = await db
+    const [adminRole] = await db
       .select()
       .from(userSiteRoles)
       .where(eq(userSiteRoles.userId, adminUser.id))
-      .get()
     expect(adminRole?.role).toBe('admin')
     expect(adminRole?.siteId).toBe(DEFAULT_SITE_ID)
   })
@@ -316,17 +274,13 @@ describe('admin runtime tenancy and guards', () => {
 
     try {
       const cms = createCMS({
-        db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+        db: { driver: 'postgres', url: DATABASE_URL },
         admin: { enabled: false },
       })
       await cms.launch()
 
       const db = cms.getDatabase()
-      const defaultAdmin = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, 'admin@local.dev'))
-        .get()
+      const [defaultAdmin] = await db.select().from(users).where(eq(users.email, 'admin@local.dev'))
 
       expect(defaultAdmin?.name).toBe('Local Admin')
       expect(Boolean(defaultAdmin?.passwordHash)).toBe(true)

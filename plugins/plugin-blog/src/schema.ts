@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
-export const posts = sqliteTable(
+export const posts = pgTable(
   'blog_posts',
   {
     id: text('id').primaryKey(),
@@ -14,20 +14,16 @@ export const posts = sqliteTable(
       .default('draft'),
     authorId: text('author_id'),
     categoryId: text('category_id'),
-    publishedAt: integer('published_at', { mode: 'timestamp' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    publishedAt: timestamp('published_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
     siteSlugUnique: uniqueIndex('blog_posts_site_slug_unique').on(table.siteId, table.slug),
   }),
 )
 
-export const categories = sqliteTable(
+export const categories = pgTable(
   'blog_categories',
   {
     id: text('id').primaryKey(),
@@ -35,9 +31,7 @@ export const categories = sqliteTable(
     name: text('name').notNull(),
     slug: text('slug').notNull(),
     description: text('description'),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
     siteSlugUnique: uniqueIndex('blog_categories_site_slug_unique').on(table.siteId, table.slug),

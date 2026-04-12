@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'bun:test'
-import { blogPlugin } from './index'
 import { createCMS } from '@hana/core'
+import { blogPlugin } from './index'
 
-const SQLITE_MEMORY_DB = ':memory:'
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
 
 function createMultisiteCMS() {
   return createCMS({
-    db: { driver: 'sqlite', url: SQLITE_MEMORY_DB },
+    db: { driver: 'postgres', url: DATABASE_URL },
     admin: { enabled: false },
     plugins: [blogPlugin()],
   })
@@ -96,11 +96,5 @@ describe('blog plugin site isolation', () => {
     expect(response.status).toBe(201)
     const body = await response.json()
     expect(body.data.siteId).toBe('default')
-  })
-
-  test('blog schema tables have site_id column with default value', () => {
-    const { posts, categories } = require('./schema')
-    expect(posts.site_id).toBeDefined
-    expect(categories.site_id).toBeDefined
   })
 })

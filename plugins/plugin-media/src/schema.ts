@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const mediaFiles = sqliteTable('media_files', {
+export const mediaFiles = pgTable('media_files', {
   id: text('id').primaryKey(),
   siteId: text('site_id').notNull().default('default'),
   filename: text('filename').notNull(),
@@ -10,9 +10,7 @@ export const mediaFiles = sqliteTable('media_files', {
   path: text('path').notNull(),
   alt: text('alt'),
   uploadedBy: text('uploaded_by'),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 })
 
 export const mediaSchema = { mediaFiles }

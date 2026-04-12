@@ -14,7 +14,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bunup && tsc -p tsconfig.build.json",
+    "build": "bunup && rimraf tsconfig.build.tsbuildinfo && tsc -p tsconfig.build.json",
     "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "dev": "bunup --watch",
     "test": "bun test"
@@ -23,7 +23,6 @@
     "@hana/schema": "workspace:*",
     "@hana/types": "workspace:*",
     "@hana/validator": "workspace:*",
-    "@libsql/client": "^0.17.2",
     "@tiptap/extension-image": "^3.22.3",
     "@tiptap/extension-link": "^3.22.3",
     "@tiptap/extension-text-align": "^3.22.3",
@@ -31,7 +30,7 @@
     "@tiptap/html": "^3.22.3",
     "@tiptap/pm": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
-    "drizzle-orm": "^0.44.0",
+    "drizzle-orm": "0.44.7",
     "eta": "^4.5.1",
     "hono": "^4.7.0"
   },

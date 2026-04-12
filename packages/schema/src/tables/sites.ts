@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
-export const sites = sqliteTable(
+export const sites = pgTable(
   'hana_sites',
   {
     id: text('id').primaryKey(),
@@ -9,13 +9,9 @@ export const sites = sqliteTable(
     status: text('status', { enum: ['active', 'archived', 'suspended'] })
       .notNull()
       .default('active'),
-    config: text('config', { mode: 'json' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    config: jsonb('config'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
     slugUnique: uniqueIndex('hana_sites_slug_unique').on(table.slug),

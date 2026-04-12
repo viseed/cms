@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
+import { runDbCommand } from './commands/db'
 import { initProject } from './commands/init'
-import { runMigrations } from './commands/migrate'
 import { installPlugin, uninstallPlugin } from './commands/plugin'
 import { installTheme, uninstallTheme } from './commands/theme'
 
@@ -12,15 +12,26 @@ async function main(): Promise<void> {
     case 'init': {
       const name = args[0]
       if (!name) {
-        console.error('Usage: hana init <project-name>')
+        console.error('Usage: hanabi init <project-name>')
         process.exit(1)
       }
       await initProject(name)
       break
     }
 
+    case 'db': {
+      const subcommand = args[0]
+      if (!subcommand) {
+        console.error('Usage: hanabi db <push|generate|migrate>')
+        process.exit(1)
+      }
+      await runDbCommand(subcommand)
+      break
+    }
+
     case 'migrate': {
-      await runMigrations()
+      console.log('Note: "hanabi migrate" is deprecated. Use "hanabi db migrate" instead.')
+      await runDbCommand('migrate')
       break
     }
 
@@ -28,7 +39,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: hana plugin <install|uninstall> <package-name>')
+        console.error('Usage: hanabi plugin <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -46,7 +57,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: hana theme <install|uninstall> <package-name>')
+        console.error('Usage: hanabi theme <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -61,11 +72,13 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.log('Hana CMS CLI')
+      console.log('Hanabi CMS CLI')
       console.log('')
       console.log('Commands:')
       console.log('  init <name>                     Create a new Hana CMS project')
-      console.log('  migrate                         Run database migrations')
+      console.log('  db push                         Push schema to database (dev)')
+      console.log('  db generate                     Generate SQL migration files (prod)')
+      console.log('  db migrate                      Apply pending migrations (prod)')
       console.log('  plugin install <package>         Install a plugin')
       console.log('  plugin uninstall <package>       Uninstall a plugin')
       console.log('  theme install <package>          Install a theme')

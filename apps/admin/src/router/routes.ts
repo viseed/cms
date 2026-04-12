@@ -1,5 +1,5 @@
-import type { RouteRecordRaw } from 'vue-router'
 import type { Permission } from '@hana/types'
+import type { RouteRecordRaw } from 'vue-router'
 
 type AdminRouteMeta = {
   requiresAuth?: boolean

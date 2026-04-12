@@ -1,39 +1,42 @@
 ---
-description: Database patterns — Drizzle ORM conventions, schema design, driver support
-globs: ["packages/schema/**", "packages/core/src/database.ts", "packages/core/src/database-bootstrap.ts", "packages/core/src/libsql-connection.ts", "plugins/**"]
+description: Database patterns — Drizzle ORM conventions, schema design, PostgreSQL driver
+globs: ["packages/schema/**", "packages/core/src/database.ts", "plugins/**"]
 alwaysApply: false
 ---
 
-# Database Patterns — Drizzle ORM
+# Database Patterns — Drizzle ORM + PostgreSQL
 
-> **Khi thêm DB driver mới hoặc thay đổi schema patterns → cập nhật file này.**
+> **Khi thay đổi schema patterns → cập nhật file này.**
 
-## Driver support — hai nhóm (Drizzle)
+## Driver — PostgreSQL only
 
-Schema trong repo hiện dùng **`drizzle-orm/sqlite-core`** (`sqliteTable`, …). Điều này **không** áp dụng trực tiếp cho adapter Postgres/MySQL; muốn hai engine đó cần **`pgTable` / `mysqlTable`** (hoặc chiến lược multi-dialect riêng).
+Hana CMS sử dụng **PostgreSQL** duy nhất, qua stack:
 
-### Nhóm A — SQLite dialect (một schema hiện tại)
+- **Client**: `bun:sql` (Bun built-in PostgreSQL driver)
+- **ORM**: `drizzle-orm/bun-sql`
+- **Schema dialect**: `drizzle-orm/pg-core` (`pgTable`, `serial`, `text`, `timestamp`, `boolean`, `jsonb`, …)
+- **Migration tooling**: `drizzle-kit` (dialect `postgresql`)
 
-| Driver | Status | Config |
-|---|---|---|
-| `sqlite` | ✅ Wired | Local only: `{ driver: 'sqlite', url: './data.db' }` hoặc `:memory:` — runtime **`@libsql/client` + `drizzle-orm/libsql`** (URL chuẩn hóa `file:`). |
-| `turso` | ✅ Wired | `{ driver: 'turso', url: 'libsql://...', authToken: '...' }` — remote bắt buộc `authToken`; `file:` không cần. Cùng stack libSQL với `sqlite`. |
+```typescript
+// packages/core/src/database.ts
+import { drizzle } from 'drizzle-orm/bun-sql'
 
-- **Không còn `drizzle-orm/bun-sqlite`** trong factory: dev và prod cùng engine libSQL, cùng `database-bootstrap.ts`.
-- `PRAGMA journal_mode = WAL` — best-effort sau khi mở client (local file thường áp dụng; remote có thể bỏ qua).
+export async function createDatabase(config: DatabaseConfig, pluginSchemas = []) {
+  const finalSchema = mergeSchemas(coreSchema, ...pluginSchemas)
+  return drizzle(config.url, { schema: finalSchema })
+}
+```
 
-### Nhóm B — Server SQL (config sẵn, schema chưa)
+Config:
 
-| Driver | Status | Config |
-|---|---|---|
-| `postgres` | 🔜 Cần dialect + factory | `{ driver: 'postgres', url: 'postgresql://...' }` |
-| `mysql` | 🔜 Cần dialect + factory | `{ driver: 'mysql', url: 'mysql://...' }` |
-
-`DatabaseConfig` đã cho phép các giá trị trên để deploy chỉ đổi env khi team triển khai lớp schema B; `createDatabase()` phải báo lỗi rõ nếu chưa implement.
-
-Source: `packages/core/src/database.ts` — `export async function createDatabase()` (bootstrap libSQL là async; luôn `await` khi gọi trực tiếp).
-
-URL resolution: `packages/core/src/libsql-connection.ts` (`toLibsqlLocalUrl`, `resolveLibsqlConnection`). `:memory:` → `file::memory:?cache=private` (in-memory tách theo client; `cache=shared` chỉ khi config URL tường minh).
+```typescript
+const cms = createCMS({
+  db: {
+    driver: 'postgres',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+  },
+})
+```
 
 ## Schema Architecture
 
@@ -57,21 +60,21 @@ theme_state        → active theme + settings theo site (`site_id`)
 
 ```typescript
 // ✅ Đúng
-const posts      = sqliteTable('blog_posts', ...)      // prefix: blog_
-const categories = sqliteTable('blog_categories', ...) // prefix: blog_
+const posts      = pgTable('blog_posts', ...)      // prefix: blog_
+const categories = pgTable('blog_categories', ...) // prefix: blog_
 
 // ❌ Sai — tên chung có thể conflict với plugin khác
-const posts = sqliteTable('posts', ...)
+const posts = pgTable('posts', ...)
 ```
 
 - **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@hana/schema`):
 
 ```typescript
 // ✅ Đúng — plugin content table with site_id
-export const posts = sqliteTable(
+export const posts = pgTable(
   'blog_posts',
   {
-    id: text('id').primaryKey(),
+    id: serial('id').primaryKey(),
     siteId: text('site_id').notNull().default('default'),
     slug: text('slug').notNull(),
     // ...
@@ -98,33 +101,49 @@ HanaCMS.launch()
 
 Source: `packages/schema/src/schema-builder.ts`
 
-## Conventions khi viết Drizzle Schema
+## Conventions khi viết Drizzle Schema (PostgreSQL)
 
 ```typescript
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
+import { pgTable, serial, text, timestamp, boolean, jsonb, index } from 'drizzle-orm/pg-core'
 
-export const blogPosts = sqliteTable('blog_posts', {
-  // ID: integer autoIncrement
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const blogPosts = pgTable('blog_posts', {
+  // ID: serial (auto-increment integer)
+  id: serial('id').primaryKey(),
 
-  // Timestamps: luôn thêm createdAt, updatedAt
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  // Timestamps: native PostgreSQL timestamp
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 
   // Text fields
   title: text('title').notNull(),
   slug:  text('slug').notNull().unique(),
+
+  // Boolean
+  published: boolean('published').notNull().default(false),
+
+  // JSON data
+  metadata: jsonb('metadata'),
 }, (table) => ({
-  // Index quan trọng
   slugIdx: index('blog_posts_slug_idx').on(table.slug),
 }))
 ```
 
-## Multi-site Tenancy Convention (Phase 2)
+### Query patterns (bun-sql)
+
+Drizzle với `bun-sql` trả về **array**, không có `.get()` hay `.all()` (đó là SQLite-only):
+
+```typescript
+// Lấy 1 row — destructure array
+const [user] = await db.select().from(users).where(eq(users.id, id))
+
+// Lấy nhiều rows — array trực tiếp
+const allPosts = await db.select().from(posts).where(eq(posts.siteId, siteId))
+
+// Insert returning
+const [newPost] = await db.insert(posts).values({ ... }).returning()
+```
+
+## Multi-site Tenancy Convention
 
 - Các bảng mang trạng thái theo site **bắt buộc** có `site_id`:
   - `sessions`, `installed_plugins`, `installed_themes`, `theme_state`, plugin content tables.
@@ -139,8 +158,8 @@ export const blogPosts = sqliteTable('blog_posts', {
 ## Lấy DB Instance trong Plugin
 
 ```typescript
-// ✅ Đúng — nhận qua cms:init hook (createDatabase là async; instance lấy từ cms)
-let db: Awaited<ReturnType<typeof import('@hana/core').createDatabase>>
+// ✅ Đúng — nhận qua cms:init hook
+let db: DatabaseInstance
 
 export const hooks = {
   'cms:init': async (cms) => {
@@ -149,27 +168,47 @@ export const hooks = {
 }
 
 // ❌ Sai — KHÔNG tự tạo connection riêng trong plugin
-import { Database } from 'bun:sqlite'
-const db = new Database('./data.db')  // ❌
+import { SQL } from 'bun'
+const client = new SQL(...)  // ❌
 ```
 
-## Migration
+## Migration (CLI)
 
 ```bash
-# Chạy migration qua CLI
-bunx hanabi migrate
+# Development — push schema trực tiếp
+bunx hanabi db push
 
-# Lệnh này: thu thập schemas từ core + tất cả installed plugins
-# → generate Drizzle migration files → apply vào DB
+# Production — generate SQL migration files
+bunx hanabi db generate
+
+# Production — apply pending migrations
+bunx hanabi db migrate
 ```
 
-Migration được quản lý bởi `packages/cli/src/commands/migrate.ts`
+CLI tự động:
+1. Phát hiện `@hana/plugin-*` packages đã cài
+2. Generate barrel file `.hana/_schema.ts` re-export tất cả schemas
+3. Generate `.hana/drizzle.config.ts` trỏ vào barrel file
+4. Chạy `bunx drizzle-kit` với config tạm
+
+Source: `packages/cli/src/commands/db.ts`
+
+## Monorepo Development
+
+```bash
+# Root-level commands for monorepo dev
+bun run db:push      # drizzle-kit push
+bun run db:generate  # drizzle-kit generate
+bun run db:migrate   # drizzle-kit migrate
+bun run db:studio    # drizzle-kit studio
+```
+
+Config: `drizzle.config.ts` (root) — schema paths point to source files in monorepo.
 
 ## Last updated
 
-2026-04-03 — `sqlite` + `turso` đều qua `@libsql/client` + `drizzle-orm/libsql` (bỏ `bun-sqlite` trong factory)
-2026-04-03 — Turso/libSQL wired; `createDatabase` async; bootstrap dùng chung `database-bootstrap.ts`
-2026-04-03 — Driver matrix: nhóm A (sqlite/turso) vs nhóm B (postgres/mysql); caveat schema dialect
-2026-04-03 — Added plugin content table `site_id` convention (plain text, no `.references()`, site-scoped unique indexes)
-2026-03-30 — Added multisite tenancy model (`sites`, `site_domains`, `user_site_roles`) and `site_id` scoping conventions
+2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql). Zero external DB deps.
+2026-04-12 — PostgreSQL-only rewrite: removed SQLite/Turso/MySQL. Updated query patterns, CLI db commands, schema conventions.
+2026-04-03 — Added plugin content table `site_id` convention
+2026-03-30 — Added multisite tenancy model
 2026-03-22 — Added installed_themes and theme_state core tables

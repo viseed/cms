@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 interface Post {
   id: string
@@ -120,9 +120,7 @@ async function savePost() {
       categoryId: form.value.categoryId || null,
     }
 
-    const url = isEditing.value
-      ? `/api/blog/posts/${editingPost.value!.id}`
-      : '/api/blog/posts'
+    const url = isEditing.value ? `/api/blog/posts/${editingPost.value!.id}` : '/api/blog/posts'
 
     const res = await fetch(url, {
       method: isEditing.value ? 'PUT' : 'POST',

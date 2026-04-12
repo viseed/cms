@@ -16,6 +16,9 @@ const STARTER_PACKAGE_JSON = (name: string): string =>
         '@hana/plugin-auth': 'latest',
         '@hana/plugin-blog': 'latest',
       },
+      devDependencies: {
+        '@hana/cli': 'latest',
+      },
     },
     null,
     2,
@@ -27,8 +30,8 @@ import { blogPlugin } from '@hana/plugin-blog'
 
 const cms = createCMS({
   db: {
-    driver: 'sqlite',
-    url: './data.db',
+    driver: 'postgres',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
   admin: {
     bootstrapAdmin:
@@ -83,6 +86,10 @@ export async function initProject(projectName: string): Promise<void> {
   console.log(`\nNext steps:`)
   console.log(`  cd ${projectName}`)
   console.log(`  bun install`)
+  console.log(`  # Set your PostgreSQL connection string:`)
+  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/hana"`)
+  console.log(`  # Push schema to database:`)
+  console.log(`  bunx hanabi db push`)
   console.log(`  # Dev default admin is auto-seeded on first run:`)
   console.log(`  # email: admin@local.dev`)
   console.log(`  # password: 12345678`)

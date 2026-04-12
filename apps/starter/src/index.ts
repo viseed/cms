@@ -6,8 +6,8 @@ import { newsTheme } from '@hana/theme-news'
 
 const cms = createCMS({
   db: {
-    driver: 'sqlite',
-    url: './data.db',
+    driver: 'postgres',
+    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
   },
   themes: [newsTheme()],
   defaultTheme: 'news',

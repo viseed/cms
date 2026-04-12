@@ -58,14 +58,13 @@ export function blogPlugin(): CMSPlugin {
             .where(eq(posts.status, 'published'))
             .orderBy(desc(posts.publishedAt))
             .limit(10)
-            .all()
 
           const postsWithHtml = latestPosts.map((p) => ({
             ...p,
             bodyHtml: renderBody(p.body),
           }))
 
-          const allCategories = await db.select().from(categories).all()
+          const allCategories = await db.select().from(categories)
 
           return { ...data, posts: postsWithHtml, categories: allCategories }
         }
@@ -73,11 +72,10 @@ export function blogPlugin(): CMSPlugin {
         if (layoutKey === 'post') {
           const slug = reqCtx.params.slug
           if (slug) {
-            const post = await db
+            const [post] = await db
               .select()
               .from(posts)
               .where(and(eq(posts.slug, slug), eq(posts.status, 'published')))
-              .get()
 
             if (post) {
               return { ...data, post: { ...post, bodyHtml: renderBody(post.body) } }
@@ -89,11 +87,7 @@ export function blogPlugin(): CMSPlugin {
         if (layoutKey === 'category') {
           const slug = reqCtx.params.slug
           if (slug) {
-            const category = await db
-              .select()
-              .from(categories)
-              .where(eq(categories.slug, slug))
-              .get()
+            const [category] = await db.select().from(categories).where(eq(categories.slug, slug))
 
             if (category) {
               const categoryPosts = await db
@@ -101,7 +95,6 @@ export function blogPlugin(): CMSPlugin {
                 .from(posts)
                 .where(and(eq(posts.categoryId, category.id), eq(posts.status, 'published')))
                 .orderBy(desc(posts.publishedAt))
-                .all()
 
               const postsWithHtml = categoryPosts.map((p) => ({
                 ...p,

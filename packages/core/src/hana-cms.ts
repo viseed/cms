@@ -236,7 +236,7 @@ export class HanaCMS {
     if (this.themeRegistry.size === 0) return
 
     const db = this.getDatabase()
-    const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
+    const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
     if (row?.activeThemeName && this.themeRegistry.has(row.activeThemeName)) {
       this.activeThemeName = row.activeThemeName
@@ -256,7 +256,7 @@ export class HanaCMS {
 
   private async syncPluginActiveStateFromDb(): Promise<void> {
     const db = this.getDatabase()
-    const rows = await db.select().from(installedPlugins).all()
+    const rows = await db.select().from(installedPlugins)
 
     for (const row of rows) {
       if (row.enabled && this.pluginRegistry.isInstalled(row.name)) {
@@ -265,7 +265,7 @@ export class HanaCMS {
     }
 
     for (const plugin of this.plugins) {
-      const dbRecord = rows.find((r) => r.name === plugin.name)
+      const dbRecord = rows.find((r: { name: string }) => r.name === plugin.name)
       if (!dbRecord) {
         this.pluginRegistry.activate(plugin.name)
       }
@@ -290,7 +290,7 @@ export class HanaCMS {
     const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
     if (token) {
       const db = this.getDatabase()
-      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
+      const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
       if (row?.previewToken === token) {
         if (row.previewThemeName) {
@@ -324,11 +324,7 @@ export class HanaCMS {
 
   private async clearThemePreviewState(c: Context) {
     const db = this.getDatabase()
-    const existing = await db
-      .select()
-      .from(themeState)
-      .where(eq(themeState.siteId, 'default'))
-      .get()
+    const [existing] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
     if (existing) {
       await db
@@ -486,17 +482,28 @@ export class HanaCMS {
     }
 
     const db = this.getDatabase()
-    const existingUser = await db.select().from(users).where(eq(users.email, email)).get()
+
+    const [defaultSite] = await db.select().from(sites).where(eq(sites.id, SINGLE_SITE_CONTEXT.id))
+    if (!defaultSite) {
+      await db.insert(sites).values({
+        id: SINGLE_SITE_CONTEXT.id,
+        name: SINGLE_SITE_CONTEXT.name,
+        slug: SINGLE_SITE_CONTEXT.slug,
+        status: 'active',
+      })
+    }
+
+    const [existingUser] = await db.select().from(users).where(eq(users.email, email))
     if (existingUser) {
       return
     }
 
-    const hasAnyUser = await db.select({ id: users.id }).from(users).limit(1).get()
+    const [hasAnyUser] = await db.select({ id: users.id }).from(users).limit(1)
     if (hasAnyUser) {
       return
     }
 
-    const targetSite = await db.select().from(sites).where(eq(sites.id, siteId)).get()
+    const [targetSite] = await db.select().from(sites).where(eq(sites.id, siteId))
     if (!targetSite) {
       throw new Error(`admin.bootstrapAdmin.siteId "${siteId}" does not exist.`)
     }
@@ -647,11 +654,10 @@ export class HanaCMS {
       const requestContext = this.resolveRequestContext(c)
       const site = requestContext.site
       const db = this.getDatabase()
-      const user = await db
+      const [user] = await db
         .select()
         .from(users)
         .where(eq(users.email, parsed.data.email.trim().toLowerCase()))
-        .get()
 
       if (!user) {
         return c.json({ error: 'Invalid email or password.' }, 401)
@@ -669,14 +675,13 @@ export class HanaCMS {
         })
         .from(userSiteRoles)
         .where(eq(userSiteRoles.userId, user.id))
-        .all()
 
       const usersTableRole = parseUsersTableRole(user.role)
       const usersTableGrantsDefaultSite =
         site.id === SINGLE_SITE_CONTEXT.id &&
         (usersTableRole === 'site_admin' || usersTableRole === 'site_content_writer')
       const hasSiteAccess =
-        roleRows.some((row) => row.role === 'admin' || row.siteId === site.id) ||
+        roleRows.some((row: { role: string; siteId: string }) => row.role === 'admin' || row.siteId === site.id) ||
         usersTableRole === 'admin' ||
         usersTableGrantsDefaultSite
 
@@ -716,7 +721,6 @@ export class HanaCMS {
           })
           .from(sessions)
           .where(eq(sessions.token, token))
-          .all()
 
         for (const row of rows) {
           const sameSite = row.siteId === requestContext.site.id
@@ -799,7 +803,7 @@ export class HanaCMS {
 
     registerAdminRoute('GET', '/themes', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
-      const dbRecords = await db.select().from(installedThemes).all()
+      const dbRecords = await db.select().from(installedThemes)
       const activeTheme = this.getTheme()
 
       const seen = new Set<string>()
@@ -833,7 +837,7 @@ export class HanaCMS {
 
     registerAdminRoute('GET', '/themes/preview', 'platform.sites.read', async (c) => {
       const db = this.getDatabase()
-      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
+      const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
       const previewThemeName = row?.previewThemeName ?? null
       const previewThemePath = row?.previewThemePath ?? null
@@ -901,11 +905,7 @@ export class HanaCMS {
       const token = randomBytes(24).toString('hex')
       const db = this.getDatabase()
       const activeTheme = this.activeThemeName ?? 'default'
-      const existing = await db
-        .select()
-        .from(themeState)
-        .where(eq(themeState.siteId, 'default'))
-        .get()
+      const [existing] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
       const updatePayload = {
         previewThemeName,
@@ -955,11 +955,10 @@ export class HanaCMS {
       if (!name) return c.json({ error: 'Theme name is required.' }, 400)
       const db = this.getDatabase()
 
-      const existing = await db
+      const [existing] = await db
         .select()
         .from(installedThemes)
         .where(eq(installedThemes.name, name))
-        .get()
 
       if (existing) {
         return c.json({ error: `Theme "${name}" is already installed.` }, 409)
@@ -993,11 +992,10 @@ export class HanaCMS {
         )
       }
 
-      const existing = await db
+      const [existing] = await db
         .select()
         .from(installedThemes)
         .where(eq(installedThemes.name, name))
-        .get()
 
       if (!existing) {
         return c.json({ error: `Theme "${name}" is not installed.` }, 404)
@@ -1020,11 +1018,10 @@ export class HanaCMS {
       const registeredTheme = this.themeRegistry.get(name)
 
       if (!registeredTheme) {
-        const installedRecord = await db
+        const [installedRecord] = await db
           .select()
           .from(installedThemes)
           .where(eq(installedThemes.name, name))
-          .get()
 
         if (!installedRecord) {
           return c.json({ error: `Theme "${name}" is not available.` }, 404)
@@ -1059,11 +1056,10 @@ export class HanaCMS {
         await this.hooks.run(HOOK_KEY.PLUGIN_DISABLED, previousTheme.companionPlugin.name)
       }
 
-      const existingRow = await db
+      const [existingRow] = await db
         .select()
         .from(themeState)
         .where(eq(themeState.siteId, 'default'))
-        .get()
 
       if (existingRow) {
         await db
@@ -1107,7 +1103,7 @@ export class HanaCMS {
       }
 
       const db = this.getDatabase()
-      const row = await db.select().from(themeState).where(eq(themeState.siteId, 'default')).get()
+      const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
       return c.json({
         schema: theme.settingsSchema ?? null,
@@ -1141,11 +1137,7 @@ export class HanaCMS {
       }
 
       const db = this.getDatabase()
-      const existing = await db
-        .select()
-        .from(themeState)
-        .where(eq(themeState.siteId, 'default'))
-        .get()
+      const [existing] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
       if (existing) {
         await db
@@ -1164,11 +1156,10 @@ export class HanaCMS {
       if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
       const db = this.getDatabase()
-      const existing = await db
+      const [existing] = await db
         .select()
         .from(installedPlugins)
         .where(eq(installedPlugins.name, name))
-        .get()
 
       if (existing) {
         return c.json({ error: `Plugin "${name}" is already installed.` }, 409)
@@ -1202,11 +1193,10 @@ export class HanaCMS {
       if (!name) return c.json({ error: 'Plugin name is required.' }, 400)
 
       const db = this.getDatabase()
-      const existing = await db
+      const [existing] = await db
         .select()
         .from(installedPlugins)
         .where(eq(installedPlugins.name, name))
-        .get()
 
       if (!existing) {
         return c.json({ error: `Plugin "${name}" is not installed.` }, 404)

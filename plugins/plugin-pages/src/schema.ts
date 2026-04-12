@@ -1,6 +1,6 @@
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
-export const pages = sqliteTable(
+export const pages = pgTable(
   'cms_pages',
   {
     id: text('id').primaryKey(),
@@ -13,13 +13,9 @@ export const pages = sqliteTable(
       .notNull()
       .default('draft'),
     authorId: text('author_id'),
-    publishedAt: integer('published_at', { mode: 'timestamp' }),
-    createdAt: integer('created_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-    updatedAt: integer('updated_at', { mode: 'timestamp' })
-      .notNull()
-      .$defaultFn(() => new Date()),
+    publishedAt: timestamp('published_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
     siteSlugUnique: uniqueIndex('cms_pages_site_slug_unique').on(table.siteId, table.slug),

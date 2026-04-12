@@ -17,7 +17,7 @@ alwaysApply: true
 | `packages/core` | `@hana/core` | `HanaCMS` class, `HookRegistry`, `createDatabase()`, static admin serve | plugins, apps, CLI |
 | `packages/registry` | `@hana/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@hana/core`, `@hana/ui` |
 | `packages/ui` | `@hana/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
-| `packages/cli` | `@hana/cli` | CLI commands: `hanabi init`, `hanabi migrate`, `hanabi plugin install/uninstall` | standalone binary |
+| `packages/cli` | `@hana/cli` | CLI commands: `hanabi init`, `hanabi db push/generate/migrate`, `hanabi plugin install/uninstall` | standalone binary |
 | `packages/config` | `@hana/config` | Shared tsconfig (`tsconfig.base.json`, `tsconfig.app.json`, `tsconfig.lib.json`) | Tất cả packages |
 
 ## Plugins (`plugins/`)
@@ -68,7 +68,8 @@ packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme regist
 packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
 packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
-packages/core/src/database.ts       → createDatabase()
+packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
+packages/cli/src/commands/db.ts     → hanabi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
 packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
@@ -82,6 +83,8 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql).
+2026-04-12 — PostgreSQL-only: removed SQLite/Turso/MySQL. Updated CLI description (db commands). Added db.ts entry point.
 2026-04-10 — Added `PluginAdminConfig` to plugin-blog and plugin-pages. Updated entry points with admin manifest + bundle serving APIs.
 2026-04-10 — Added `@hana/theme-news`, `@hana/plugin-pages`, `Themes (themes/)` section. Updated entry points for theme registry/hot-swap.
 2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.

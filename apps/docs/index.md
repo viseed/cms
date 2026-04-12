@@ -15,7 +15,7 @@ features:
   - title: Plugin Architecture
     details: Extend everything with official and community plugins. Install from NPM or dynamically from CDN.
   - title: Bun-Native Performance
-    details: Built for Bun runtime. Lightning-fast startup, native SQLite, and zero cold starts.
+    details: Built for Bun runtime. Lightning-fast startup, PostgreSQL-powered, and zero cold starts.
   - title: Admin Dashboard
     details: Beautiful Vue 3 admin panel with plugin marketplace, content management, and media library.
 ---
