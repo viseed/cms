@@ -1,7 +1,9 @@
 {
   "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
-    "extendedDiagnostics": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src"
   },

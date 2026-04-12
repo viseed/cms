@@ -14,7 +14,6 @@ import type {
   CMSPlugin,
   CMSRouteContextHelpers,
   CMSTheme,
-  HookName,
   Permission,
   RequestContext,
   RequiredLayoutKey,
@@ -137,7 +136,7 @@ export class HanaCMS {
 
     await this.ensureBootstrapAdmin()
 
-    await this.hooks.run('cms:init', this as never)
+    await this.hooks.run(HOOK_KEY.CMS_INIT, this as never)
 
     const helpers = this.createRouteContextHelpers()
     for (const plugin of this.plugins) {

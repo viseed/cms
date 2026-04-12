@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "bunup && tsc -p tsconfig.build.json",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
     "test": "bun test"
   },
   "dependencies": {

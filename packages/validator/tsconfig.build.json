@@ -1,14 +1,12 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
-    "composite": false,
-    "incremental": false,
-    "rootDir": "src",
+    "isolatedDeclarations": false,
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "dist"
+    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
+    "outDir": "dist",
+    "rootDir": "src"
   },
   "include": [
     "src"

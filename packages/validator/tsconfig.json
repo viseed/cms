@@ -1,8 +1,10 @@
 {
   "extends": "@hana/config/tsconfig.lib.json",
   "compilerOptions": {
-    "isolatedDeclarations": false,
+    "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
