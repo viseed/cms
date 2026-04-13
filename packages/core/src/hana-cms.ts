@@ -18,7 +18,7 @@ import type {
   RequestContext,
   RequiredLayoutKey,
 } from '@hana/types'
-import { HOOK_KEY, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
+import { HOOK_KEY, resolveDefaultSettings, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { loginSchema } from '@hana/validator'
 import { eq } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
@@ -417,11 +417,13 @@ export class HanaCMS {
               renderRequestContext,
             )) as Record<string, unknown>
 
+            const settings = activeTheme.settingsSchema ? resolveDefaultSettings(activeTheme.settingsSchema) : {}
+
             const html = await runtime.renderLayout(
               resolvedLayoutKey,
               {
                 data,
-                settings: {},
+                settings,
                 menus: {},
                 request: {
                   url: c.req.url,

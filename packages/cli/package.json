@@ -15,6 +15,7 @@
     "dist"
   ],
   "scripts": {
+    "dev": "bunup --watch",
     "build": "bunup",
     "clean": "rimraf dist",
     "test": "bun test"
