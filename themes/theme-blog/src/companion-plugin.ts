@@ -1,8 +1,8 @@
 import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
 
-export function newsCompanionPlugin(): CMSPlugin {
+export function blogCompanionPlugin(): CMSPlugin {
   return {
-    name: 'news-companion',
+    name: 'blog-companion',
     version: '0.1.0',
     hooks: {
       [HOOK_KEY.THEME_BEFORE_RENDER]: async (
@@ -15,7 +15,7 @@ export function newsCompanionPlugin(): CMSPlugin {
             ...data,
             relatedPosts: [],
             showAuthorBio: true,
-            theme: 'news',
+            theme: 'blog',
           }
         }
 
@@ -24,7 +24,7 @@ export function newsCompanionPlugin(): CMSPlugin {
     },
     routes: (app) => {
       app.get('/test/api', (c) => {
-        return c.json({ message: 'news-companion plugin is alive', theme: 'news' })
+        return c.json({ message: 'blog-companion plugin is alive', theme: 'blog' })
       })
     },
   }

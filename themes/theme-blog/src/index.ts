@@ -1,19 +1,19 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { CMSTheme } from '@hana/types'
-import { newsCompanionPlugin } from './companion-plugin'
+import { blogCompanionPlugin } from './companion-plugin'
 
-export { newsCompanionPlugin }
+export { blogCompanionPlugin }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export function newsTheme(): CMSTheme {
+export function blogTheme(): CMSTheme {
   return {
-    name: 'news',
+    name: 'blog',
     version: '0.1.0',
     templateRoot: resolve(__dirname, '../templates'),
     staticRoot: resolve(__dirname, '../static'),
-    companionPlugin: newsCompanionPlugin(),
+    companionPlugin: blogCompanionPlugin(),
     layouts: {
       home: { template: 'home.eta' },
       post: { template: 'post.eta' },
@@ -29,12 +29,12 @@ export function newsTheme(): CMSTheme {
           key: 'general',
           title: 'General',
           fields: [
-            { key: 'siteTitle', label: 'Site Title', type: 'text', default: 'Hana News' },
+            { key: 'siteTitle', label: 'Site Title', type: 'text', default: 'Hana Blog' },
             {
               key: 'siteDescription',
               label: 'Site Description',
               type: 'textarea',
-              default: 'A modern news site powered by Hana CMS',
+              default: 'A modern blog powered by Hana CMS',
             },
             { key: 'brandColor', label: 'Brand Color', type: 'color', default: '#1a56db' },
           ],

@@ -2,15 +2,15 @@ import { createCMS } from '@hana/core'
 import { authPlugin } from '@hana/plugin-auth'
 import { blogPlugin } from '@hana/plugin-blog'
 import { pagesPlugin } from '@hana/plugin-pages'
-import { newsTheme } from '@hana/theme-news'
+import { blogTheme } from '@hana/theme-blog'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
     url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
   },
-  themes: [newsTheme()],
-  defaultTheme: 'news',
+  themes: [blogTheme()],
+  defaultTheme: 'blog',
 })
 
 cms.use(authPlugin())

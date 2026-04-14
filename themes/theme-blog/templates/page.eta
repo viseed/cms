@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= it.data.page ? it.data.page.title + ' — ' : '' %><%= it.settings.siteTitle || 'Hana News' %></title>
+  <title><%= it.data.page ? it.data.page.title + ' — ' : '' %><%= it.settings.siteTitle || 'Hana Blog' %></title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
-  <% if (it.settings.brandColor) { %>
-    <style>:root { --brand: <%= it.settings.brandColor %>; }</style>
+  <% if (it.settings['general.brandColor']) { %>
+    <style>:root { --brand: <%= it.settings['general.brandColor'] %>; }</style>
   <% } %>
 </head>
 <body>

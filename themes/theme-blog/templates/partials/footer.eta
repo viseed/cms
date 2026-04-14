@@ -2,24 +2,24 @@
   <div class="container">
     <div class="footer-content">
       <div class="footer-brand">
-        <p class="footer-title"><%= it.settings.siteTitle || 'Hana News' %></p>
+        <p class="footer-title"><%= it.settings.siteTitle || 'Hana Blog' %></p>
         <p class="footer-desc"><%= it.settings.siteDescription || '' %></p>
       </div>
-      <% if (it.settings.footerLinks && it.settings.footerLinks.length) { %>
+      <% if (it.settings['footer.footerLinks'] && it.settings['footer.footerLinks'].length) { %>
         <div class="footer-links">
-          <% for (const link of it.settings.footerLinks) { %>
+          <% for (const link of it.settings['footer.footerLinks']) { %>
             <a href="<%= link.url %>"><%= link.label %></a>
           <% } %>
         </div>
       <% } %>
-      <% if (it.settings.socialLinks && it.settings.socialLinks.length) { %>
+      <% if (it.settings['footer.socialLinks'] && it.settings['footer.socialLinks'].length) { %>
         <div class="footer-social">
-          <% for (const link of it.settings.socialLinks) { %>
+          <% for (const link of it.settings['footer.socialLinks']) { %>
             <a href="<%= link.url %>" target="_blank" rel="noopener"><%= link.label %></a>
           <% } %>
         </div>
       <% } %>
     </div>
-    <p class="footer-copy">&copy; <%= new Date().getFullYear() %> <%= it.settings.siteTitle || 'Hana News' %>. Powered by Hana CMS.</p>
+    <p class="footer-copy">&copy; <%= new Date().getFullYear() %> <%= it.settings.siteTitle || 'Hana Blog' %>. Powered by Hana CMS.</p>
   </div>
 </footer>

@@ -39,7 +39,7 @@ alwaysApply: true
 
 | Theme | Npm scope | Mô tả |
 |---|---|---|
-| `themes/theme-news` | `@hana/theme-news` | Editorial news theme — Eta templates, settings schema, static assets. Factory `newsTheme()` |
+| `themes/theme-blog` | `@hana/theme-blog` | Blog theme — Eta templates, settings schema, static assets. Factory `blogTheme()` |
 
 ## Apps (`apps/`)
 
@@ -76,7 +76,7 @@ packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern)
 packages/schema/src/schema-builder.ts → mergeSchemas()
 packages/registry/src/registry-client.ts → PluginRegistryClient
 packages/registry/src/integrity.ts  → verifyBundle()
-themes/theme-news/src/index.ts      → newsTheme() factory
+themes/theme-blog/src/index.ts      → blogTheme() factory
 apps/admin/src/main.ts              → dynamic plugin route registration via import()
 apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifest from API
 ```
@@ -86,6 +86,6 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql).
 2026-04-12 — PostgreSQL-only: removed SQLite/Turso/MySQL. Updated CLI description (db commands). Added db.ts entry point.
 2026-04-10 — Added `PluginAdminConfig` to plugin-blog and plugin-pages. Updated entry points with admin manifest + bundle serving APIs.
-2026-04-10 — Added `@hana/theme-news`, `@hana/plugin-pages`, `Themes (themes/)` section. Updated entry points for theme registry/hot-swap.
+2026-04-14 — Renamed `@hana/theme-news` → `@hana/theme-blog`, `newsTheme()` → `blogTheme()`.
 2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.
 2026-03-22 — Added Theme System section

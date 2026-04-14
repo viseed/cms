@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= it.settings.siteTitle || 'Hana News' %></title>
+  <title><%= it.settings.siteTitle || 'Hana Blog' %></title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
-  <% if (it.settings.brandColor) { %>
-    <style>:root { --brand: <%= it.settings.brandColor %>; }</style>
+  <% if (it.settings['general.brandColor']) { %>
+    <style>:root { --brand: <%= it.settings['general.brandColor'] %>; }</style>
   <% } %>
 </head>
 <body>
   <%~ include('partials/header', it) %>
 
   <main class="container">
-    <% if (it.settings.showHero !== false) { %>
+    <% if (it.settings['hero.showHero'] !== false) { %>
       <section class="hero">
-        <h1><%= it.settings['general.siteTitle'] || 'Hana News' %></h1>
-        <p><%= it.settings['general.siteDescription'] || 'A modern news site powered by Hana CMS' %></p>
+        <h1><%= it.settings['general.siteTitle'] || 'Hana Blog' %></h1>
+        <p><%= it.settings['general.siteDescription'] || 'A modern blog powered by Hana CMS' %></p>
       </section>
     <% } %>
 
@@ -38,7 +38,7 @@
         <% } %>
       </section>
 
-      <% if (it.settings.showSidebar !== false) { %>
+      <% if (it.settings['sidebar.showSidebar'] !== false) { %>
         <aside class="sidebar">
           <div class="sidebar-section">
             <h3>Categories</h3>

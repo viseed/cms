@@ -13,7 +13,7 @@
     "build:plugins": "turbo run build --filter=\"./plugins/*\"",
     "clean": "turbo run clean && rimraf .turbo node_modules/.cache",
     "dev:docs": "turbo run dev --filter=@hana/docs",
-    "dev": "turbo run dev --filter=@hana/schema --filter=@hana/types --filter=@hana/validator --filter=@hana/core --filter=@hana/admin --filter=@hana/starter --filter=@hana/theme-news",
+    "dev": "turbo run dev --filter=@hana/schema --filter=@hana/types --filter=@hana/validator --filter=@hana/core --filter=@hana/admin --filter=@hana/starter --filter=@hana/theme-blog",
     "test": "turbo run test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

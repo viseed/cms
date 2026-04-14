@@ -15,6 +15,6 @@
     "@hana/plugin-pages": "workspace:*"
   },
   "devDependencies": {
-    "@hana/theme-news": "workspace:*"
+    "@hana/theme-blog": "workspace:*"
   }
 }
