@@ -1,0 +1,155 @@
+import type { DatabaseInstance } from '@hana/core'
+import type { CMSRouteContextHelpers } from '@hana/types'
+import { asc, eq } from 'drizzle-orm'
+import { Hono } from 'hono'
+import { menuItems, menus } from './schema'
+
+export function setupMenuRoutes(
+  app: Hono,
+  helpers: CMSRouteContextHelpers,
+  getDb: () => DatabaseInstance | null,
+): void {
+  const router = new Hono()
+
+  router.get('/', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const { site } = helpers.resolveRequestContext(c)
+    const rows = await db.select().from(menus).where(eq(menus.siteId, site.id))
+    return c.json({ menus: rows })
+  })
+
+  router.post('/', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const body = await c.req.json()
+    if (!body.name || !body.zone) {
+      return c.json({ error: 'name and zone are required' }, 400)
+    }
+
+    const { site } = helpers.resolveRequestContext(c)
+    const id = crypto.randomUUID()
+
+    await db.insert(menus).values({
+      id,
+      siteId: site.id,
+      name: body.name,
+      zone: body.zone,
+      createdAt: new Date(),
+    })
+
+    const [created] = await db.select().from(menus).where(eq(menus.id, id))
+    return c.json({ menu: created }, 201)
+  })
+
+  router.put('/:id', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const id = c.req.param('id')
+    const body = await c.req.json()
+
+    const [existing] = await db.select().from(menus).where(eq(menus.id, id))
+    if (!existing) return c.json({ error: 'Menu not found' }, 404)
+
+    await db
+      .update(menus)
+      .set({ name: body.name ?? existing.name, zone: body.zone ?? existing.zone })
+      .where(eq(menus.id, id))
+
+    const [updated] = await db.select().from(menus).where(eq(menus.id, id))
+    return c.json({ menu: updated })
+  })
+
+  router.delete('/:id', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const id = c.req.param('id')
+    const [existing] = await db.select().from(menus).where(eq(menus.id, id))
+    if (!existing) return c.json({ error: 'Menu not found' }, 404)
+
+    await db.delete(menuItems).where(eq(menuItems.menuId, id))
+    await db.delete(menus).where(eq(menus.id, id))
+    return c.json({ message: 'Menu deleted', id })
+  })
+
+  router.get('/:id/items', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const id = c.req.param('id')
+    const items = await db
+      .select()
+      .from(menuItems)
+      .where(eq(menuItems.menuId, id))
+      .orderBy(asc(menuItems.sortOrder))
+
+    return c.json({ items })
+  })
+
+  router.put('/:id/items', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const menuId = c.req.param('id')
+    const body = await c.req.json()
+    const incomingItems: Array<{
+      id?: string
+      parentId?: string | null
+      label: string
+      url: string
+      target?: string
+      sortOrder: number
+    }> = body.items ?? []
+
+    const existing = await db.select().from(menuItems).where(eq(menuItems.menuId, menuId))
+    const existingIds = new Set(existing.map((i) => i.id))
+    const incomingIds = new Set(incomingItems.filter((i) => i.id).map((i) => i.id as string))
+
+    for (const id of existingIds) {
+      if (!incomingIds.has(id)) {
+        await db.delete(menuItems).where(eq(menuItems.id, id))
+      }
+    }
+
+    for (const item of incomingItems) {
+      if (item.id && existingIds.has(item.id)) {
+        await db
+          .update(menuItems)
+          .set({
+            parentId: item.parentId ?? null,
+            label: item.label,
+            url: item.url,
+            target: item.target ?? '_self',
+            sortOrder: item.sortOrder,
+          })
+          .where(eq(menuItems.id, item.id))
+      } else {
+        const newId = crypto.randomUUID()
+        await db.insert(menuItems).values({
+          id: newId,
+          menuId,
+          parentId: item.parentId ?? null,
+          label: item.label,
+          url: item.url,
+          target: item.target ?? '_self',
+          sortOrder: item.sortOrder,
+          createdAt: new Date(),
+        })
+      }
+    }
+
+    const saved = await db
+      .select()
+      .from(menuItems)
+      .where(eq(menuItems.menuId, menuId))
+      .orderBy(asc(menuItems.sortOrder))
+
+    return c.json({ items: saved })
+  })
+
+  app.route('/api/menus', router)
+}

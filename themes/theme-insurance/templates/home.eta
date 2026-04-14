@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= it.settings['general.siteName'] || 'Insurance' %></title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+</head>
+<body>
+  <%~ include('partials/header', it) %>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner" <% if (it.settings['banner.imageUrl']) { %>style="background-image: url('<%= it.settings['banner.imageUrl'] %>')"<% } %>>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <h1 class="hero-title"><%= it.settings['banner.title'] || 'Welcome' %></h1>
+      <p class="hero-subtitle"><%= it.settings['banner.subtitle'] || '' %></p>
+      <% if (it.settings['banner.ctaUrl']) { %>
+        <a href="<%= it.settings['banner.ctaUrl'] %>" class="btn-hero">
+          <%= it.settings['banner.ctaText'] || 'Learn More' %>
+        </a>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Products Carousel Section -->
+  <section class="products-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-titles">
+          <p class="section-eyebrow"><%= it.settings['products.sectionSubtitle'] || '' %></p>
+          <h2 class="section-title"><%= it.settings['products.sectionTitle'] || 'Insurance Solutions' %></h2>
+        </div>
+        <% if (it.settings['products.viewAllUrl']) { %>
+          <a href="<%= it.settings['products.viewAllUrl'] %>" class="btn-outline">
+            <%= it.settings['products.viewAllText'] || 'View all' %> →
+          </a>
+        <% } %>
+      </div>
+
+      <div class="products-carousel">
+        <% if (it.data.carouselItems && it.data.carouselItems.length) { %>
+          <% for (const item of it.data.carouselItems) { %>
+            <article class="product-card">
+              <div class="product-card-image">
+                <img src="<%= item.imageUrl %>" alt="<%= item.title %>" loading="lazy">
+              </div>
+              <div class="product-card-body">
+                <span class="product-label">Insurance</span>
+                <h3 class="product-card-title">
+                  <a href="/post/<%= item.slug %>"><%= item.title %></a>
+                </h3>
+                <% if (item.excerpt) { %>
+                  <p class="product-card-excerpt"><%= item.excerpt %></p>
+                <% } %>
+                <a href="/post/<%= item.slug %>" class="product-card-link">View details →</a>
+              </div>
+            </article>
+          <% } %>
+        <% } else { %>
+          <div class="empty-carousel">
+            <p>No products featured yet. Add products via Admin → Home Carousel.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest News Section -->
+  <% if (it.data.posts && it.data.posts.length) { %>
+  <section class="news-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Latest News</h2>
+        <a href="/category" class="btn-outline">View all news →</a>
+      </div>
+      <div class="news-grid">
+        <% for (const post of it.data.posts.slice(0, 3)) { %>
+          <article class="news-card">
+            <div class="news-card-body">
+              <time class="news-date">
+                <%= post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('vi-VN') : '' %>
+              </time>
+              <h3 class="news-card-title">
+                <a href="/post/<%= post.slug %>"><%= post.title %></a>
+              </h3>
+              <% if (post.excerpt) { %>
+                <p class="news-card-excerpt"><%= post.excerpt %></p>
+              <% } %>
+            </div>
+          </article>
+        <% } %>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <%~ include('partials/footer', it) %>
+</body>
+</html>

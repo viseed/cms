@@ -1,0 +1,98 @@
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="container footer-grid">
+      <!-- Brand column -->
+      <div class="footer-brand">
+        <% if (it.settings['general.logoUrl']) { %>
+          <img src="<%= it.settings['general.logoUrl'] %>" alt="<%= it.settings['general.siteName'] || 'Insurance' %>" class="footer-logo">
+        <% } else { %>
+          <p class="footer-logo-text"><%= it.settings['general.siteName'] || 'Insurance' %></p>
+        <% } %>
+        <% if (it.settings['footer.aboutText']) { %>
+          <p class="footer-about"><%= it.settings['footer.aboutText'] %></p>
+        <% } %>
+        <div class="footer-contact-info">
+          <% if (it.settings['footer.address']) { %>
+            <p>📍 <%= it.settings['footer.address'] %></p>
+          <% } %>
+          <% if (it.settings['footer.footerPhone']) { %>
+            <p>📞 <%= it.settings['footer.footerPhone'] %></p>
+          <% } %>
+          <% if (it.settings['footer.footerEmail']) { %>
+            <p>✉ <a href="mailto:<%= it.settings['footer.footerEmail'] %>"><%= it.settings['footer.footerEmail'] %></a></p>
+          <% } %>
+        </div>
+        <% if (it.settings['footer.socialLinks'] && it.settings['footer.socialLinks'].length) { %>
+          <div class="footer-social">
+            <% for (const link of it.settings['footer.socialLinks']) { %>
+              <a href="<%= link.url %>" target="_blank" rel="noopener" class="social-link">
+                <%= link.label %>
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Column 1 -->
+      <div class="footer-col">
+        <% if (it.settings['footer.col1Title']) { %>
+          <h4 class="footer-col-title"><%= it.settings['footer.col1Title'] %></h4>
+        <% } %>
+        <ul class="footer-links">
+          <% if (it.settings['footer.col1Links'] && it.settings['footer.col1Links'].length) { %>
+            <% for (const link of it.settings['footer.col1Links']) { %>
+              <li><a href="<%= link.url %>" target="<%= link.target || '_self' %>"><%= link.label %></a></li>
+            <% } %>
+          <% } %>
+          <% if (it.data.menuFooter && it.data.menuFooter.length && !(it.settings['footer.col1Links'] && it.settings['footer.col1Links'].length)) { %>
+            <% for (const item of it.data.menuFooter) { %>
+              <li><a href="<%= item.url %>"><%= item.label %></a></li>
+            <% } %>
+          <% } %>
+        </ul>
+      </div>
+
+      <!-- Column 2 -->
+      <% if (it.settings['footer.col2Title'] || (it.settings['footer.col2Links'] && it.settings['footer.col2Links'].length)) { %>
+      <div class="footer-col">
+        <% if (it.settings['footer.col2Title']) { %>
+          <h4 class="footer-col-title"><%= it.settings['footer.col2Title'] %></h4>
+        <% } %>
+        <ul class="footer-links">
+          <% if (it.settings['footer.col2Links'] && it.settings['footer.col2Links'].length) { %>
+            <% for (const link of it.settings['footer.col2Links']) { %>
+              <li><a href="<%= link.url %>" target="<%= link.target || '_self' %>"><%= link.label %></a></li>
+            <% } %>
+          <% } %>
+        </ul>
+      </div>
+      <% } %>
+
+      <!-- Column 3 -->
+      <% if (it.settings['footer.col3Title'] || (it.settings['footer.col3Links'] && it.settings['footer.col3Links'].length)) { %>
+      <div class="footer-col">
+        <% if (it.settings['footer.col3Title']) { %>
+          <h4 class="footer-col-title"><%= it.settings['footer.col3Title'] %></h4>
+        <% } %>
+        <ul class="footer-links">
+          <% if (it.settings['footer.col3Links'] && it.settings['footer.col3Links'].length) { %>
+            <% for (const link of it.settings['footer.col3Links']) { %>
+              <li><a href="<%= link.url %>" target="<%= link.target || '_self' %>"><%= link.label %></a></li>
+            <% } %>
+          <% } %>
+        </ul>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p class="footer-copy">
+        &copy; <%= new Date().getFullYear() %>
+        <%= it.settings['general.siteName'] || 'Insurance' %>.
+        <%= it.settings['footer.copyrightText'] || 'All rights reserved.' %>
+      </p>
+    </div>
+  </div>
+</footer>

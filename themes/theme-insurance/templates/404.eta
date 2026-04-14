@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Page Not Found — <%= it.settings['general.siteName'] || 'Insurance' %></title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+</head>
+<body>
+  <%~ include('partials/header', it) %>
+
+  <main class="error-page">
+    <div class="container error-page-content">
+      <div class="error-code">404</div>
+      <h1 class="error-title">Page Not Found</h1>
+      <p class="error-description">
+        Sorry, the page you are looking for could not be found.<br>
+        It may have been moved or deleted.
+      </p>
+      <div class="error-actions">
+        <a href="/" class="btn btn-primary">Back to Home</a>
+        <% if (it.settings['header.contactPhone']) { %>
+          <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="btn btn-outline">
+            Contact Us
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <%~ include('partials/footer', it) %>
+</body>
+</html>

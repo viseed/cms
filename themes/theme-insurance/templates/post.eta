@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    <%= it.data.post ? it.data.post.title + ' — ' : '' %><%= it.settings['general.siteName'] || 'Insurance' %>
+  </title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+</head>
+<body>
+  <%~ include('partials/header', it) %>
+
+  <div class="page-hero page-hero--small">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>›</span>
+        <% if (it.data.post && it.data.post.categoryId) { %>
+          <a href="/category">Category</a>
+          <span>›</span>
+        <% } %>
+        <span><%= it.data.post ? it.data.post.title : 'Post' %></span>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container page-content">
+    <% if (it.data.post) { %>
+      <div class="post-layout">
+        <article class="post-article">
+          <header class="article-header">
+            <h1 class="article-title"><%= it.data.post.title %></h1>
+            <div class="article-meta">
+              <time class="article-date">
+                <%= it.data.post.publishedAt ? new Date(it.data.post.publishedAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
+              </time>
+            </div>
+            <% if (it.data.post.excerpt) { %>
+              <p class="article-lead"><%= it.data.post.excerpt %></p>
+            <% } %>
+          </header>
+
+          <div class="article-body">
+            <%~ it.data.post.bodyHtml || '' %>
+          </div>
+
+          <div class="article-footer">
+            <a href="javascript:history.back()" class="btn-back">← Back</a>
+          </div>
+        </article>
+
+        <!-- Sidebar -->
+        <aside class="post-sidebar">
+          <!-- Related products / recent posts -->
+          <% if (it.data.posts && it.data.posts.length) { %>
+            <div class="sidebar-card">
+              <h3 class="sidebar-card-title">Related Articles</h3>
+              <ul class="sidebar-post-list">
+                <% for (const related of it.data.posts.filter(p => p.id !== it.data.post.id).slice(0, 5)) { %>
+                  <li>
+                    <a href="/post/<%= related.slug %>"><%= related.title %></a>
+                    <time>
+                      <%= related.publishedAt ? new Date(related.publishedAt).toLocaleDateString('vi-VN') : '' %>
+                    </time>
+                  </li>
+                <% } %>
+              </ul>
+            </div>
+          <% } %>
+
+          <!-- Contact Card -->
+          <div class="sidebar-card sidebar-contact-card">
+            <h3 class="sidebar-card-title">Need help?</h3>
+            <p class="sidebar-contact-text">Our team is ready to assist you</p>
+            <% if (it.settings['header.contactPhone']) { %>
+              <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="sidebar-phone">
+                📞 <%= it.settings['header.contactPhone'] %>
+              </a>
+            <% } %>
+            <% if (it.settings['header.contactEmail']) { %>
+              <a href="mailto:<%= it.settings['header.contactEmail'] %>" class="sidebar-email">
+                ✉ <%= it.settings['header.contactEmail'] %>
+              </a>
+            <% } %>
+          </div>
+        </aside>
+      </div>
+    <% } else { %>
+      <div class="not-found-page">
+        <h1>Article not found</h1>
+        <p>The article you are looking for does not exist.</p>
+        <a href="/" class="btn-primary-link">Back to Home</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%~ include('partials/footer', it) %>
+</body>
+</html>

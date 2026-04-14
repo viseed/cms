@@ -30,6 +30,7 @@ alwaysApply: true
 | `plugins/plugin-auth` | `@hana/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
 | `plugins/plugin-blog` | `@hana/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
 | `plugins/plugin-media` | `@hana/plugin-media` | File upload schema + routes (local storage adapter) |
+| `plugins/plugin-menu` | `@hana/plugin-menu` | Menu management — schema + CRUD REST routes + admin view (MenusView). Injects `menuMain`/`menuFooter` into theme context via `theme:beforeRender` hook |
 | `plugins/plugin-pages` | `@hana/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
 
 ## Themes (`themes/`)
@@ -40,6 +41,7 @@ alwaysApply: true
 | Theme | Npm scope | Mô tả |
 |---|---|---|
 | `themes/theme-blog` | `@hana/theme-blog` | Blog theme — Eta templates, settings schema, static assets. Factory `blogTheme()` |
+| `themes/theme-insurance` | `@hana/theme-insurance` | Insurance product theme — Eta templates (home/category/post/404), companion plugin for home carousel, full settings schema. Factory `insuranceTheme()` |
 
 ## Apps (`apps/`)
 
@@ -77,15 +79,14 @@ packages/schema/src/schema-builder.ts → mergeSchemas()
 packages/registry/src/registry-client.ts → PluginRegistryClient
 packages/registry/src/integrity.ts  → verifyBundle()
 themes/theme-blog/src/index.ts      → blogTheme() factory
+themes/theme-insurance/src/index.ts → insuranceTheme() factory
+themes/theme-insurance/src/companion-plugin.ts → insuranceCompanionPlugin() — home carousel schema, THEME_BEFORE_RENDER hook, HomeCarouselView admin UI
+plugins/plugin-menu/src/index.ts    → menuPlugin() factory — menu + menu_items schema, THEME_BEFORE_RENDER hook injects menuMain/menuFooter, MenusView admin UI
 apps/admin/src/main.ts              → dynamic plugin route registration via import()
 apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifest from API
 ```
 
 ## Last updated
 
-2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql).
-2026-04-12 — PostgreSQL-only: removed SQLite/Turso/MySQL. Updated CLI description (db commands). Added db.ts entry point.
-2026-04-10 — Added `PluginAdminConfig` to plugin-blog and plugin-pages. Updated entry points with admin manifest + bundle serving APIs.
+2026-04-14 — Added `theme-insurance` (insurance product theme with companion plugin) and `plugin-menu` (menu management plugin).
 2026-04-14 — Renamed `@hana/theme-news` → `@hana/theme-blog`, `newsTheme()` → `blogTheme()`.
-2026-03-29 — `@hana/ui`: `themeWidgetRegistry` for theme extension widgets by slot.
-2026-03-22 — Added Theme System section
