@@ -8,6 +8,7 @@ export const mediaFiles = pgTable('media_files', {
   mimeType: text('mime_type').notNull(),
   size: integer('size').notNull(),
   path: text('path').notNull(),
+  slug: text('slug'),
   alt: text('alt'),
   uploadedBy: text('uploaded_by'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
