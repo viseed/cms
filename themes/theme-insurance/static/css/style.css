@@ -7,7 +7,7 @@
 :root {
   --color-primary: #232734;
   --color-accent: #1a1d28;
-  --color-accent-light: #2b303f;
+  --color-accent-light: rgb(104, 141, 252);
   --color-red: #c0392b;
   --color-white: #ffffff;
   --color-bg: #f4f7fb;
@@ -24,7 +24,7 @@
   --shadow-lg: 0 8px 32px rgba(0, 48, 135, 0.15);
 
   --header-top-height: 40px;
-  --header-nav-height: 72px;
+  --header-nav-height: 68px;
 }
 
 /* ----- Reset ----- */
@@ -100,7 +100,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .main-nav .container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
   gap: 32px;
 }
@@ -121,6 +121,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .nav-item {
   position: relative;
+  padding: 14px 0;
 }
 .nav-link {
   display: flex;
@@ -134,19 +135,20 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   transition: background 0.2s, color 0.2s;
   white-space: nowrap;
 }
-.nav-link:hover,
-.nav-item:hover > .nav-link {
-  background: var(--color-bg-alt);
-  color: var(--color-accent);
+
+.nav-item:hover .nav-link {
+  color: var(--color-accent-light);
 }
+
 .dropdown-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 1px);
+  top: calc(100%);
   left: 0;
-  background: var(--color-white);
+  background: var(--color-bg-alt);
   min-width: 220px;
-  border-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  border-bottom-left-radius: var(--radius);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
   color: var(--color-accent);
@@ -163,9 +165,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   color: var(--color-accent);
   transition: background 0.15s, color 0.15s;
 }
-.dropdown-menu li a:hover {
-  background: var(--color-bg-alt);
-  color: var(--color-accent);
+.dropdown-menu li:hover a {
+  color: var(--color-accent-light);
 }
 .nav-toggle {
   display: none;
