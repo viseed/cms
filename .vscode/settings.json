@@ -4,5 +4,8 @@
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
-  "editor.fontFamily": "MonoLisa, JetBrains Mono, Consolas, 'Courier New', monospace"
+  "editor.fontFamily": "MonoLisa, JetBrains Mono, Consolas, 'Courier New', monospace",
+  "[eta]": {
+    "editor.defaultFormatter": "letea.vscode-eta-language"
+  }
 }

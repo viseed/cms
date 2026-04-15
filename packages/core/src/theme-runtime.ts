@@ -22,13 +22,14 @@ export interface ThemeRuntime {
 
 export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
-  const defaultEta = new Eta({ views: defaultTemplateDir, cache: true })
+  const isDevelopment = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+  const defaultEta = new Eta({ views: defaultTemplateDir, cache: !isDevelopment })
   const etaByRoot = new Map<string, Eta>()
 
   function etaForRoot(root: string): Eta {
     let instance = etaByRoot.get(root)
     if (!instance) {
-      instance = new Eta({ views: root, cache: true })
+      instance = new Eta({ views: root, cache: !isDevelopment })
       etaByRoot.set(root, instance)
     }
     return instance

@@ -50,3 +50,6 @@ coverage/
 
 # Data files
 data.*
+
+# Uploads
+apps/starter/uploads/

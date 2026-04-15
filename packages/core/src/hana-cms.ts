@@ -164,6 +164,7 @@ export class HanaCMS {
       }
     }
 
+    this.mountUploadsServing()
     this.setupAdminApi()
     this.setupAdminServing()
 
@@ -349,6 +350,18 @@ export class HanaCMS {
     )
   }
 
+  private mountUploadsServing(): void {
+    const uploadDir = this.config.media?.uploadDir ?? './uploads'
+    const absoluteUploadDir = resolve(uploadDir)
+    this.app.get(
+      '/uploads/*',
+      serveStatic({
+        root: absoluteUploadDir,
+        rewriteRequestPath: (path) => path.replace('/uploads', ''),
+      }),
+    )
+  }
+
   private mountThemeRoutes(): void {
     this.app.get('/theme/static/*', async (c, next) => {
       const resolved = await this.resolveThemeForRequest(c)
@@ -417,7 +430,16 @@ export class HanaCMS {
               renderRequestContext,
             )) as Record<string, unknown>
 
-            const settings = activeTheme.settingsSchema ? resolveDefaultSettings(activeTheme.settingsSchema) : {}
+            const defaultSettings = activeTheme.settingsSchema
+              ? resolveDefaultSettings(activeTheme.settingsSchema)
+              : {}
+            const db = this.getDatabase()
+            const [themeRow] = await db
+              .select()
+              .from(themeState)
+              .where(eq(themeState.siteId, 'default'))
+            const storedSettings = (themeRow?.settings as Record<string, unknown>) ?? {}
+            const settings = { ...defaultSettings, ...storedSettings }
 
             const html = await runtime.renderLayout(
               resolvedLayoutKey,

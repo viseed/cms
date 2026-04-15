@@ -160,6 +160,10 @@ export interface CMSConfig {
     port?: number
     hostname?: string
   }
+  media?: {
+    /** Directory to store uploaded files. Defaults to './uploads'. */
+    uploadDir?: string
+  }
 }
 
 export interface HanaCMS {
