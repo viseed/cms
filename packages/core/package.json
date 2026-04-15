@@ -32,11 +32,12 @@
     "@tiptap/pm": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
     "drizzle-orm": "0.44.7",
-    "eta": "^4.5.1",
-    "hono": "^4.7.0"
+    "hono": "^4.7.0",
+    "nunjucks": "^3.2.4"
   },
   "devDependencies": {
     "@hana/config": "workspace:*",
-    "@types/node": "^25.5.0"
+    "@types/node": "^25.5.0",
+    "@types/nunjucks": "^3.2.6"
   }
 }

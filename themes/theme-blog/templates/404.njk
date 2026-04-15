@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Not Found — <%= it.settings.siteTitle || 'Hana Blog' %></title>
+  <title>Not Found — {{ settings.siteTitle or 'Hana Blog' }}</title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
-  <% if (it.settings['general.brandColor']) { %>
-    <style>:root { --brand: <%= it.settings['general.brandColor'] %>; }</style>
-  <% } %>
+  {% if settings['general.brandColor'] %}
+    <style>:root { --brand: {{ settings['general.brandColor'] }}; }</style>
+  {% endif %}
 </head>
 <body>
-  <%~ include('partials/header', it) %>
+  {% include "partials/header.njk" %}
 
   <main class="container">
     <div class="not-found">
@@ -20,6 +20,6 @@
     </div>
   </main>
 
-  <%~ include('partials/footer', it) %>
+  {% include "partials/footer.njk" %}
 </body>
 </html>

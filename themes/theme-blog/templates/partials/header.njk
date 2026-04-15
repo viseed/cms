@@ -1,0 +1,12 @@
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">{{ settings.siteTitle or 'Hana Blog' }}</a>
+    <nav class="site-nav">
+      {% if menus and menus.primary %}
+        {% for item in menus.primary %}
+          <a href="{{ item.url }}" class="nav-link">{{ item.label }}</a>
+        {% endfor %}
+      {% endif %}
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,70 @@
+<header class="site-header">
+  <!-- Top Contact Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-bar-contact">
+        {% if settings['header.hotlineText'] or settings['header.contactPhone'] %}
+        <span class="contact-item">
+          <span class="contact-icon">📞</span>
+          <strong>{{ settings['header.contactPhone'] or '' }}</strong>
+        </span>
+        {% endif %}
+        {% if settings['header.contactEmail'] %}
+        <span class="contact-item contact-separator">|</span>
+        <span class="contact-item">
+          <span class="contact-icon">✉</span>
+          <a href="mailto:{{ settings['header.contactEmail'] }}">{{ settings['header.contactEmail'] }}</a>
+        </span>
+        {% endif %}
+      </div>
+      <div class="top-bar-links">
+        {% if settings['header.topBarLinks'] and settings['header.topBarLinks'].length %}
+        {% for link in settings['header.topBarLinks'] %}
+        <a href="{{ link.url }}" target="{{ link.target or '_self' }}" class="top-bar-link">
+          {{ link.label }}
+        </a>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <!-- Main Nav -->
+  <div class="main-nav">
+    <div class="container nav-inner">
+      <!-- Logo -->
+      <a href="/" class="site-logo">
+        {% if settings['general.logoUrl'] %}
+        <img src="{{ settings['general.logoUrl'] }}" alt="{{ settings['general.siteName'] or 'Insurance' }}" class="logo-img">
+        {% else %}
+        <span class="logo-text">{{ settings['general.siteName'] or 'Insurance' }}</span>
+        {% endif %}
+      </a>
+      <!-- Navigation -->
+      <nav class="nav-menu" aria-label="Main navigation">
+        {% if data.menuMain and data.menuMain.length %}
+        {% for item in data.menuMain %}
+        <div class="nav-item {% if item.children and item.children.length %}has-dropdown{% endif %}">
+          <a href="{{ item.url }}" target="{{ item.target or '_self' }}" class="nav-link">
+            {{ item.label }}
+            {% if item.children and item.children.length %}
+            <span class="dropdown-arrow">▾</span>
+            {% endif %}
+          </a>
+          {% if item.children and item.children.length %}
+          <ul class="dropdown-menu">
+            {% for child in item.children %}
+            <li>
+              <a href="{{ child.url }}" target="{{ child.target or '_self' }}">{{ child.label }}</a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+      </nav>
+      <!-- Mobile menu toggle -->
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.querySelector('.nav-menu').classList.toggle('open')"> ☰ </button>
+    </div>
+  </div>
+</header>

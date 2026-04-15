@@ -15,11 +15,11 @@ export function blogTheme(): CMSTheme {
     staticRoot: resolve(__dirname, '../static'),
     companionPlugin: blogCompanionPlugin(),
     layouts: {
-      home: { template: 'home.eta' },
-      post: { template: 'post.eta' },
-      category: { template: 'category.eta' },
-      page: { template: 'page.eta' },
-      404: { template: '404.eta' },
+      home: { template: 'home.njk' },
+      post: { template: 'post.njk' },
+      category: { template: 'category.njk' },
+      page: { template: 'page.njk' },
+      404: { template: '404.njk' },
     },
     menuZones: ['primary', 'footer'],
     settingsSchema: {

@@ -2,7 +2,7 @@
  * Theme extension points — regions, slots, and widget contracts.
  *
  * Plugins contribute widget metadata (logic / component identity); themes decide
- * where slots appear in `.eta` layouts and which regions exist.
+ * where slots appear in `.njk` layouts and which regions exist.
  */
 
 // ---------------------------------------------------------------------------

@@ -4,45 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>
-    <%= it.data.post ? it.data.post.title + ' — ' : '' %><%= it.settings['general.siteName'] || 'Insurance' %>
+    {% if data.post %}{{ data.post.title }} — {% endif %}{{ settings['general.siteName'] or 'Insurance' }}
   </title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
 </head>
 <body>
-  <%~ include('partials/header', it) %>
+  {% include "partials/header.njk" %}
 
   <div class="page-hero page-hero--small">
     <div class="container">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>›</span>
-        <% if (it.data.post && it.data.post.categoryId) { %>
+        {% if data.post and data.post.categoryId %}
           <a href="/category">Category</a>
           <span>›</span>
-        <% } %>
-        <span><%= it.data.post ? it.data.post.title : 'Post' %></span>
+        {% endif %}
+        <span>{{ data.post.title if data.post else 'Post' }}</span>
       </nav>
     </div>
   </div>
 
   <main class="container page-content">
-    <% if (it.data.post) { %>
+    {% if data.post %}
       <div class="post-layout">
         <article class="post-article">
           <header class="article-header">
-            <h1 class="article-title"><%= it.data.post.title %></h1>
+            <h1 class="article-title">{{ data.post.title }}</h1>
             <div class="article-meta">
-              <time class="article-date">
-                <%= it.data.post.publishedAt ? new Date(it.data.post.publishedAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
-              </time>
+              <time class="article-date">{{ data.post.publishedAt | dateFormatLong }}</time>
             </div>
-            <% if (it.data.post.excerpt) { %>
-              <p class="article-lead"><%= it.data.post.excerpt %></p>
-            <% } %>
+            {% if data.post.excerpt %}
+              <p class="article-lead">{{ data.post.excerpt }}</p>
+            {% endif %}
           </header>
 
           <div class="article-body">
-            <%~ it.data.post.bodyHtml || '' %>
+            {{ data.post.bodyHtml | safe }}
           </div>
 
           <div class="article-footer">
@@ -53,48 +51,46 @@
         <!-- Sidebar -->
         <aside class="post-sidebar">
           <!-- Related products / recent posts -->
-          <% if (it.data.posts && it.data.posts.length) { %>
+          {% if data.posts and data.posts.length %}
             <div class="sidebar-card">
               <h3 class="sidebar-card-title">Related Articles</h3>
               <ul class="sidebar-post-list">
-                <% for (const related of it.data.posts.filter(p => p.id !== it.data.post.id).slice(0, 5)) { %>
+                {% for related in data.posts | excludeById(data.post.id) | take(5) %}
                   <li>
-                    <a href="/post/<%= related.slug %>"><%= related.title %></a>
-                    <time>
-                      <%= related.publishedAt ? new Date(related.publishedAt).toLocaleDateString('vi-VN') : '' %>
-                    </time>
+                    <a href="/post/{{ related.slug }}">{{ related.title }}</a>
+                    <time>{{ related.publishedAt | dateFormat('vi-VN') }}</time>
                   </li>
-                <% } %>
+                {% endfor %}
               </ul>
             </div>
-          <% } %>
+          {% endif %}
 
           <!-- Contact Card -->
           <div class="sidebar-card sidebar-contact-card">
             <h3 class="sidebar-card-title">Need help?</h3>
             <p class="sidebar-contact-text">Our team is ready to assist you</p>
-            <% if (it.settings['header.contactPhone']) { %>
-              <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="sidebar-phone">
-                📞 <%= it.settings['header.contactPhone'] %>
+            {% if settings['header.contactPhone'] %}
+              <a href="tel:{{ settings['header.contactPhone'] | stripSpaces }}" class="sidebar-phone">
+                📞 {{ settings['header.contactPhone'] }}
               </a>
-            <% } %>
-            <% if (it.settings['header.contactEmail']) { %>
-              <a href="mailto:<%= it.settings['header.contactEmail'] %>" class="sidebar-email">
-                ✉ <%= it.settings['header.contactEmail'] %>
+            {% endif %}
+            {% if settings['header.contactEmail'] %}
+              <a href="mailto:{{ settings['header.contactEmail'] }}" class="sidebar-email">
+                ✉ {{ settings['header.contactEmail'] }}
               </a>
-            <% } %>
+            {% endif %}
           </div>
         </aside>
       </div>
-    <% } else { %>
+    {% else %}
       <div class="not-found-page">
         <h1>Article not found</h1>
         <p>The article you are looking for does not exist.</p>
         <a href="/" class="btn-primary-link">Back to Home</a>
       </div>
-    <% } %>
+    {% endif %}
   </main>
 
-  <%~ include('partials/footer', it) %>
+  {% include "partials/footer.njk" %}
 </body>
 </html>

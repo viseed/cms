@@ -1,17 +1,17 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
-import { Eta } from 'eta'
+import nunjucks from 'nunjucks'
 import type { HanaCMS } from './hana-cms'
 
 export interface ThemeRenderOptions {
-  /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
+  /** Absolute directory that contains `.njk` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
   templateRoot?: string
 }
 
 export interface ThemeRuntime {
   theme: CMSTheme
-  eta: Eta
+  env: nunjucks.Environment
   renderLayout(
     layoutKey: string,
     context: Omit<LayoutContext, 'data'> & { data: Record<string, unknown> },
@@ -20,24 +20,69 @@ export interface ThemeRuntime {
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }
 }
 
+function createNunjucksEnv(templateDir: string, isDev: boolean): nunjucks.Environment {
+  const loader = new nunjucks.FileSystemLoader(templateDir)
+  const env = new nunjucks.Environment(loader, { autoescape: true, noCache: isDev })
+
+  env.addFilter('dateFormat', (date: unknown, locale = 'en-US') => {
+    if (!date) return ''
+    try {
+      return new Date(date as string).toLocaleDateString(locale)
+    } catch {
+      return ''
+    }
+  })
+
+  env.addFilter('dateFormatLong', (date: unknown, locale = 'vi-VN') => {
+    if (!date) return ''
+    try {
+      return new Date(date as string).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    } catch {
+      return ''
+    }
+  })
+
+  env.addFilter('stripSpaces', (str: unknown) => {
+    return typeof str === 'string' ? str.replace(/\s/g, '') : ''
+  })
+
+  env.addFilter('take', (arr: unknown, n: number) => {
+    if (!Array.isArray(arr)) return []
+    return arr.slice(0, n)
+  })
+
+  env.addFilter('excludeById', (arr: unknown, id: unknown) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter((item: Record<string, unknown>) => item.id !== id)
+  })
+
+  env.addGlobal('currentYear', new Date().getFullYear())
+
+  return env
+}
+
 export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
   const isDevelopment = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
-  const defaultEta = new Eta({ views: defaultTemplateDir, cache: !isDevelopment })
-  const etaByRoot = new Map<string, Eta>()
+  const defaultEnv = createNunjucksEnv(defaultTemplateDir, isDevelopment)
+  const envByRoot = new Map<string, nunjucks.Environment>()
 
-  function etaForRoot(root: string): Eta {
-    let instance = etaByRoot.get(root)
+  function envForRoot(root: string): nunjucks.Environment {
+    let instance = envByRoot.get(root)
     if (!instance) {
-      instance = new Eta({ views: root, cache: !isDevelopment })
-      etaByRoot.set(root, instance)
+      instance = createNunjucksEnv(root, isDevelopment)
+      envByRoot.set(root, instance)
     }
     return instance
   }
 
   return {
     theme,
-    eta: defaultEta,
+    env: defaultEnv,
 
     async renderLayout(layoutKey, context, options?) {
       const layout = theme.layouts[layoutKey]
@@ -59,13 +104,12 @@ export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime 
       }
 
       const templateRoot = options?.templateRoot ?? defaultTemplateDir
-      const eta = options?.templateRoot ? etaForRoot(templateRoot) : defaultEta
+      const env = options?.templateRoot ? envForRoot(templateRoot) : defaultEnv
 
-      const html =
-        eta.render(layout.template, {
-          ...finalContext,
-          assets: buildAssetTags(theme.assets),
-        }) ?? ''
+      const html = env.render(layout.template, {
+        ...finalContext,
+        assets: buildAssetTags(theme.assets),
+      })
 
       return html
     },

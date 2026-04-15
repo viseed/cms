@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ settings['general.siteName'] or 'Insurance' }}</title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+</head>
+<body>
+  {% include "partials/header.njk" %}
+
+  <!-- Hero Banner -->
+  <section class="hero-banner"{% if settings['banner.imageUrl'] %} style="background-image: url('{{ settings['banner.imageUrl'] }}')"{% endif %}>
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <h1 class="hero-title">{{ settings['banner.title'] or 'Welcome' }}</h1>
+      <p class="hero-subtitle">{{ settings['banner.subtitle'] or '' }}</p>
+      {% if settings['banner.ctaUrl'] %}
+        <a href="{{ settings['banner.ctaUrl'] }}" class="btn-hero">
+          {{ settings['banner.ctaText'] or 'Learn More' }}
+        </a>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- Products Carousel Section -->
+  <section class="products-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-titles">
+          <p class="section-eyebrow">{{ settings['products.sectionSubtitle'] or '' }}</p>
+          <h2 class="section-title">{{ settings['products.sectionTitle'] or 'Insurance Solutions' }}</h2>
+        </div>
+        {% if settings['products.viewAllUrl'] %}
+          <a href="{{ settings['products.viewAllUrl'] }}" class="btn-outline">
+            {{ settings['products.viewAllText'] or 'View all' }} →
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="products-carousel">
+        {% if data.carouselItems and data.carouselItems.length %}
+          {% for item in data.carouselItems %}
+            <article class="product-card">
+              <div class="product-card-image">
+                <img src="{{ item.imageUrl }}" alt="{{ item.title }}" loading="lazy">
+              </div>
+              <div class="product-card-body">
+                <span class="product-label">Insurance</span>
+                <h3 class="product-card-title">
+                  <a href="/post/{{ item.slug }}">{{ item.title }}</a>
+                </h3>
+                {% if item.excerpt %}
+                  <p class="product-card-excerpt">{{ item.excerpt }}</p>
+                {% endif %}
+                <a href="/post/{{ item.slug }}" class="product-card-link">View details →</a>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <div class="empty-carousel">
+            <p>No products featured yet. Add products via Admin → Home Carousel.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest News Section -->
+  {% if data.posts and data.posts.length %}
+  <section class="news-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Latest News</h2>
+        <a href="/category" class="btn-outline">View all news →</a>
+      </div>
+      <div class="news-grid">
+        {% for post in data.posts | take(3) %}
+          <article class="news-card">
+            <div class="news-card-body">
+              <time class="news-date">{{ post.publishedAt | dateFormat('vi-VN') }}</time>
+              <h3 class="news-card-title">
+                <a href="/post/{{ post.slug }}">{{ post.title }}</a>
+              </h3>
+              {% if post.excerpt %}
+                <p class="news-card-excerpt">{{ post.excerpt }}</p>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {% include "partials/footer.njk" %}
+</body>
+</html>

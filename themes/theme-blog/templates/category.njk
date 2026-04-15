@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if data.category %}{{ data.category.name }} — {% endif %}{{ settings.siteTitle or 'Hana Blog' }}</title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+  {% if settings['general.brandColor'] %}
+    <style>:root { --brand: {{ settings['general.brandColor'] }}; }</style>
+  {% endif %}
+</head>
+<body>
+  {% include "partials/header.njk" %}
+
+  <main class="container">
+    {% if data.category %}
+      <section class="category-archive">
+        <h1>{{ data.category.name }}</h1>
+        {% if data.category.description %}
+          <p class="category-desc">{{ data.category.description }}</p>
+        {% endif %}
+
+        <div class="post-list">
+          {% if data.posts and data.posts.length %}
+            {% for post in data.posts %}
+              <article class="post-card">
+                <h3><a href="/post/{{ post.slug }}">{{ post.title }}</a></h3>
+                {% if post.excerpt %}
+                  <p class="post-excerpt">{{ post.excerpt }}</p>
+                {% endif %}
+                <time class="post-date">{{ post.publishedAt | dateFormat }}</time>
+              </article>
+            {% endfor %}
+          {% else %}
+            <p class="empty-state">No posts in this category yet.</p>
+          {% endif %}
+        </div>
+      </section>
+    {% else %}
+      <div class="not-found">
+        <h1>Category not found</h1>
+        <p>The category you are looking for does not exist.</p>
+        <a href="/" class="btn">Back to Home</a>
+      </div>
+    {% endif %}
+  </main>
+
+  {% include "partials/footer.njk" %}
+</body>
+</html>

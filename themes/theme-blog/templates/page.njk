@@ -3,32 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= it.data.page ? it.data.page.title + ' — ' : '' %><%= it.settings.siteTitle || 'Hana Blog' %></title>
+  <title>{% if data.page %}{{ data.page.title }} — {% endif %}{{ settings.siteTitle or 'Hana Blog' }}</title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
-  <% if (it.settings['general.brandColor']) { %>
-    <style>:root { --brand: <%= it.settings['general.brandColor'] %>; }</style>
-  <% } %>
+  {% if settings['general.brandColor'] %}
+    <style>:root { --brand: {{ settings['general.brandColor'] }}; }</style>
+  {% endif %}
 </head>
 <body>
-  <%~ include('partials/header', it) %>
+  {% include "partials/header.njk" %}
 
   <main class="container">
-    <% if (it.data.page) { %>
+    {% if data.page %}
       <article class="page-content">
-        <h1><%= it.data.page.title %></h1>
+        <h1>{{ data.page.title }}</h1>
         <div class="page-body">
-          <%~ it.data.page.bodyHtml || '' %>
+          {{ data.page.bodyHtml | safe }}
         </div>
       </article>
-    <% } else { %>
+    {% else %}
       <div class="not-found">
         <h1>Page not found</h1>
         <p>The page you are looking for does not exist.</p>
         <a href="/" class="btn">Back to Home</a>
       </div>
-    <% } %>
+    {% endif %}
   </main>
 
-  <%~ include('partials/footer', it) %>
+  {% include "partials/footer.njk" %}
 </body>
 </html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ settings.siteTitle or 'Hana Blog' }}</title>
+  <link rel="stylesheet" href="/theme/static/css/style.css">
+  {% if settings['general.brandColor'] %}
+    <style>:root { --brand: {{ settings['general.brandColor'] }}; }</style>
+  {% endif %}
+</head>
+<body>
+  {% include "partials/header.njk" %}
+
+  <main class="container">
+    {% if settings['hero.showHero'] is not sameas false %}
+      <section class="hero">
+        <h1>{{ settings['general.siteTitle'] or 'Hana Blog' }}</h1>
+        <p>{{ settings['general.siteDescription'] or 'A modern blog powered by Hana CMS' }}</p>
+      </section>
+    {% endif %}
+
+    <div class="layout-grid">
+      <section class="post-list">
+        <h2>Latest Posts</h2>
+        {% if data.posts and data.posts.length %}
+          {% for post in data.posts %}
+            <article class="post-card">
+              <h3><a href="/post/{{ post.slug }}">{{ post.title }}</a></h3>
+              {% if post.excerpt %}
+                <p class="post-excerpt">{{ post.excerpt }}</p>
+              {% endif %}
+              <time class="post-date">{{ post.publishedAt | dateFormat }}</time>
+            </article>
+          {% endfor %}
+        {% else %}
+          <p class="empty-state">No posts published yet.</p>
+        {% endif %}
+      </section>
+
+      {% if settings['sidebar.showSidebar'] is not sameas false %}
+        <aside class="sidebar">
+          <div class="sidebar-section">
+            <h3>Categories</h3>
+            {% if data.categories and data.categories.length %}
+              <ul class="category-list">
+                {% for cat in data.categories %}
+                  <li><a href="/category/{{ cat.slug }}">{{ cat.name }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="empty-state">No categories yet.</p>
+            {% endif %}
+          </div>
+        </aside>
+      {% endif %}
+    </div>
+  </main>
+
+  {% include "partials/footer.njk" %}
+</body>
+</html>

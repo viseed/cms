@@ -38,14 +38,14 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 | **theme registry** | In-memory `Map` giữ tất cả `CMSTheme` objects đăng ký qua `CMSConfig.themes[]` | `themeRegistry`, `themeRuntimes` trong `HanaCMS` |
 | **name preview** | Preview theme từ registry bằng tên; swap toàn bộ theme object (templates + static + settings) | `theme_state.previewThemeName` + `previewToken` |
 | **path preview** | Thư mục dưới `themes/…` dùng tạm cho templates/static; fallback khi theme không trong registry | `theme_state.previewThemePath` + `previewToken` |
-| **templateRoot** | Absolute path tới thư mục chứa `.eta` template files, khai báo trong `CMSTheme` | `resolve(__dirname, '../templates')` |
+| **templateRoot** | Absolute path tới thư mục chứa `.njk` template files, khai báo trong `CMSTheme` | `resolve(__dirname, '../templates')` |
 | **staticRoot** | Absolute path tới thư mục chứa static assets (css, js, images) | `resolve(__dirname, '../static')` |
 | **menu zone** | Vùng navigation do theme khai báo, dữ liệu menu items do admin/plugin cung cấp | `primary`, `footer`, `mobile` |
 
 ### Quy tắc đặt tên trong code
 
 - Biến/type liên quan đến theme dùng prefix `theme` hoặc `Theme`: `ThemeManifest`, `activeTheme`, `themeSettings`.
-- **KHÔNG** dùng từ `template` để chỉ theme concept. `template` chỉ dùng khi nói về Eta template file (`.eta`).
+- **KHÔNG** dùng từ `template` để chỉ theme concept. `template` chỉ dùng khi nói về Nunjucks template file (`.njk`).
 - Layout keys dùng **kebab-case**: `blog-post`, `single-page`, `archive`.
 - Region names dùng **kebab-case**: `main-content`, `left-sidebar`.
 - Slot names dùng pattern `region:qualifier`: `sidebar:before`, `header:nav`.
@@ -62,7 +62,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 ### Theme ĐƯỢC phép ✅
 
 - Khai báo layouts mà nó hỗ trợ (qua manifest).
-- Cung cấp `.eta` template files cho từng layout.
+- Cung cấp `.njk` template files cho từng layout.
 - Khai báo settings schema (JSON Schema hoặc Zod — chốt ở plan 09).
 - Export optional `data()` hook để extend/override data context trước khi render.
 - Include static assets (CSS, images, fonts).
@@ -78,7 +78,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 ### Extension points (regions / slots / widgets) — official contract
 
 - **Types**: `@hana/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
-- **Theme**: `CMSTheme.extensionPoints?` — optional manifest (`slots[]`) mô tả slot id theme thực sự render trong `.eta`.
+- **Theme**: `CMSTheme.extensionPoints?` — optional manifest (`slots[]`) mô tả slot id theme thực sự render trong `.njk`.
 - **Nguyên tắc**: Plugin cung cấp **logic hoặc component identity** (`ThemeExtensionWidgetDescriptor` / registration với `source`); **theme quyết định vị trí** bằng cách khai báo slot và gọi render hook trong template.
 - **Admin UI registry** (Vue): `packages/ui/src/theme-widget-registry.ts` — `themeWidgetRegistry` giữ đăng ký widget theo `source` + `id`, query theo `slot` qua `getWidgetsForSlot` (không dùng `component-registry` cho mục đích này).
 - **Out of scope MVP**: drag-drop builder, per-page layout composer (chỉ contract + registry nhỏ).
@@ -135,18 +135,18 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 
 ## CMSTheme Asset Resolution
 
-- `CMSTheme.templateRoot`: absolute path tới thư mục `.eta` files. Ưu tiên hơn cwd-based resolve.
+- `CMSTheme.templateRoot`: absolute path tới thư mục `.njk` files. Ưu tiên hơn cwd-based resolve.
 - `CMSTheme.staticRoot`: absolute path tới thư mục static assets.
 - Package-based themes dùng `resolve(__dirname, '../templates')` và `resolve(__dirname, '../static')` (relative to compiled output).
 - Fallback: nếu không set, `theme-runtime.ts` resolve từ `process.cwd()` (backward compatible).
 
 ## Rendering Mechanism (đã chốt)
 
-- **Eta templates** + render function pattern.
+- **Nunjucks templates** + render function pattern.
 - Core đăng ký Hono routes theo layout keys, dynamic dispatch dựa trên `resolveThemeForRequest()`.
 - Plugin inject data vào theme qua `theme:beforeRender` hook (waterfall at index 1 for `data` argument).
 - `theme:beforeRender(layoutKey, data, requestContext)` — `requestContext` chứa `params`, `url`, `query`, `path`.
-- Theme cung cấp `.eta` files + optional `data()` hook.
+- Theme cung cấp `.njk` files + optional `data()` hook.
 - Output là HTML string — SEO-friendly, zero client JS mặc định.
 - Client-side interactivity (Vue/React) là **plugin concern**, không phải theme/core.
 
@@ -168,9 +168,9 @@ A theme can bundle a `companionPlugin?: CMSPlugin` — a full `CMSPlugin` (schem
 
 ```typescript
 layouts: {
-  home:    { template: 'home.eta' },                                    // uses default '/'
-  product: { template: 'product.eta', routePattern: '/product/:slug' }, // custom route
-  cart:    { template: 'cart.eta', routePattern: '/cart' },              // custom route
+  home:    { template: 'home.njk' },                                    // uses default '/'
+  product: { template: 'product.njk', routePattern: '/product/:slug' }, // custom route
+  cart:    { template: 'cart.njk', routePattern: '/cart' },              // custom route
 }
 ```
 
@@ -186,7 +186,7 @@ Custom route patterns from ALL registered themes are mounted at startup. The han
 
 ## Last updated
 
-2026-04-10 — Added `companionPlugin`, `routePattern` override, `PluginRouteRegistry` integration.
+2026-04-15 — Replaced Eta with Nunjucks as template engine (`.eta` → `.njk`). Updated `theme-runtime.ts` to use `nunjucks.Environment` with custom filters (`dateFormat`, `dateFormatLong`, `stripSpaces`, `take`, `excludeById`) and `currentYear` global.
 2026-04-10 — Theme registry, hot-swap, `templateRoot`/`staticRoot`, name-based preview, `theme:beforeRender` requestContext, `runWaterfallAt`.
 2026-03-29 — Widget vocabulary: `ThemeExtensionWidget*`, `ThemeExtensionSlotId` as `string`, `themeWidgetRegistry` (`theme-widget-registry.ts`).
 2026-03-29 — Documented path-based theme preview (token-gated, `themes/` root only).

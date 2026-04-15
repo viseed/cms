@@ -4,69 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>
-    <%= it.data.category ? it.data.category.name + ' — ' : '' %><%= it.settings['general.siteName'] || 'Insurance' %>
+    {% if data.category %}{{ data.category.name }} — {% endif %}{{ settings['general.siteName'] or 'Insurance' }}
   </title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
 </head>
 <body>
-  <%~ include('partials/header', it) %>
+  {% include "partials/header.njk" %}
 
   <div class="page-hero page-hero--small">
     <div class="container">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span>›</span>
-        <span><%= it.data.category ? it.data.category.name : 'Category' %></span>
+        <span>{{ data.category.name if data.category else 'Category' }}</span>
       </nav>
     </div>
   </div>
 
   <main class="container page-content">
-    <% if (it.data.category) { %>
+    {% if data.category %}
       <div class="category-header">
-        <h1 class="page-title"><%= it.data.category.name %></h1>
-        <% if (it.data.category.description) { %>
-          <p class="page-description"><%= it.data.category.description %></p>
-        <% } %>
+        <h1 class="page-title">{{ data.category.name }}</h1>
+        {% if data.category.description %}
+          <p class="page-description">{{ data.category.description }}</p>
+        {% endif %}
       </div>
 
-      <% if (it.data.posts && it.data.posts.length) { %>
+      {% if data.posts and data.posts.length %}
         <div class="posts-grid">
-          <% for (const post of it.data.posts) { %>
+          {% for post in data.posts %}
             <article class="post-card">
               <div class="post-card-body">
                 <span class="post-label">Insurance</span>
                 <h2 class="post-card-title">
-                  <a href="/post/<%= post.slug %>"><%= post.title %></a>
+                  <a href="/post/{{ post.slug }}">{{ post.title }}</a>
                 </h2>
-                <% if (post.excerpt) { %>
-                  <p class="post-card-excerpt"><%= post.excerpt %></p>
-                <% } %>
+                {% if post.excerpt %}
+                  <p class="post-card-excerpt">{{ post.excerpt }}</p>
+                {% endif %}
                 <div class="post-card-footer">
-                  <time class="post-date">
-                    <%= post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('vi-VN') : '' %>
-                  </time>
-                  <a href="/post/<%= post.slug %>" class="post-read-more">Read more →</a>
+                  <time class="post-date">{{ post.publishedAt | dateFormat('vi-VN') }}</time>
+                  <a href="/post/{{ post.slug }}" class="post-read-more">Read more →</a>
                 </div>
               </div>
             </article>
-          <% } %>
+          {% endfor %}
         </div>
-      <% } else { %>
+      {% else %}
         <div class="empty-state-page">
           <p>No posts in this category yet.</p>
           <a href="/" class="btn-primary-link">Back to Home</a>
         </div>
-      <% } %>
-    <% } else { %>
+      {% endif %}
+    {% else %}
       <div class="not-found-page">
         <h1>Category not found</h1>
         <p>The category you are looking for does not exist.</p>
         <a href="/" class="btn-primary-link">Back to Home</a>
       </div>
-    <% } %>
+    {% endif %}
   </main>
 
-  <%~ include('partials/footer', it) %>
+  {% include "partials/footer.njk" %}
 </body>
 </html>

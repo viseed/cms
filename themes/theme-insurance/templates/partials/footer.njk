@@ -1,0 +1,97 @@
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="container footer-grid">
+      <!-- Brand column -->
+      <div class="footer-brand">
+        {% if settings['general.logoUrl'] %}
+          <img src="{{ settings['general.logoUrl'] }}" alt="{{ settings['general.siteName'] or 'Insurance' }}" class="footer-logo">
+        {% else %}
+          <p class="footer-logo-text">{{ settings['general.siteName'] or 'Insurance' }}</p>
+        {% endif %}
+        {% if settings['footer.aboutText'] %}
+          <p class="footer-about">{{ settings['footer.aboutText'] }}</p>
+        {% endif %}
+        <div class="footer-contact-info">
+          {% if settings['footer.address'] %}
+            <p>📍 {{ settings['footer.address'] }}</p>
+          {% endif %}
+          {% if settings['footer.footerPhone'] %}
+            <p>📞 {{ settings['footer.footerPhone'] }}</p>
+          {% endif %}
+          {% if settings['footer.footerEmail'] %}
+            <p>✉ <a href="mailto:{{ settings['footer.footerEmail'] }}">{{ settings['footer.footerEmail'] }}</a></p>
+          {% endif %}
+        </div>
+        {% if settings['footer.socialLinks'] and settings['footer.socialLinks'].length %}
+          <div class="footer-social">
+            {% for link in settings['footer.socialLinks'] %}
+              <a href="{{ link.url }}" target="_blank" rel="noopener" class="social-link">
+                {{ link.label }}
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Column 1 -->
+      <div class="footer-col">
+        {% if settings['footer.col1Title'] %}
+          <h4 class="footer-col-title">{{ settings['footer.col1Title'] }}</h4>
+        {% endif %}
+        <ul class="footer-links">
+          {% if settings['footer.col1Links'] and settings['footer.col1Links'].length %}
+            {% for link in settings['footer.col1Links'] %}
+              <li><a href="{{ link.url }}" target="{{ link.target or '_self' }}">{{ link.label }}</a></li>
+            {% endfor %}
+          {% elif data.menuFooter and data.menuFooter.length %}
+            {% for item in data.menuFooter %}
+              <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Column 2 -->
+      {% if settings['footer.col2Title'] or (settings['footer.col2Links'] and settings['footer.col2Links'].length) %}
+      <div class="footer-col">
+        {% if settings['footer.col2Title'] %}
+          <h4 class="footer-col-title">{{ settings['footer.col2Title'] }}</h4>
+        {% endif %}
+        <ul class="footer-links">
+          {% if settings['footer.col2Links'] and settings['footer.col2Links'].length %}
+            {% for link in settings['footer.col2Links'] %}
+              <li><a href="{{ link.url }}" target="{{ link.target or '_self' }}">{{ link.label }}</a></li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Column 3 -->
+      {% if settings['footer.col3Title'] or (settings['footer.col3Links'] and settings['footer.col3Links'].length) %}
+      <div class="footer-col">
+        {% if settings['footer.col3Title'] %}
+          <h4 class="footer-col-title">{{ settings['footer.col3Title'] }}</h4>
+        {% endif %}
+        <ul class="footer-links">
+          {% if settings['footer.col3Links'] and settings['footer.col3Links'].length %}
+            {% for link in settings['footer.col3Links'] %}
+              <li><a href="{{ link.url }}" target="{{ link.target or '_self' }}">{{ link.label }}</a></li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="container footer-bottom-inner">
+      <p class="footer-copy">
+        &copy; {{ currentYear }}
+        {{ settings['general.siteName'] or 'Insurance' }}.
+        {{ settings['footer.copyrightText'] or 'All rights reserved.' }}
+      </p>
+    </div>
+  </div>
+</footer>

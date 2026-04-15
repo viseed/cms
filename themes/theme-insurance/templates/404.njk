@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 — Page Not Found — <%= it.settings['general.siteName'] || 'Insurance' %></title>
+  <title>404 — Page Not Found — {{ settings['general.siteName'] or 'Insurance' }}</title>
   <link rel="stylesheet" href="/theme/static/css/style.css">
 </head>
 <body>
-  <%~ include('partials/header', it) %>
+  {% include "partials/header.njk" %}
 
   <main class="error-page">
     <div class="container error-page-content">
@@ -19,15 +19,15 @@
       </p>
       <div class="error-actions">
         <a href="/" class="btn btn-primary">Back to Home</a>
-        <% if (it.settings['header.contactPhone']) { %>
-          <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="btn btn-outline">
+        {% if settings['header.contactPhone'] %}
+          <a href="tel:{{ settings['header.contactPhone'] | stripSpaces }}" class="btn btn-outline">
             Contact Us
           </a>
-        <% } %>
+        {% endif %}
       </div>
     </div>
   </main>
 
-  <%~ include('partials/footer', it) %>
+  {% include "partials/footer.njk" %}
 </body>
 </html>
