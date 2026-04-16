@@ -18,6 +18,8 @@ export type {
 export { createDatabase, type DatabaseInstance } from './database'
 export { createCMS, HanaCMS } from './hana-cms'
 export { HookRegistry } from './hook-registry'
+export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
+export { setupMediaRoutes, type MediaRouteOptions } from './media-routes'
 export { PluginRouteRegistry } from './plugin-route-registry'
 export { renderBody } from './render-body'
 export {

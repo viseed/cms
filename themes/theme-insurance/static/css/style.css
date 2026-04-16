@@ -215,7 +215,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 20, 60, 0.42);
+  /* background: rgba(0, 20, 60, 0.42); */
   pointer-events: none;
 }
 
@@ -223,7 +223,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .hero-content {
   position: relative;
   z-index: 1;
-  color: var(--color-white);
+  color: var(--color-primary);
   padding: 80px 24px;
   max-width: 620px;
 }

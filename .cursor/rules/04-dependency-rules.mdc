@@ -102,5 +102,6 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
 
 ## Last updated
 
+2026-04-16 — `@hana/schema` now exports `mediaFiles` (part of `coreSchema`). `@hana/core` exports `LocalStorageAdapter`, `StorageAdapter`, `setupMediaRoutes`. `plugin-media` re-exports these from `@hana/core` and `@hana/schema` (no direct schema or route logic).
 2026-04-10 — Added `themes/*` dependency rule (only `@hana/types`)
 2026-03-21 — Initial creation

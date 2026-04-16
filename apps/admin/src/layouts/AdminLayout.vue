@@ -51,6 +51,7 @@ const navItems = computed(() => {
     const meta = r.meta as NavMeta
     if (!meta?.navigation) continue
     if (!navAllowed(meta)) continue
+    if (!r.path) continue
     const path = r.path.startsWith('/') ? r.path : `/${r.path}`
     items.push({
       path,

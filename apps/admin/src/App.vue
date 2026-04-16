@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAdminSiteContext } from './composables/useAdminSiteContext'
+import MediaPickerModal from './components/MediaPickerModal.vue'
 import AdminLayout from './layouts/AdminLayout.vue'
 
 const { activeSiteId } = useAdminSiteContext()
@@ -16,6 +17,8 @@ const useAdminLayout = computed(() => route.path !== '/login')
     <router-view :key="routeViewKey" />
   </AdminLayout>
   <router-view v-else />
+  <!-- Global media picker modal — must be mounted once at root -->
+  <MediaPickerModal />
 </template>
 
 <style>

@@ -7,6 +7,7 @@ import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import { onBeforeUnmount, watch } from 'vue'
+import { useMediaPicker } from '../composables/useMediaPicker'
 
 const props = defineProps<{
   modelValue: string | null
@@ -67,9 +68,11 @@ function setLink() {
   editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
-function addImage() {
+const { openMediaPicker } = useMediaPicker()
+
+async function addImage() {
   if (!editor.value) return
-  const url = window.prompt('Image URL', 'https://')
+  const url = await openMediaPicker()
   if (!url) return
   editor.value.chain().focus().setImage({ src: url }).run()
 }

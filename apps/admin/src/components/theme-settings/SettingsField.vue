@@ -7,6 +7,7 @@ import type {
   ThemeSettingsSelectField,
 } from '@hana/types'
 import { computed, ref } from 'vue'
+import { useMediaPicker } from '../../composables/useMediaPicker'
 
 const props = defineProps<{
   field: ThemeSettingsField
@@ -19,6 +20,13 @@ const fieldId = computed(() => `field-${props.field.key}`)
 
 function update(value: unknown) {
   emit('update:modelValue', value)
+}
+
+const { openMediaPicker } = useMediaPicker()
+
+async function browseMedia(onSelect: (url: string) => void) {
+  const url = await openMediaPicker()
+  if (url) onSelect(url)
 }
 
 const selectField = computed(() =>
@@ -248,15 +256,22 @@ const ilModalTitle = computed(() => {
     </div>
 
     <!-- image (URL input) -->
-    <input
-      v-else-if="field.type === 'image'"
-      :id="fieldId"
-      type="url"
-      class="field-input"
-      :value="(modelValue as string) ?? ''"
-      placeholder="https://..."
-      @input="update(($event.target as HTMLInputElement).value)"
-    />
+    <div v-else-if="field.type === 'image'" class="field-image-row">
+      <input
+        :id="fieldId"
+        type="url"
+        class="field-input"
+        :value="(modelValue as string) ?? ''"
+        placeholder="https://..."
+        @input="update(($event.target as HTMLInputElement).value)"
+      />
+      <button type="button" class="browse-media-btn" title="Browse media library" @click="browseMedia(update)">
+        Browse
+      </button>
+    </div>
+    <div v-if="field.type === 'image' && modelValue" class="field-image-preview">
+      <img :src="(modelValue as string)" alt="preview" />
+    </div>
 
     <!-- link_list -->
     <div v-else-if="field.type === 'link_list'" class="field-linklist">
@@ -425,13 +440,23 @@ const ilModalTitle = computed(() => {
 
                 <!-- image sub-field -->
                 <template v-else-if="subField.type === 'image'">
-                  <input
-                    type="text"
-                    class="field-input"
-                    :value="String(ilEditDraft[subField.key] ?? '')"
-                    :placeholder="subField.placeholder ?? 'https://... or /uploads/...'"
-                    @input="ilSubFieldUpdate(subField, ($event.target as HTMLInputElement).value)"
-                  />
+                  <div class="field-image-row">
+                    <input
+                      type="text"
+                      class="field-input"
+                      :value="String(ilEditDraft[subField.key] ?? '')"
+                      :placeholder="subField.placeholder ?? 'https://... or /uploads/...'"
+                      @input="ilSubFieldUpdate(subField, ($event.target as HTMLInputElement).value)"
+                    />
+                    <button
+                      type="button"
+                      class="browse-media-btn"
+                      title="Browse media library"
+                      @click="browseMedia((url) => ilSubFieldUpdate(subField, url))"
+                    >
+                      Browse
+                    </button>
+                  </div>
                   <div v-if="ilEditDraft[subField.key]" class="il-img-preview">
                     <img :src="String(ilEditDraft[subField.key])" alt="preview" />
                   </div>
@@ -554,6 +579,41 @@ const ilModalTitle = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.field-image-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.field-image-row .field-input {
+  flex: 1;
+}
+.browse-media-btn {
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  background: var(--color-bg-secondary, #1a1c26);
+  border: 1px solid var(--color-border, #2e3144);
+  border-radius: 6px;
+  color: var(--color-text, #e2e8f0);
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.browse-media-btn:hover {
+  background: var(--color-border, #2e3144);
+  border-color: var(--color-primary, #6366f1);
+}
+.field-image-preview {
+  margin-top: 0.5rem;
+}
+.field-image-preview img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #2e3144);
+  object-fit: cover;
 }
 
 .field-color-swatch {
@@ -775,7 +835,7 @@ const ilModalTitle = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 999;
 }
 
 .il-modal {

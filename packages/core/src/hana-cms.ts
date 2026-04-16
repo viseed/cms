@@ -34,6 +34,8 @@ import {
 } from './admin-auth-policy'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
+import { LocalStorageAdapter } from './media-storage'
+import { setupMediaRoutes } from './media-routes'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
 import {
@@ -140,6 +142,14 @@ export class HanaCMS {
     await this.hooks.run(HOOK_KEY.CMS_INIT, this as never)
 
     const helpers = this.createRouteContextHelpers()
+
+    // Mount core media routes (always available, no plugin required)
+    const mediaStorage = new LocalStorageAdapter(this.config.media?.uploadDir ?? './uploads')
+    setupMediaRoutes(this.app, helpers, () => this.db, {
+      storage: mediaStorage,
+      maxFileSizeMb: this.config.media?.maxFileSizeMb,
+    })
+
     for (const plugin of this.plugins) {
       this.pluginRegistry.register(plugin, helpers)
     }

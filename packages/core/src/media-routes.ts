@@ -1,13 +1,13 @@
-import type { DatabaseInstance } from '@hana/core'
+import type { DatabaseInstance } from './database'
 import type { CMSRouteContextHelpers } from '@hana/types'
-import { mediaQuerySchema } from '@hana/validator'
-import { and, eq } from 'drizzle-orm'
+import { mediaFiles } from '@hana/schema'
+import { and, count, desc, eq, ilike, or } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { mediaFiles } from './schema'
-import { LocalStorageAdapter, type StorageAdapter } from './storage'
+import { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 
 export interface MediaRouteOptions {
   storage?: StorageAdapter
+  maxFileSizeMb?: number
 }
 
 function slugify(name: string): string {
@@ -40,9 +40,11 @@ async function generateUniqueSlug(
 function buildFileUrl(
   file: { path: string; siteId: string; slug: string | null },
   adapter: StorageAdapter,
+  baseUrl?: string,
 ): string {
   if (file.slug) {
-    return `/api/media/file/${encodeURIComponent(file.slug)}`
+    const relativePath = `/api/media/file/${encodeURIComponent(file.slug)}`
+    return baseUrl ? `${baseUrl}${relativePath}` : relativePath
   }
   return adapter.getUrl(file.path, file.siteId)
 }
@@ -55,33 +57,57 @@ export function setupMediaRoutes(
 ): void {
   const media = new Hono()
   const adapter = options?.storage ?? new LocalStorageAdapter()
+  const maxBytes = (options?.maxFileSizeMb ?? 10) * 1024 * 1024
 
-  // GET /api/media — list all files for site
+  // GET /api/media — list files for site with search + pagination
   media.get('/', async (c) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const query = mediaQuerySchema.safeParse(c.req.query())
-    if (!query.success) {
-      return c.json({ error: 'Invalid query', details: query.error.flatten() }, 400)
-    }
+    const raw = c.req.query()
+    const page = Math.max(1, Number(raw.page ?? 1))
+    const limit = Math.min(100, Math.max(1, Number(raw.limit ?? 24)))
+    const search = raw.search?.trim() ?? ''
+    const mimeType = raw.mimeType?.trim() ?? ''
 
     const { site } = helpers.resolveRequestContext(c)
+
+    // Extract base URL from request
+    const requestUrl = new URL(c.req.url)
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+
+    const baseCondition = eq(mediaFiles.siteId, site.id)
+
+    const mimeCondition = mimeType ? eq(mediaFiles.mimeType, mimeType) : undefined
+
+    const searchCondition = search
+      ? or(
+          ilike(mediaFiles.filename, `%${search}%`),
+          ilike(mediaFiles.originalName, `%${search}%`),
+          ilike(mediaFiles.slug, `%${search}%`),
+          ilike(mediaFiles.alt, `%${search}%`),
+        )
+      : undefined
+
+    const conditions = [baseCondition, mimeCondition, searchCondition].filter(Boolean)
+    const where = conditions.length === 1 ? conditions[0] : and(...(conditions as [never, never]))
+
+    const [{ total }] = await db.select({ total: count() }).from(mediaFiles).where(where)
+
     const rows = await db
       .select()
       .from(mediaFiles)
-      .where(eq(mediaFiles.siteId, site.id))
-      .orderBy(mediaFiles.createdAt)
+      .where(where)
+      .orderBy(desc(mediaFiles.createdAt))
+      .limit(limit)
+      .offset((page - 1) * limit)
 
-    const filesWithUrl = rows.map((f) => ({
-      ...f,
-      url: buildFileUrl(f, adapter),
-    }))
+    const files = rows.map((f) => ({ ...f, url: buildFileUrl(f, adapter, baseUrl) }))
 
-    return c.json({ files: filesWithUrl })
+    return c.json({ files, total, page, limit, pages: Math.ceil(total / limit) })
   })
 
-  // GET /api/media/file/:slug — zero-copy streaming trực tiếp từ disk
+  // GET /api/media/file/:slug — zero-copy streaming from disk
   media.get('/file/:slug', async (c) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
@@ -117,7 +143,6 @@ export function setupMediaRoutes(
 
     const formData = await c.req.formData()
 
-    // Accept both `files` (multi) and `file` (single, backward compat)
     const rawFiles = formData.getAll('files')
     const rawSingle = formData.get('file')
     const fileList: File[] = []
@@ -133,7 +158,20 @@ export function setupMediaRoutes(
       return c.json({ error: 'No file provided' }, 400)
     }
 
+    const oversized = fileList.find((f) => f.size > maxBytes)
+    if (oversized) {
+      return c.json(
+        { error: `File "${oversized.name}" exceeds the ${options?.maxFileSizeMb ?? 10} MB limit` },
+        413,
+      )
+    }
+
     const { site, actor } = helpers.resolveRequestContext(c)
+    
+    // Extract base URL from request
+    const requestUrl = new URL(c.req.url)
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+    
     const inserted: object[] = []
 
     for (const file of fileList) {
@@ -156,7 +194,7 @@ export function setupMediaRoutes(
       })
 
       const [row] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, id))
-      if (row) inserted.push({ ...row, url: buildFileUrl(row, adapter) })
+      if (row) inserted.push({ ...row, url: buildFileUrl(row, adapter, baseUrl) })
     }
 
     // Single-file callers expect { file: ... } for backward compat
@@ -190,7 +228,6 @@ export function setupMediaRoutes(
     const newSlug = slugRaw !== null ? (String(slugRaw).trim() || null) : undefined
     const newAlt = altRaw !== null ? (String(altRaw).trim() || null) : undefined
 
-    // Validate slug uniqueness within site (excluding self)
     if (newSlug !== undefined && newSlug !== null) {
       const [conflict] = await db
         .select({ id: mediaFiles.id })
@@ -202,18 +239,21 @@ export function setupMediaRoutes(
       }
     }
 
-    // Build update object
     const updates: Partial<typeof existing> = {}
     if (newSlug !== undefined) updates.slug = newSlug
     if (newAlt !== undefined) updates.alt = newAlt
 
-    // Handle file replacement
     if (newFile instanceof File) {
+      if (newFile.size > maxBytes) {
+        return c.json(
+          { error: `File exceeds the ${options?.maxFileSizeMb ?? 10} MB limit` },
+          413,
+        )
+      }
       const uniqueName = `${Date.now()}-${newFile.name}`
       const buffer = await newFile.arrayBuffer()
       const newPath = await adapter.save(uniqueName, buffer, site.id)
 
-      // Delete old physical file
       try {
         await adapter.delete(existing.path)
       } catch {
@@ -235,7 +275,14 @@ export function setupMediaRoutes(
     const [updated] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, fileId))
     if (!updated) return c.json({ error: 'File not found after update' }, 500)
 
-    return c.json({ message: 'File updated', file: { ...updated, url: buildFileUrl(updated, adapter) } })
+    // Extract base URL from request
+    const requestUrl = new URL(c.req.url)
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+
+    return c.json({
+      message: 'File updated',
+      file: { ...updated, url: buildFileUrl(updated, adapter, baseUrl) },
+    })
   })
 
   // DELETE /api/media/:id
@@ -246,10 +293,7 @@ export function setupMediaRoutes(
     const fileId = c.req.param('id')
     const { site } = helpers.resolveRequestContext(c)
 
-    const [existing] = await db
-      .select()
-      .from(mediaFiles)
-      .where(eq(mediaFiles.id, fileId))
+    const [existing] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, fileId))
 
     if (!existing || existing.siteId !== site.id) {
       return c.json({ error: 'File not found' }, 404)

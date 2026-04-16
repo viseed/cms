@@ -84,64 +84,64 @@
   <% if (slideCount > 1) { %>
   <script>
     (function () {
-      var track = document.getElementById('heroSlidesTrack')
-      var dots = document.querySelectorAll('.hero-dot')
-      var total = <%= slideCount %>
-      var current = 0
-      var autoplayTimer = null
-      var AUTOPLAY_DELAY = 5000
+      var track = document.getElementById('heroSlidesTrack');
+      var dots = document.querySelectorAll('.hero-dot');
+      var total = <%= slideCount %>;
+      var current = 0;
+      var autoplayTimer = null;
+      var AUTOPLAY_DELAY = 5000;
 
       function updateSlider() {
-        track.style.transform = 'translateX(-' + (current * 100) + '%)'
+        track.style.transform = 'translateX(-' + (current * 100) + '%)';
         dots.forEach(function (dot, i) {
-          dot.classList.toggle('active', i === current)
-        })
+          dot.classList.toggle('active', i === current);
+        });
       }
 
       function next() {
-        current = (current + 1) % total
-        updateSlider()
-        resetAutoplay()
+        current = (current + 1) % total;
+        updateSlider();
+        resetAutoplay();
       }
 
       function prev() {
-        current = (current - 1 + total) % total
-        updateSlider()
-        resetAutoplay()
+        current = (current - 1 + total) % total;
+        updateSlider();
+        resetAutoplay();
       }
 
       function goTo(index) {
-        current = index
-        updateSlider()
-        resetAutoplay()
+        current = index;
+        updateSlider();
+        resetAutoplay();
       }
 
       function startAutoplay() {
         autoplayTimer = setInterval(function () {
-          current = (current + 1) % total
-          updateSlider()
-        }, AUTOPLAY_DELAY)
+          current = (current + 1) % total;
+          updateSlider();
+        }, AUTOPLAY_DELAY);
       }
 
       function resetAutoplay() {
-        clearInterval(autoplayTimer)
-        startAutoplay()
+        clearInterval(autoplayTimer);
+        startAutoplay();
       }
 
       // Pause on hover
-      var section = document.getElementById('heroCarousel')
-      section.addEventListener('mouseenter', function () { clearInterval(autoplayTimer) })
-      section.addEventListener('mouseleave', function () { startAutoplay() })
+      var section = document.getElementById('heroCarousel');
+      section.addEventListener('mouseenter', function () { clearInterval(autoplayTimer); });
+      section.addEventListener('mouseleave', function () { startAutoplay(); });
 
       // Touch / swipe support
       var touchStartX = 0
       section.addEventListener('touchstart', function (e) {
-        touchStartX = e.changedTouches[0].screenX
+        touchStartX = e.changedTouches[0].screenX;
       }, { passive: true })
       section.addEventListener('touchend', function (e) {
-        var diff = touchStartX - e.changedTouches[0].screenX
+        var diff = touchStartX - e.changedTouches[0].screenX;
         if (Math.abs(diff) > 50) {
-          if (diff > 0) next(); else prev()
+          if (diff > 0) next(); else prev();
         }
       }, { passive: true })
 

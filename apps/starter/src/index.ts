@@ -1,7 +1,6 @@
 import { createCMS } from '@hana/core'
 import { authPlugin } from '@hana/plugin-auth'
 import { blogPlugin } from '@hana/plugin-blog'
-import { mediaPlugin } from '@hana/plugin-media'
 import { menuPlugin } from '@hana/plugin-menu'
 import { pagesPlugin } from '@hana/plugin-pages'
 import { blogTheme } from '@hana/theme-blog'
@@ -18,7 +17,6 @@ const cms = createCMS({
 
 cms.use(authPlugin())
 cms.use(blogPlugin())
-cms.use(mediaPlugin())
 cms.use(menuPlugin())
 cms.use(pagesPlugin())
 

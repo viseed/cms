@@ -163,6 +163,8 @@ export interface CMSConfig {
   media?: {
     /** Directory to store uploaded files. Defaults to './uploads'. */
     uploadDir?: string
+    /** Maximum allowed upload file size in megabytes. Defaults to 10. */
+    maxFileSizeMb?: number
   }
 }
 
