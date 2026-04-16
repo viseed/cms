@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type {
   ThemeSettingsField,
+  ThemeSettingsItemField,
+  ThemeSettingsItemListField,
   ThemeSettingsLinkItem,
   ThemeSettingsSelectField,
 } from '@hana/types'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   field: ThemeSettingsField
@@ -23,7 +25,9 @@ const selectField = computed(() =>
   props.field.type === 'select' ? (props.field as ThemeSettingsSelectField) : null,
 )
 
+// ---------------------------------------------------------------------------
 // Link list helpers
+// ---------------------------------------------------------------------------
 const linkItems = computed(() => (props.modelValue as ThemeSettingsLinkItem[]) ?? [])
 
 function addLink() {
@@ -38,6 +42,135 @@ function updateLink(index: number, patch: Partial<ThemeSettingsLinkItem>) {
 function removeLink(index: number) {
   update(linkItems.value.filter((_, i) => i !== index))
 }
+
+// ---------------------------------------------------------------------------
+// Item list helpers (grid thumbnail + drag-drop + modal)
+// ---------------------------------------------------------------------------
+type ItemRecord = Record<string, unknown>
+
+const ilField = computed(() =>
+  props.field.type === 'item_list' ? (props.field as ThemeSettingsItemListField) : null,
+)
+
+const ilItems = computed(() => (props.modelValue as ItemRecord[]) ?? [])
+
+function ilBuildEmpty(): ItemRecord {
+  const item: ItemRecord = {}
+  for (const f of ilField.value?.itemSchema ?? []) {
+    item[f.key] = f.type === 'boolean' ? false : ''
+  }
+  return item
+}
+
+function ilUpdate(items: ItemRecord[]) {
+  update([...items])
+}
+
+function ilAddItem() {
+  ilUpdate([...ilItems.value, ilBuildEmpty()])
+}
+
+function ilRemoveItem(index: number) {
+  ilUpdate(ilItems.value.filter((_, i) => i !== index))
+}
+
+function ilToggleActive(index: number) {
+  const updated = ilItems.value.map((item, i) => {
+    if (i !== index) return item
+    return { ...item, active: !item.active }
+  })
+  ilUpdate(updated)
+}
+
+// Drag-and-drop
+const ilDragIndex = ref<number | null>(null)
+const ilDragOverIndex = ref<number | null>(null)
+
+function ilOnDragStart(index: number, e: Event) {
+  ilDragIndex.value = index
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dt = (e as any).dataTransfer as { effectAllowed: string; setData(f: string, v: string): void } | null
+  if (dt) {
+    dt.effectAllowed = 'move'
+    dt.setData('text/plain', String(index))
+  }
+}
+
+function ilOnDragOver(index: number, e: Event) {
+  e.preventDefault()
+  ilDragOverIndex.value = index
+}
+
+function ilOnDragLeave() {
+  ilDragOverIndex.value = null
+}
+
+function ilOnDrop(targetIndex: number, e: Event) {
+  e.preventDefault()
+  if (ilDragIndex.value === null || ilDragIndex.value === targetIndex) {
+    ilDragIndex.value = null
+    ilDragOverIndex.value = null
+    return
+  }
+  const arr = [...ilItems.value]
+  const moved = arr.splice(ilDragIndex.value, 1)[0]
+  if (moved !== undefined) arr.splice(targetIndex, 0, moved)
+  ilDragIndex.value = null
+  ilDragOverIndex.value = null
+  ilUpdate(arr)
+}
+
+function ilOnDragEnd() {
+  ilDragIndex.value = null
+  ilDragOverIndex.value = null
+}
+
+// Edit modal
+const ilEditingIndex = ref(-1)
+const ilEditDraft = ref<ItemRecord | null>(null)
+
+function ilOpenEdit(index: number) {
+  ilEditingIndex.value = index
+  ilEditDraft.value = { ...ilItems.value[index] }
+}
+
+function ilOpenAdd() {
+  ilEditingIndex.value = ilItems.value.length
+  ilEditDraft.value = ilBuildEmpty()
+}
+
+function ilCloseEdit() {
+  ilEditingIndex.value = -1
+  ilEditDraft.value = null
+}
+
+function ilSaveEdit() {
+  if (!ilEditDraft.value) return
+  const arr = [...ilItems.value]
+  if (ilEditingIndex.value >= arr.length) {
+    arr.push({ ...ilEditDraft.value })
+  } else {
+    arr[ilEditingIndex.value] = { ...ilEditDraft.value }
+  }
+  ilUpdate(arr)
+  ilCloseEdit()
+}
+
+function ilSubFieldUpdate(subField: ThemeSettingsItemField, value: unknown) {
+  if (!ilEditDraft.value) return
+  ilEditDraft.value = { ...ilEditDraft.value, [subField.key]: value }
+}
+
+function ilThumbnailUrl(item: ItemRecord): string {
+  const key = ilField.value?.imageKey
+  if (!key) return ''
+  return (item[key] as string) ?? ''
+}
+
+const ilModalTitle = computed(() => {
+  if (ilEditingIndex.value < ilItems.value.length) return 'Edit Item'
+  return 'Add Item'
+})
 </script>
 
 <template>
@@ -159,6 +292,170 @@ function removeLink(index: number) {
         </button>
       </div>
       <button type="button" class="link-add" @click="addLink">+ Add link</button>
+    </div>
+
+    <!-- item_list: thumbnail grid with drag-drop + edit modal -->
+    <div v-else-if="field.type === 'item_list'" class="field-itemlist">
+      <div class="il-grid">
+        <div
+          v-for="(item, index) in ilItems"
+          :key="index"
+          class="il-card"
+          :class="{
+            'il-card--drag-over': ilDragOverIndex === index,
+            'il-card--dragging': ilDragIndex === index,
+            'il-card--inactive': item.active === false,
+          }"
+          draggable="true"
+          @dragstart="ilOnDragStart(index, $event)"
+          @dragover="ilOnDragOver(index, $event)"
+          @dragleave="ilOnDragLeave"
+          @drop="ilOnDrop(index, $event)"
+          @dragend="ilOnDragEnd"
+        >
+          <!-- Thumbnail -->
+          <div class="il-thumb">
+            <img
+              v-if="ilThumbnailUrl(item)"
+              :src="ilThumbnailUrl(item)"
+              :alt="String(item.title ?? item.label ?? `Item ${index + 1}`)"
+            />
+            <div v-else class="il-thumb-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <span class="il-order-badge">{{ index + 1 }}</span>
+          </div>
+
+          <!-- Hover overlay -->
+          <div class="il-overlay">
+            <!-- Edit -->
+            <button
+              type="button"
+              class="il-action"
+              title="Edit"
+              @click.stop="ilOpenEdit(index)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <!-- Toggle active -->
+            <button
+              type="button"
+              class="il-action"
+              :title="item.active === false ? 'Enable' : 'Disable'"
+              @click.stop="ilToggleActive(index)"
+            >
+              <svg v-if="item.active !== false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+            <!-- Delete -->
+            <button
+              type="button"
+              class="il-action il-action--danger"
+              title="Delete"
+              @click.stop="ilRemoveItem(index)"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add new item card -->
+        <button
+          v-if="!ilField?.maxItems || ilItems.length < ilField.maxItems"
+          type="button"
+          class="il-add-card"
+          @click="ilOpenAdd"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Add item</span>
+        </button>
+      </div>
+
+      <!-- Edit modal -->
+      <div v-if="ilEditDraft" class="il-modal-backdrop" @click.self="ilCloseEdit">
+        <div class="il-modal">
+          <div class="il-modal-header">
+            <h3>{{ ilModalTitle }}</h3>
+            <button type="button" class="il-modal-close" @click="ilCloseEdit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="il-modal-body">
+            <template v-for="subField in ilField?.itemSchema" :key="subField.key">
+              <div class="il-form-group">
+                <label class="il-form-label">
+                  {{ subField.label }}
+                  <span v-if="subField.required" class="required-mark">*</span>
+                </label>
+
+                <!-- boolean sub-field -->
+                <label v-if="subField.type === 'boolean'" class="field-toggle">
+                  <input
+                    type="checkbox"
+                    :checked="ilEditDraft[subField.key] !== false && ilEditDraft[subField.key] !== undefined ? !!ilEditDraft[subField.key] : false"
+                    @change="ilSubFieldUpdate(subField, ($event.target as HTMLInputElement).checked)"
+                  />
+                  <span class="toggle-track" />
+                </label>
+
+                <!-- image sub-field -->
+                <template v-else-if="subField.type === 'image'">
+                  <input
+                    type="text"
+                    class="field-input"
+                    :value="String(ilEditDraft[subField.key] ?? '')"
+                    :placeholder="subField.placeholder ?? 'https://... or /uploads/...'"
+                    @input="ilSubFieldUpdate(subField, ($event.target as HTMLInputElement).value)"
+                  />
+                  <div v-if="ilEditDraft[subField.key]" class="il-img-preview">
+                    <img :src="String(ilEditDraft[subField.key])" alt="preview" />
+                  </div>
+                </template>
+
+                <!-- text sub-field -->
+                <input
+                  v-else
+                  type="text"
+                  class="field-input"
+                  :value="String(ilEditDraft[subField.key] ?? '')"
+                  :placeholder="subField.placeholder ?? ''"
+                  @input="ilSubFieldUpdate(subField, ($event.target as HTMLInputElement).value)"
+                />
+              </div>
+            </template>
+          </div>
+
+          <div class="il-modal-footer">
+            <button type="button" class="il-btn-secondary" @click="ilCloseEdit">Cancel</button>
+            <button type="button" class="il-btn-primary" @click="ilSaveEdit">Save</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -319,5 +616,282 @@ function removeLink(index: number) {
 
 .link-add:hover {
   background: #f3f1ff;
+}
+
+/* -------------------------------------------------------------------------
+   Item list — grid + drag-drop + modal
+   ------------------------------------------------------------------------- */
+
+.field-itemlist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.il-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Individual item card */
+.il-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: grab;
+  transition: border-color 0.15s, opacity 0.15s, transform 0.15s;
+  background: #f5f5f5;
+}
+
+.il-card:active {
+  cursor: grabbing;
+}
+
+.il-card--drag-over {
+  border-color: #6c63ff;
+  transform: scale(1.03);
+}
+
+.il-card--dragging {
+  opacity: 0.4;
+}
+
+.il-card--inactive {
+  opacity: 0.5;
+}
+
+/* Thumbnail area — square */
+.il-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #e8e8e8;
+}
+
+.il-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.il-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+}
+
+.il-order-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+/* Hover overlay */
+.il-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.18s;
+  pointer-events: none;
+}
+
+.il-card:hover .il-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.il-action {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.il-action:hover {
+  background: #fff;
+}
+
+.il-action--danger:hover {
+  background: #ffebee;
+  color: #e53935;
+}
+
+/* Add item card */
+.il-add-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  aspect-ratio: 1 / 1;
+  border: 2px dashed #c8c8c8;
+  border-radius: 8px;
+  background: none;
+  color: #aaa;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  padding: 0;
+}
+
+.il-add-card:hover {
+  border-color: #6c63ff;
+  color: #6c63ff;
+}
+
+/* Modal */
+.il-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.il-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 480px;
+  max-width: calc(100vw - 2rem);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.il-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eee;
+}
+
+.il-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.il-modal-close {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.il-modal-close:hover {
+  color: #222;
+}
+
+.il-modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.il-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.il-form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.il-img-preview {
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 120px;
+  background: #f0f0f0;
+}
+
+.il-img-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.il-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.il-btn-secondary {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #444;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.il-btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+.il-btn-primary {
+  padding: 0.5rem 1rem;
+  background: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.il-btn-primary:hover {
+  background: #574fd6;
 }
 </style>

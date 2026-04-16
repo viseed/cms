@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ThemeSettingsSchema } from '@hana/types'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import SettingsSection from '../components/theme-settings/SettingsSection.vue'
 import { adminFetch } from '../lib/admin-api'
@@ -19,7 +19,12 @@ const saving = ref(false)
 const saveError = ref<string | null>(null)
 const saveSuccess = ref(false)
 
+/** Key of the currently expanded section (one at a time). */
+const activeSection = ref<string | null>(null)
+
 onMounted(async () => {
+  document.addEventListener('keydown', handleKeydown)
+
   try {
     const res = await adminFetch(`/api/admin/themes/${themeName.value}/settings`)
     if (!res.ok) {
@@ -32,12 +37,29 @@ onMounted(async () => {
     }
     schema.value = data.schema
     Object.assign(flatValues, data.values)
-  } catch (err) {
+    // Expand the first section by default
+    activeSection.value = data.schema?.sections[0]?.key ?? null
+  } catch {
     schema.value = null
   } finally {
     loading.value = false
   }
 })
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
+function handleKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    if (!saving.value && schema.value) saveSettings()
+  }
+}
+
+function toggleSection(key: string) {
+  activeSection.value = activeSection.value === key ? null : key
+}
 
 /** Extract values for a single section from the flat map. */
 function sectionValues(sectionKey: string): Record<string, unknown> {
@@ -53,13 +75,11 @@ function sectionValues(sectionKey: string): Record<string, unknown> {
 
 /** Merge updated section values back into the flat map. */
 function updateSectionValues(sectionKey: string, updated: Record<string, unknown>) {
-  // Remove old keys for this section
   for (const key of Object.keys(flatValues)) {
     if (key.startsWith(`${sectionKey}.`)) {
       delete flatValues[key]
     }
   }
-  // Write updated keys
   for (const [fieldKey, value] of Object.entries(updated)) {
     flatValues[`${sectionKey}.${fieldKey}`] = value
   }
@@ -112,25 +132,45 @@ async function saveSettings() {
     </div>
 
     <form v-else @submit.prevent="saveSettings">
+      <!-- Save bar — top -->
+      <div class="save-bar save-bar-top">
+        <div class="save-feedback-wrap">
+          <span v-if="saveSuccess" class="save-feedback success" role="status">
+            ✓ Saved successfully
+          </span>
+          <span v-else-if="saveError" class="save-feedback error" role="alert">
+            ✗ {{ saveError }}
+          </span>
+          <span v-else class="save-feedback-hint">Ctrl+S to save</span>
+        </div>
+        <button type="submit" class="save-btn" :disabled="saving">
+          <span v-if="saving">Saving…</span>
+          <span v-else>Save Settings</span>
+        </button>
+      </div>
+
       <div class="sections-list">
         <SettingsSection
           v-for="section in schema.sections"
           :key="section.key"
           :section="section"
           :values="sectionValues(section.key)"
+          :expanded="activeSection === section.key"
+          @toggle="toggleSection(section.key)"
           @update:values="updateSectionValues(section.key, $event)"
         />
       </div>
 
-      <div class="form-footer">
-        <div v-if="saveSuccess" class="save-feedback success" role="status">
-          ✓ Settings saved successfully.
+      <!-- Save bar — bottom -->
+      <div class="save-bar save-bar-bottom">
+        <div class="save-feedback-wrap">
+          <span v-if="saveSuccess" class="save-feedback success" role="status">
+            ✓ Saved successfully
+          </span>
+          <span v-else-if="saveError" class="save-feedback error" role="alert">
+            ✗ {{ saveError }}
+          </span>
         </div>
-        <div v-else-if="saveError" class="save-feedback error" role="alert">
-          ✗ {{ saveError }}
-        </div>
-        <div v-else class="save-feedback placeholder" aria-hidden="true" />
-
         <button type="submit" class="save-btn" :disabled="saving">
           <span v-if="saving">Saving…</span>
           <span v-else>Save Settings</span>
@@ -144,7 +184,7 @@ async function saveSettings() {
 .theme-settings-view {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   max-width: 800px;
 }
 
@@ -209,20 +249,35 @@ async function saveSettings() {
 .sections-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
-.form-footer {
+/* ---- Save bar ---- */
+.save-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 0.5rem;
   gap: 1rem;
+  padding: 0.6rem 1rem;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+}
+
+.save-bar-top {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.save-feedback-wrap {
+  flex: 1;
+  min-height: 1.2em;
 }
 
 .save-feedback {
-  font-size: 0.875rem;
-  flex: 1;
+  font-size: 0.85rem;
 }
 
 .save-feedback.success {
@@ -233,17 +288,18 @@ async function saveSettings() {
   color: #c62828;
 }
 
-.save-feedback.placeholder {
-  min-height: 1.2em;
+.save-feedback-hint {
+  font-size: 0.78rem;
+  color: #bbb;
 }
 
 .save-btn {
-  padding: 0.6rem 1.75rem;
+  padding: 0.5rem 1.5rem;
   background: #6c63ff;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: 7px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;

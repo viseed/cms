@@ -72,6 +72,26 @@ export interface ThemeSettingsLinkListField extends ThemeSettingsFieldBase {
   maxItems?: number
 }
 
+/** Sub-field definition for each item inside an item_list field. */
+export interface ThemeSettingsItemField {
+  key: string
+  label: string
+  /** 'text' and 'image' both render as a URL/text input; 'boolean' renders as a checkbox. */
+  type: 'text' | 'image' | 'boolean'
+  required?: boolean
+  placeholder?: string
+}
+
+export interface ThemeSettingsItemListField extends ThemeSettingsFieldBase {
+  type: 'item_list'
+  /** Key of the sub-field used as the thumbnail image in the grid UI. */
+  imageKey?: string
+  /** Schema defining what sub-fields each item has. */
+  itemSchema: ThemeSettingsItemField[]
+  maxItems?: number
+  default?: Record<string, unknown>[]
+}
+
 /** Discriminated union of all supported field types. */
 export type ThemeSettingsField =
   | ThemeSettingsTextField
@@ -81,6 +101,7 @@ export type ThemeSettingsField =
   | ThemeSettingsColorField
   | ThemeSettingsImageField
   | ThemeSettingsLinkListField
+  | ThemeSettingsItemListField
 
 // ---------------------------------------------------------------------------
 // Groups / sections — for structured admin form rendering

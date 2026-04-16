@@ -95,6 +95,8 @@ export type {
   ThemeSettingsField,
   ThemeSettingsFieldBase,
   ThemeSettingsImageField,
+  ThemeSettingsItemField,
+  ThemeSettingsItemListField,
   ThemeSettingsLinkItem,
   ThemeSettingsLinkListField,
   ThemeSettingsSection,

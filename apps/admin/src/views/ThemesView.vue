@@ -174,6 +174,25 @@ async function uninstallTheme(theme: ThemeItem) {
   }
 }
 
+async function previewTheme(theme: ThemeItem) {
+  actionLoading.value = `preview_${theme.name}`
+  try {
+    const res = await adminFetch('/api/admin/themes/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ themeName: theme.name, skipCookie: true }),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.ok && body.previewQueryExample) {
+      window.open(body.previewQueryExample, '_blank', 'noopener,noreferrer')
+    } else {
+      showNotification('error', body.error ?? 'Failed to get preview URL.')
+    }
+  } finally {
+    actionLoading.value = null
+  }
+}
+
 async function activateTheme(theme: ThemeItem) {
   actionLoading.value = theme.name
   try {
@@ -327,6 +346,14 @@ async function activateTheme(theme: ThemeItem) {
           <span class="theme-version">v{{ theme.version }}</span>
           <div class="theme-actions">
             <button
+              class="theme-action preview"
+              :disabled="actionLoading === `preview_${theme.name}`"
+              title="Open theme preview in new tab"
+              @click="previewTheme(theme)"
+            >
+              {{ actionLoading === `preview_${theme.name}` ? '…' : 'Preview' }}
+            </button>
+            <button
               v-if="theme.active"
               class="theme-action settings"
               title="Configure theme settings"
@@ -473,6 +500,12 @@ async function activateTheme(theme: ThemeItem) {
 .theme-action:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.theme-action.preview {
+  background: #fff;
+  color: #00897b;
+  border-color: #00897b;
 }
 
 .theme-action.install {

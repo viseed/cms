@@ -9,19 +9,149 @@
 <body>
   <%~ include('partials/header', it) %>
 
-  <!-- Hero Banner -->
-  <section class="hero-banner" <% if (it.settings['banner.imageUrl']) { %>style="background-image: url('<%= it.settings['banner.imageUrl'] %>')"<% } %>>
-    <div class="hero-overlay"></div>
-    <div class="container hero-content">
-      <h1 class="hero-title"><%= it.settings['banner.title'] || 'Welcome' %></h1>
-      <p class="hero-subtitle"><%= it.settings['banner.subtitle'] || '' %></p>
-      <% if (it.settings['banner.ctaUrl']) { %>
-        <a href="<%= it.settings['banner.ctaUrl'] %>" class="btn-hero">
-          <%= it.settings['banner.ctaText'] || 'Learn More' %>
-        </a>
+  <!-- Hero Banner Carousel -->
+  <section class="hero-carousel" id="heroCarousel">
+    <div class="hero-slides-track" id="heroSlidesTrack">
+      <%
+        const rawBannerSlides = it.settings['banner.slides']
+        const bannerSlides = Array.isArray(rawBannerSlides)
+          ? rawBannerSlides.filter(function(s) { return s.active !== false })
+          : []
+        const hasBannerSlides = bannerSlides.length > 0
+      %>
+      <% if (hasBannerSlides) { %>
+        <% for (const slide of bannerSlides) { %>
+          <div class="hero-slide" style="background-image: url('<%= slide.imageUrl %>')">
+            <div class="hero-overlay"></div>
+            <div class="container hero-content">
+              <% if (slide.title) { %>
+                <h1 class="hero-title"><%= slide.title %></h1>
+              <% } %>
+              <% if (slide.subtitle) { %>
+                <p class="hero-subtitle"><%= slide.subtitle %></p>
+              <% } %>
+              <% if (slide.ctaUrl && slide.ctaText) { %>
+                <a href="<%= slide.ctaUrl %>" class="btn-hero"><%= slide.ctaText %></a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      <% } else { %>
+        <!-- Fallback: single slide from theme settings -->
+        <div class="hero-slide" <% if (it.settings['banner.imageUrl']) { %>style="background-image: url('<%= it.settings['banner.imageUrl'] %>')"<% } %>>
+          <div class="hero-overlay"></div>
+          <div class="container hero-content">
+            <h1 class="hero-title"><%= it.settings['banner.title'] || 'Welcome' %></h1>
+            <p class="hero-subtitle"><%= it.settings['banner.subtitle'] || '' %></p>
+            <% if (it.settings['banner.ctaUrl']) { %>
+              <a href="<%= it.settings['banner.ctaUrl'] %>" class="btn-hero">
+                <%= it.settings['banner.ctaText'] || 'Learn More' %>
+              </a>
+            <% } %>
+          </div>
+        </div>
       <% } %>
     </div>
+
+    <% const slideCount = hasBannerSlides ? bannerSlides.length : 1 %>
+    <% if (slideCount > 1) { %>
+      <!-- Prev / Next arrows -->
+      <button class="hero-arrow hero-arrow--prev" aria-label="Previous slide" onclick="heroSlider.prev()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <button class="hero-arrow hero-arrow--next" aria-label="Next slide" onclick="heroSlider.next()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+
+      <!-- Dot indicators -->
+      <div class="hero-dots" id="heroDots">
+        <% for (let i = 0; i < slideCount; i++) { %>
+          <button
+            class="hero-dot <%= i === 0 ? 'active' : '' %>"
+            aria-label="Go to slide <%= i + 1 %>"
+            onclick="heroSlider.goTo(<%= i %>)"
+          ></button>
+        <% } %>
+      </div>
+    <% } %>
   </section>
+
+  <!-- Hero Slider Script -->
+  <% if (slideCount > 1) { %>
+  <script>
+    (function () {
+      var track = document.getElementById('heroSlidesTrack')
+      var dots = document.querySelectorAll('.hero-dot')
+      var total = <%= slideCount %>
+      var current = 0
+      var autoplayTimer = null
+      var AUTOPLAY_DELAY = 5000
+
+      function updateSlider() {
+        track.style.transform = 'translateX(-' + (current * 100) + '%)'
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('active', i === current)
+        })
+      }
+
+      function next() {
+        current = (current + 1) % total
+        updateSlider()
+        resetAutoplay()
+      }
+
+      function prev() {
+        current = (current - 1 + total) % total
+        updateSlider()
+        resetAutoplay()
+      }
+
+      function goTo(index) {
+        current = index
+        updateSlider()
+        resetAutoplay()
+      }
+
+      function startAutoplay() {
+        autoplayTimer = setInterval(function () {
+          current = (current + 1) % total
+          updateSlider()
+        }, AUTOPLAY_DELAY)
+      }
+
+      function resetAutoplay() {
+        clearInterval(autoplayTimer)
+        startAutoplay()
+      }
+
+      // Pause on hover
+      var section = document.getElementById('heroCarousel')
+      section.addEventListener('mouseenter', function () { clearInterval(autoplayTimer) })
+      section.addEventListener('mouseleave', function () { startAutoplay() })
+
+      // Touch / swipe support
+      var touchStartX = 0
+      section.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX
+      }, { passive: true })
+      section.addEventListener('touchend', function (e) {
+        var diff = touchStartX - e.changedTouches[0].screenX
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) next(); else prev()
+        }
+      }, { passive: true })
+
+      // Expose globally for onclick handlers
+      window.heroSlider = { next: next, prev: prev, goTo: goTo }
+
+      startAutoplay()
+    })()
+  </script>
+  <% } %>
 
   <!-- Products Carousel Section -->
   <section class="products-section">
@@ -39,27 +169,33 @@
       </div>
 
       <div class="products-carousel">
-        <% if (it.data.carouselItems && it.data.carouselItems.length) { %>
-          <% for (const item of it.data.carouselItems) { %>
+        <%
+          const rawCarouselItems = it.settings['products.items']
+          const carouselItems = Array.isArray(rawCarouselItems)
+            ? rawCarouselItems.filter(function(i) { return i.active !== false })
+            : []
+        %>
+        <% if (carouselItems.length) { %>
+          <% for (const item of carouselItems) { %>
             <article class="product-card">
               <div class="product-card-image">
-                <img src="<%= item.imageUrl %>" alt="<%= item.title %>" loading="lazy">
+                <img src="<%= item.imageUrl %>" alt="<%= item.title || 'Insurance product' %>" loading="lazy">
               </div>
               <div class="product-card-body">
                 <span class="product-label">Insurance</span>
                 <h3 class="product-card-title">
-                  <a href="/post/<%= item.slug %>"><%= item.title %></a>
+                  <a href="<%= item.postUrl || '#' %>"><%= item.title || 'Learn More' %></a>
                 </h3>
                 <% if (item.excerpt) { %>
                   <p class="product-card-excerpt"><%= item.excerpt %></p>
                 <% } %>
-                <a href="/post/<%= item.slug %>" class="product-card-link">View details →</a>
+                <a href="<%= item.postUrl || '#' %>" class="product-card-link">View details →</a>
               </div>
             </article>
           <% } %>
         <% } else { %>
           <div class="empty-carousel">
-            <p>No products featured yet. Add products via Admin → Home Carousel.</p>
+            <p>No products featured yet. Add products via Admin → Theme Settings → Products Carousel.</p>
           </div>
         <% } %>
       </div>

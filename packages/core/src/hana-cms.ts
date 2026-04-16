@@ -947,12 +947,14 @@ export class HanaCMS {
         })
       }
 
-      setCookie(c, 'hana_preview', token, {
-        path: '/',
-        httpOnly: true,
-        sameSite: 'Lax',
-        maxAge: 60 * 60 * 24 * 7,
-      })
+      if (b.skipCookie !== true) {
+        setCookie(c, 'hana_preview', token, {
+          path: '/',
+          httpOnly: true,
+          sameSite: 'Lax',
+          maxAge: 60 * 60 * 24 * 7,
+        })
+      }
 
       const url = new URL(c.req.url)
       const previewQueryExample = `${url.origin}/?hana_preview=${encodeURIComponent(token)}`
