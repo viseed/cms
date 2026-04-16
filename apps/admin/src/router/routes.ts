@@ -81,6 +81,17 @@ export const adminRoutes: Array<RouteRecordRaw> = [
     }),
   },
   {
+    path: '/theme-settings',
+    component: () => import('../views/ActiveThemeSettingsView.vue'),
+    meta: meta({
+      requiresAuth: true,
+      requiredPermissions: ['platform.sites.read'],
+      navigation: { label: 'Theme Settings', icon: '◉' },
+      platformOnly: true,
+      order: 92,
+    }),
+  },
+  {
     path: '/sites',
     component: () => import('../views/SiteManagementView.vue'),
     meta: meta({
@@ -88,7 +99,7 @@ export const adminRoutes: Array<RouteRecordRaw> = [
       requiredPermissions: ['platform.sites.manage'],
       navigation: { label: 'Sites', icon: '◇' },
       platformOnly: true,
-      order: 92,
+      order: 93,
     }),
   },
   {
