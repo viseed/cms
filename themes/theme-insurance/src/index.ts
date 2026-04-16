@@ -17,6 +17,9 @@ export function insuranceTheme(): CMSTheme {
       page: { template: 'page.eta' },
       '404': { template: '404.eta' },
     },
+    assets: {
+      css: ['css/style.css'],
+    },
     menuZones: ['primary', 'footer'],
     settingsSchema: {
       version: '1.0.0',

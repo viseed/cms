@@ -83,6 +83,7 @@ interface ResolvedTheme {
   runtime: ThemeRuntime
   templateRootOverride?: string
   staticRootOverride?: string | null
+  previewToken?: string
 }
 
 export class HanaCMS {
@@ -298,7 +299,7 @@ export class HanaCMS {
           const previewTheme = this.themeRegistry.get(row.previewThemeName)
           const previewRuntime = this.themeRuntimes.get(row.previewThemeName)
           if (previewTheme && previewRuntime) {
-            return { theme: previewTheme, runtime: previewRuntime }
+            return { theme: previewTheme, runtime: previewRuntime, previewToken: token }
           }
         }
 
@@ -310,6 +311,7 @@ export class HanaCMS {
               runtime: activeRuntime,
               templateRootOverride: resolveTemplateDirFromAbsoluteRoot(previewRoot),
               staticRootOverride: resolveThemeStaticDirFromRoot(previewRoot),
+              previewToken: token,
             }
           }
         }
@@ -396,7 +398,7 @@ export class HanaCMS {
             const resolved = await this.resolveThemeForRequest(c)
             if (!resolved) return c.text('No active theme', 404)
 
-            const { theme: activeTheme, runtime, templateRootOverride } = resolved
+            const { theme: activeTheme, runtime, templateRootOverride, previewToken } = resolved
 
             const resolvedLayoutKey = this.resolveLayoutKeyForRoute(
               activeTheme,
@@ -452,7 +454,10 @@ export class HanaCMS {
                   params: c.req.param() as Record<string, string>,
                 },
               },
-              templateRootOverride ? { templateRoot: templateRootOverride } : undefined,
+              {
+                ...(templateRootOverride ? { templateRoot: templateRootOverride } : {}),
+                ...(previewToken ? { previewToken } : {}),
+              },
             )
 
             return c.html(html)

@@ -7,6 +7,8 @@ import type { HanaCMS } from './hana-cms'
 export interface ThemeRenderOptions {
   /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
   templateRoot?: string
+  /** Preview token to append as `?hana_preview=TOKEN` on all static asset URLs. */
+  previewToken?: string
 }
 
 export interface ThemeRuntime {
@@ -64,7 +66,8 @@ export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime 
       const html =
         eta.render(layout.template, {
           ...finalContext,
-          assets: buildAssetTags(theme.assets),
+          assets: buildAssetTags(theme.assets, options?.previewToken),
+          previewToken: options?.previewToken ?? null,
         }) ?? ''
 
       return html
@@ -113,13 +116,17 @@ function resolveTemplateDir(theme: CMSTheme): string {
   return fallback
 }
 
-function buildAssetTags(assets?: ThemeAssets): { css: string[]; js: string[]; fonts: string[] } {
+function buildAssetTags(
+  assets?: ThemeAssets,
+  previewToken?: string,
+): { css: string[]; js: string[]; fonts: string[] } {
   if (!assets) return { css: [], js: [], fonts: [] }
 
   const base = '/theme/static'
+  const qs = previewToken ? `?hana_preview=${encodeURIComponent(previewToken)}` : ''
   return {
-    css: (assets.css ?? []).map((file) => `${base}/${file}`),
-    js: (assets.js ?? []).map((file) => `${base}/${file}`),
-    fonts: (assets.fonts ?? []).map((file) => `${base}/${file}`),
+    css: (assets.css ?? []).map((file) => `${base}/${file}${qs}`),
+    js: (assets.js ?? []).map((file) => `${base}/${file}${qs}`),
+    fonts: (assets.fonts ?? []).map((file) => `${base}/${file}${qs}`),
   }
 }

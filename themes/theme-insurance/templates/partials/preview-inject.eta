@@ -1,0 +1,17 @@
+<% if (it.previewToken) { %>
+<script>
+(function () {
+  var token = '<%= it.previewToken %>';
+  function rewriteLinks() {
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (href && href.startsWith('/') && href.indexOf('hana_preview') === -1) {
+        a.setAttribute('href', href + (href.indexOf('?') !== -1 ? '&' : '?') + 'hana_preview=' + token);
+      }
+    });
+  }
+  rewriteLinks();
+  new MutationObserver(rewriteLinks).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+<% } %>

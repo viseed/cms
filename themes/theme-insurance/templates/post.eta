@@ -6,7 +6,7 @@
   <title>
     <%= it.data.post ? it.data.post.title + ' — ' : '' %><%= it.settings['general.siteName'] || 'Insurance' %>
   </title>
-  <link rel="stylesheet" href="/theme/static/css/style.css">
+  <% for (const url of (it.assets?.css ?? [])) { %><link rel="stylesheet" href="<%= url %>"><% } %>
 </head>
 <body>
   <%~ include('partials/header', it) %>
@@ -96,5 +96,6 @@
   </main>
 
   <%~ include('partials/footer', it) %>
+  <%~ include('partials/preview-inject', it) %>
 </body>
 </html>
