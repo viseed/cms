@@ -117,6 +117,7 @@
       }
 
       function startAutoplay() {
+      clearInterval(autoplayTimer);
         autoplayTimer = setInterval(function () {
           current = (current + 1) % total;
           updateSlider();
