@@ -4,9 +4,9 @@
       <!-- Brand column -->
       <div class="footer-brand">
         <% if (it.settings['general.logoUrl']) { %>
-          <img src="<%= it.settings['general.logoUrl'] %>" alt="<%= it.settings['general.siteName'] || 'Insurance' %>" class="footer-logo">
+          <img src="<%= it.settings['general.logoUrl'] %>" alt="<%= it.settings['general.siteName'] || 'Bảo hiểm' %>" class="footer-logo">
         <% } else { %>
-          <p class="footer-logo-text"><%= it.settings['general.siteName'] || 'Insurance' %></p>
+          <p class="footer-logo-text"><%= it.settings['general.siteName'] || 'Bảo hiểm' %></p>
         <% } %>
         <% if (it.settings['footer.aboutText']) { %>
           <p class="footer-about"><%= it.settings['footer.aboutText'] %></p>
@@ -90,8 +90,8 @@
     <div class="container footer-bottom-inner">
       <p class="footer-copy">
         &copy; <%= new Date().getFullYear() %>
-        <%= it.settings['general.siteName'] || 'Insurance' %>.
-        <%= it.settings['footer.copyrightText'] || 'All rights reserved.' %>
+        <%= it.settings['general.siteName'] || 'Bảo hiểm' %>.
+        <%= it.settings['footer.copyrightText'] || 'Tất cả bản quyền được bảo lưu.' %>
       </p>
     </div>
   </div>

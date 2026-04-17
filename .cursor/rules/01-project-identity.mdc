@@ -1,8 +1,7 @@
 ---
 description: Project identity — Tên, scope, runtime, và các thông tin cốt lõi của Hana CMS
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Project Identity — Hana CMS
 
 ## Tên & Package Scope

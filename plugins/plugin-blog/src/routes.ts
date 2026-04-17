@@ -1,6 +1,12 @@
 import type { DatabaseInstance } from '@hana/core'
 import type { CMSRouteContextHelpers } from '@hana/types'
-import { contentQuerySchema, createContentSchema, updateContentSchema } from '@hana/validator'
+import {
+  contentQuerySchema,
+  createCategorySchema,
+  createContentSchema,
+  updateCategorySchema,
+  updateContentSchema,
+} from '@hana/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { categories, posts } from './schema'
@@ -173,20 +179,78 @@ export function setupBlogRoutes(
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const body = await c.req.json()
+    const result = createCategorySchema.safeParse(body)
+    if (!result.success) {
+      return c.json({ error: 'Invalid input', details: result.error.flatten() }, 400)
+    }
+
     const { site } = helpers.resolveRequestContext(c)
     const id = crypto.randomUUID()
 
     await db.insert(categories).values({
       id,
       siteId: site.id,
-      name: body.name,
-      slug: body.slug,
-      description: body.description ?? null,
+      name: result.data.name,
+      slug: result.data.slug,
+      description: result.data.description ?? null,
       createdAt: new Date(),
     })
 
     const [created] = await db.select().from(categories).where(eq(categories.id, id))
     return c.json({ category: created }, 201)
+  })
+
+  blog.put('/categories/:id', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const id = c.req.param('id')
+    const body = await c.req.json()
+    const result = updateCategorySchema.safeParse(body)
+    if (!result.success) {
+      return c.json({ error: 'Invalid input', details: result.error.flatten() }, 400)
+    }
+
+    const { site } = helpers.resolveRequestContext(c)
+    const [existing] = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, id), eq(categories.siteId, site.id)))
+
+    if (!existing) return c.json({ error: 'Category not found' }, 404)
+
+    const updates: Record<string, unknown> = {}
+    if (result.data.name !== undefined) updates.name = result.data.name
+    if (result.data.slug !== undefined) updates.slug = result.data.slug
+    if (result.data.description !== undefined) updates.description = result.data.description
+
+    if (Object.keys(updates).length > 0) {
+      await db.update(categories).set(updates).where(eq(categories.id, id))
+    }
+
+    const [updated] = await db.select().from(categories).where(eq(categories.id, id))
+    return c.json({ category: updated })
+  })
+
+  blog.delete('/categories/:id', async (c) => {
+    const db = getDb()
+    if (!db) return c.json({ error: 'Database not ready' }, 503)
+
+    const id = c.req.param('id')
+    const { site } = helpers.resolveRequestContext(c)
+
+    const [existing] = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.id, id), eq(categories.siteId, site.id)))
+
+    if (!existing) return c.json({ error: 'Category not found' }, 404)
+
+    // Detach posts from this category before deleting
+    await db.update(posts).set({ categoryId: null }).where(eq(posts.categoryId, id))
+    await db.delete(categories).where(eq(categories.id, id))
+
+    return c.json({ message: 'Category deleted', id })
   })
 
   app.route('/api/blog', blog)

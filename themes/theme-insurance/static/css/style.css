@@ -40,7 +40,7 @@
   padding: 0;
 }
 html {
-  font-size: 16px;
+  font-size: 15px;
   scroll-behavior: smooth;
 }
 body {
@@ -82,11 +82,12 @@ button {
 
 .top-bar {
   height: var(--header-nav-height);
-  left: 110px;
+  width: 100%;
   z-index: 1000;
   position: absolute;
   color: var(--color-white);
   display: flex;
+  pointer-events: none;
   align-items: center;
 }
 
@@ -94,6 +95,13 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
+  pointer-events: auto;
+}
+
+.contact-icon {
+  width: 32px;
+  object-fit: contain;
+  margin-right: 8px;
 }
 
 /* Main nav - Mobile first */

@@ -1,4 +1,10 @@
 export {
+  type CreateCategoryInput,
+  createCategorySchema,
+  type UpdateCategoryInput,
+  updateCategorySchema,
+} from './category'
+export {
   type ContentQuery,
   type CreateContentInput,
   contentQuerySchema,

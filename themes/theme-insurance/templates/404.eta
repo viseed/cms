@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 — Page Not Found — <%= it.settings['general.siteName'] || 'Insurance' %></title>
+  <title>404 — Không tìm thấy trang — <%= it.settings['general.siteName'] || 'Insurance' %></title>
   <% for (const url of (it.assets?.css ?? [])) { %><link rel="stylesheet" href="<%= url %>"><% } %>
 </head>
 <body>
@@ -12,16 +12,16 @@
   <main class="error-page">
     <div class="container error-page-content">
       <div class="error-code">404</div>
-      <h1 class="error-title">Page Not Found</h1>
+      <h1 class="error-title">Không tìm thấy trang</h1>
       <p class="error-description">
-        Sorry, the page you are looking for could not be found.<br>
-        It may have been moved or deleted.
+        Xin lỗi, trang bạn đang tìm kiếm không thể tìm thấy.<br>
+        Trang có thể đã được chuyển hoặc xóa.
       </p>
       <div class="error-actions">
-        <a href="/" class="btn btn-primary">Back to Home</a>
+        <a href="/" class="btn btn-primary">Về trang chủ</a>
         <% if (it.settings['header.contactPhone']) { %>
           <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="btn btn-outline">
-            Contact Us
+            Liên hệ chúng tôi
           </a>
         <% } %>
       </div>

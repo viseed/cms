@@ -832,10 +832,19 @@ export class HanaCMS {
         return c.json({ error: 'Admin bundle file not found' }, 404)
       }
 
-      return new Response(await file.arrayBuffer(), {
+      const content = await file.arrayBuffer()
+      const hashBuffer = await crypto.subtle.digest('SHA-1', content)
+      const etag = `"${Buffer.from(hashBuffer).toString('hex').slice(0, 16)}"`
+
+      if (c.req.header('if-none-match') === etag) {
+        return new Response(null, { status: 304, headers: { ETag: etag } })
+      }
+
+      return new Response(content, {
         headers: {
           'Content-Type': 'application/javascript; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600',
+          'Cache-Control': 'no-cache',
+          ETag: etag,
         },
       })
     })

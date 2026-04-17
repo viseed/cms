@@ -1,8 +1,7 @@
 ---
 description: Tooling stack — Các tools chính xác đang dùng, tránh AI suggest sai tools
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Tooling Stack — Hana CMS (03/2026)
 
 Đây là danh sách tool **đang thực sự dùng**. KHÔNG suggest thay thế trừ khi được yêu cầu.

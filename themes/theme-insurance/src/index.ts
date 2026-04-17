@@ -140,7 +140,7 @@ export function insuranceTheme(): CMSTheme {
               key: 'sectionSubtitle',
               label: 'Section Subtitle',
               type: 'text',
-              default: 'Your trusted companion, Hana provides',
+              default: 'Your trusted companion, we provides',
             },
             {
               key: 'viewAllText',

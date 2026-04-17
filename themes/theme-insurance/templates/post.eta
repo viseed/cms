@@ -14,13 +14,13 @@
   <div class="page-hero page-hero--small">
     <div class="container">
       <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Home</a>
+        <a href="/">Trang chủ</a>
         <span>›</span>
         <% if (it.data.post && it.data.post.categoryId) { %>
-          <a href="/category">Category</a>
+          <a href="/category">Danh mục</a>
           <span>›</span>
         <% } %>
-        <span><%= it.data.post ? it.data.post.title : 'Post' %></span>
+        <span><%= it.data.post ? it.data.post.title : 'Bài viết' %></span>
       </nav>
     </div>
   </div>
@@ -46,7 +46,7 @@
           </div>
 
           <div class="article-footer">
-            <a href="javascript:history.back()" class="btn-back">← Back</a>
+            <a href="javascript:history.back()" class="btn-back">← Quay lại</a>
           </div>
         </article>
 
@@ -55,7 +55,7 @@
           <!-- Related products / recent posts -->
           <% if (it.data.posts && it.data.posts.length) { %>
             <div class="sidebar-card">
-              <h3 class="sidebar-card-title">Related Articles</h3>
+              <h3 class="sidebar-card-title">Bài viết liên quan</h3>
               <ul class="sidebar-post-list">
                 <% for (const related of it.data.posts.filter(p => p.id !== it.data.post.id).slice(0, 5)) { %>
                   <li>
@@ -71,8 +71,8 @@
 
           <!-- Contact Card -->
           <div class="sidebar-card sidebar-contact-card">
-            <h3 class="sidebar-card-title">Need help?</h3>
-            <p class="sidebar-contact-text">Our team is ready to assist you</p>
+            <h3 class="sidebar-card-title">Trợ giúp?</h3>
+            <p class="sidebar-contact-text">Đội ngũ chúng tôi sẵn sàng hỗ trợ bạn</p>
             <% if (it.settings['header.contactPhone']) { %>
               <a href="tel:<%= it.settings['header.contactPhone'].replace(/\s/g, '') %>" class="sidebar-phone">
                 📞 <%= it.settings['header.contactPhone'] %>
@@ -88,9 +88,9 @@
       </div>
     <% } else { %>
       <div class="not-found-page">
-        <h1>Article not found</h1>
-        <p>The article you are looking for does not exist.</p>
-        <a href="/" class="btn-primary-link">Back to Home</a>
+        <h1>Không tìm thấy bài viết</h1>
+        <p>Bài viết bạn đang tìm kiếm không tồn tại.</p>
+        <a href="/" class="btn-primary-link">Về trang chủ</a>
       </div>
     <% } %>
   </main>

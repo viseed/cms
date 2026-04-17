@@ -5,7 +5,7 @@
       <div class="top-bar-contact">
         <% if (it.settings['header.hotlineText'] || it.settings['header.contactPhone']) { %>
         <span class="contact-item">
-          <span class="contact-icon"><img src="<%= it.settings['header.phoneIcon'] %>" alt="Phone Icon"></span>
+          <span class="contact-icon"><img src="<%= it.settings['header.phoneIcon'] %>" alt="Icon điện thoại"></span>
           <a target="_blank" href="https://zalo.me/<%= it.settings['header.contactPhone'].replace(/(\s|\(|\))/g, '') %>"><%= it.settings['header.contactPhone'] || '' %></a>
         </span>
         <% } %>
@@ -30,13 +30,13 @@
       <!-- Logo -->
       <a href="/" class="site-logo">
         <% if (it.settings['general.logoUrl']) { %>
-        <img src="<%= it.settings['general.logoUrl'] %>" alt="<%= it.settings['general.siteName'] || 'Insurance' %>" class="logo-img">
+        <img src="<%= it.settings['general.logoUrl'] %>" alt="<%= it.settings['general.siteName'] || 'Bảo hiểm' %>" class="logo-img">
         <% } else { %>
-        <span class="logo-text"><%= it.settings['general.siteName'] || 'Insurance' %></span>
+        <span class="logo-text"><%= it.settings['general.siteName'] || 'Bảo hiểm' %></span>
         <% } %>
       </a>
       <!-- Navigation -->
-      <nav class="nav-menu" aria-label="Main navigation">
+      <nav class="nav-menu" aria-label="Menu chính">
         <% if (it.data.menuMain && it.data.menuMain.length) { %>
         <% for (const item of it.data.menuMain) { %>
         <div class="nav-item <% if (item.children && item.children.length) { %>has-dropdown<% } %>">
@@ -60,7 +60,7 @@
         <% } %>
       </nav>
       <!-- Mobile menu toggle -->
-      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.querySelector('.nav-menu').classList.toggle('is-open')"> ☰ </button>
+      <button class="nav-toggle" aria-label="Mở/đóng menu" onclick="document.querySelector('.nav-menu').classList.toggle('is-open')"> ☰ </button>
     </div>
   </div>
 </header>

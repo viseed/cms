@@ -1,8 +1,7 @@
 ---
 description: Dependency rules — Import graph, ngăn circular dependency giữa các packages
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Dependency Rules — Import Graph
 
 > Vi phạm dependency rules = tạo circular dependency = build fail.

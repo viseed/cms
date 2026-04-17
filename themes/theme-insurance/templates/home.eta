@@ -41,11 +41,11 @@
         <div class="hero-slide" <% if (it.settings['banner.imageUrl']) { %>style="background-image: url('<%= it.settings['banner.imageUrl'] %>')"<% } %>>
           <div class="hero-overlay"></div>
           <div class="container hero-content">
-            <h1 class="hero-title"><%= it.settings['banner.title'] || 'Welcome' %></h1>
+            <h1 class="hero-title"><%= it.settings['banner.title'] || 'Chào mừng' %></h1>
             <p class="hero-subtitle"><%= it.settings['banner.subtitle'] || '' %></p>
             <% if (it.settings['banner.ctaUrl']) { %>
               <a href="<%= it.settings['banner.ctaUrl'] %>" class="btn-hero">
-                <%= it.settings['banner.ctaText'] || 'Learn More' %>
+                <%= it.settings['banner.ctaText'] || 'Tìm hiểu thêm' %>
               </a>
             <% } %>
           </div>
@@ -56,12 +56,12 @@
     <% const slideCount = hasBannerSlides ? bannerSlides.length : 1 %>
     <% if (slideCount > 1) { %>
       <!-- Prev / Next arrows -->
-      <button class="hero-arrow hero-arrow--prev" aria-label="Previous slide" onclick="heroSlider.prev()">
+      <button class="hero-arrow hero-arrow--prev" aria-label="Slide trước" onclick="heroSlider.prev()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
-      <button class="hero-arrow hero-arrow--next" aria-label="Next slide" onclick="heroSlider.next()">
+      <button class="hero-arrow hero-arrow--next" aria-label="Slide sau" onclick="heroSlider.next()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
         </svg>
@@ -72,7 +72,7 @@
         <% for (let i = 0; i < slideCount; i++) { %>
           <button
             class="hero-dot <%= i === 0 ? 'active' : '' %>"
-            aria-label="Go to slide <%= i + 1 %>"
+            aria-label="Đi tới slide <%= i + 1 %>"
             onclick="heroSlider.goTo(<%= i %>)"
           ></button>
         <% } %>
@@ -160,11 +160,11 @@
       <div class="section-header">
         <div class="section-titles">
           <p class="section-eyebrow"><%= it.settings['products.sectionSubtitle'] || '' %></p>
-          <h2 class="section-title"><%= it.settings['products.sectionTitle'] || 'Insurance Solutions' %></h2>
+          <h2 class="section-title"><%= it.settings['products.sectionTitle'] || 'Giải pháp bảo hiểm' %></h2>
         </div>
         <% if (it.settings['products.viewAllUrl']) { %>
           <a href="<%= it.settings['products.viewAllUrl'] %>" class="btn-outline">
-            <%= it.settings['products.viewAllText'] || 'View all' %> →
+            <%= it.settings['products.viewAllText'] || 'Xem tất cả' %> →
           </a>
         <% } %>
       </div>
@@ -180,23 +180,23 @@
           <% for (const item of carouselItems) { %>
             <article class="product-card">
               <div class="product-card-image">
-                <img src="<%= item.imageUrl %>" alt="<%= item.title || 'Insurance product' %>" loading="lazy">
+                <img src="<%= item.imageUrl %>" alt="<%= item.title || 'Sản phẩm bảo hiểm' %>" loading="lazy">
               </div>
               <div class="product-card-body">
-                <span class="product-label">Insurance</span>
+                <span class="product-label">Bảo hiểm</span>
                 <h3 class="product-card-title">
-                  <a href="<%= item.postUrl || '#' %>"><%= item.title || 'Learn More' %></a>
+                  <a href="<%= item.postUrl || '#' %>"><%= item.title || 'Tìm hiểu thêm' %></a>
                 </h3>
                 <% if (item.excerpt) { %>
                   <p class="product-card-excerpt"><%= item.excerpt %></p>
                 <% } %>
-                <a href="<%= item.postUrl || '#' %>" class="product-card-link">View details →</a>
+                <a href="<%= item.postUrl || '#' %>" class="product-card-link">Xem chi tiết →</a>
               </div>
             </article>
           <% } %>
         <% } else { %>
           <div class="empty-carousel">
-            <p>No products featured yet. Add products via Admin → Theme Settings → Products Carousel.</p>
+            <p>Chưa có sản phẩm nào được giới thiệu. Thêm sản phẩm qua Admin → Cài đặt giao diện → Carousel sản phẩm.</p>
           </div>
         <% } %>
       </div>
@@ -208,8 +208,8 @@
   <section class="news-section">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">Latest News</h2>
-        <a href="/category" class="btn-outline">View all news →</a>
+        <h2 class="section-title">Tin tức mới nhất</h2>
+        <a href="/category" class="btn-outline">Xem tất cả tin tức →</a>
       </div>
       <div class="news-grid">
         <% for (const post of it.data.posts.slice(0, 3)) { %>

@@ -1,8 +1,7 @@
 ---
 description: Package map — Danh sách đầy đủ packages, plugins, apps và vai trò của từng phần
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Package Map — Hana CMS Monorepo
 
 > **Khi thêm/xoá package, plugin, hoặc app → cập nhật file này ngay.**
@@ -88,6 +87,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-04-17 — Added `createCategorySchema`, `updateCategorySchema` to `@hana/validator`; added `PUT /categories/:id` + `DELETE /categories/:id` to `plugin-blog` routes; rewrote `CategoriesView.vue` with full CRUD (create/edit modal + delete).
 2026-04-16 — Integrated media into `@hana/core`: `media_files` table in `@hana/schema`, `LocalStorageAdapter` + media routes in `@hana/core`. `plugin-media` is now a backward-compat shim.
 2026-04-14 — Added `theme-insurance` (insurance product theme with companion plugin) and `plugin-menu` (menu management plugin).
 2026-04-14 — Renamed `@hana/theme-news` → `@hana/theme-blog`, `newsTheme()` → `blogTheme()`.
