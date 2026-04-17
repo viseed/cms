@@ -43,6 +43,12 @@ export function insuranceTheme(): CMSTheme {
           description: 'Information displayed in the top bar above the navigation',
           fields: [
             {
+              key: 'phoneIcon',
+              label: 'Phone Icon',
+              type: 'image',
+              description: 'Icon for the phone number',
+            },
+            {
               key: 'contactPhone',
               label: 'Phone Number',
               type: 'text',

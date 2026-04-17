@@ -7,5 +7,8 @@
   "editor.fontFamily": "MonoLisa, JetBrains Mono, Consolas, 'Courier New', monospace",
   "[eta]": {
     "editor.defaultFormatter": "letea.vscode-eta-language"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }

@@ -5,8 +5,8 @@
       <div class="top-bar-contact">
         <% if (it.settings['header.hotlineText'] || it.settings['header.contactPhone']) { %>
         <span class="contact-item">
-          <span class="contact-icon">📞</span>
-          <strong><%= it.settings['header.contactPhone'] || '' %></strong>
+          <span class="contact-icon"><img src="<%= it.settings['header.phoneIcon'] %>" alt="Phone Icon"></span>
+          <a target="_blank" href="https://zalo.me/<%= it.settings['header.contactPhone'].replace(/(\s|\(|\))/g, '') %>"><%= it.settings['header.contactPhone'] || '' %></a>
         </span>
         <% } %>
         <% if (it.settings['header.contactEmail']) { %>
@@ -60,7 +60,7 @@
         <% } %>
       </nav>
       <!-- Mobile menu toggle -->
-      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.querySelector('.nav-menu').classList.toggle('open')"> ☰ </button>
+      <button class="nav-toggle" aria-label="Toggle menu" onclick="document.querySelector('.nav-menu').classList.toggle('is-open')"> ☰ </button>
     </div>
   </div>
 </header>
