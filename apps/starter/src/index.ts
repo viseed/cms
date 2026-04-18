@@ -22,9 +22,11 @@ cms.use(pagesPlugin())
 
 const app = await cms.launch()
 
-console.log('Hana CMS running at http://localhost:3000')
+const port = Number(process.env.PORT) || 3000
+
+console.log(`Hana CMS running at http://localhost:${port}`)
 
 export default {
-  port: 3000,
+  port,
   fetch: app.fetch,
 }

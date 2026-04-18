@@ -19,6 +19,8 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.app1.example
+!.env.app2.example
 
 # Database
 *.db
@@ -54,3 +56,5 @@ data.*
 # Uploads
 apps/starter/uploads/
 uploads/
+
+ca-certificate.crt

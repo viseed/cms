@@ -1,0 +1,64 @@
+name: hana-cms
+
+# Shared logging config — rotate at 10 MB, keep 5 files per service
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env.app1
+    volumes:
+      - ./ca-certificate.crt:/app/ca-certificate.crt:ro
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - cms-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env.app2
+    volumes:
+      - ./ca-certificate.crt:/app/ca-certificate.crt:ro
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - cms-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - cms-network
+
+networks:
+  cms-network:
+    driver: bridge
