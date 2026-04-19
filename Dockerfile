@@ -4,7 +4,7 @@ FROM oven/bun:1-alpine AS deps
 WORKDIR /app
 
 # Copy lockfile and root manifest first for better layer caching
-COPY package.json bun.lockb turbo.json ./
+COPY package.json bun.lock turbo.json ./
 
 # Copy all workspace package.json files (needed for bun to resolve workspaces)
 COPY apps/starter/package.json          ./apps/starter/package.json

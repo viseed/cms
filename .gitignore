@@ -26,8 +26,6 @@ dist/
 *.db
 *.sqlite
 
-# Lockfiles (using bun)
-*.lock
 
 # Logs
 *.log
