@@ -30,7 +30,7 @@ FROM oven/bun:1-alpine AS runner
 RUN apk add --no-cache tzdata
 
 # Non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgrou
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 # Copy installed node_modules (includes workspace symlinks) from deps stage
