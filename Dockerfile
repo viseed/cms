@@ -23,7 +23,7 @@ COPY plugins/plugin-pages/package.json  ./plugins/plugin-pages/package.json
 COPY themes/theme-blog/package.json     ./themes/theme-blog/package.json
 COPY themes/theme-insurance/package.json ./themes/theme-insurance/package.json
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # ─── Stage 2: Runner ──────────────────────────────────────────────────────────
 FROM oven/bun:1-alpine AS runner
