@@ -15,6 +15,7 @@ services:
     env_file: .env.insurance
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ca-certificate.crt
+      - TZ=Asia/Ho_Chi_Minh
     volumes:
       - ./ca-certificate.crt:/app/ca-certificate.crt:ro
     restart: unless-stopped

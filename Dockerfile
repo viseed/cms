@@ -27,17 +27,18 @@ RUN bun install
 
 # ─── Stage 2: Runner ──────────────────────────────────────────────────────────
 FROM oven/bun:1-alpine AS runner
+RUN apk add --no-cache tzdata
 
+# Non-root user for security
+RUN addgroup -S appgroup && adduser -S appuser -G appgrou
 WORKDIR /app
 
 # Copy installed node_modules (includes workspace symlinks) from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy full source (node_modules excluded via .dockerignore)
-COPY . .
+COPY --chown=appuser:appgroup . .
 
-# Non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
 ENV PORT=3000
