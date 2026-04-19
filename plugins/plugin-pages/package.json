@@ -9,6 +9,7 @@
       "types": "./dist/index.d.ts"
     },
     "./schema": {
+      "bun": "./src/schema.ts",
       "import": "./dist/schema.js",
       "types": "./dist/schema.d.ts"
     }

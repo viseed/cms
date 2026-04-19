@@ -4,10 +4,12 @@
   "type": "module",
   "exports": {
     ".": {
+      "bun": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./schema": {
+      "bun": "./src/schema.ts",
       "import": "./dist/schema.js",
       "types": "./dist/schema.d.ts"
     }
