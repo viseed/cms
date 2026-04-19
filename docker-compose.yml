@@ -12,25 +12,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: .env.app1
-    volumes:
-      - ./ca-certificate.crt:/app/ca-certificate.crt:ro
-    restart: unless-stopped
-    logging: *default-logging
-    networks:
-      - cms-network
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  app2:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file: .env.app2
+    env_file: .env.insurance
     volumes:
       - ./ca-certificate.crt:/app/ca-certificate.crt:ro
     restart: unless-stopped

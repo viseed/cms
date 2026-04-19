@@ -20,7 +20,7 @@ import type {
 } from '@hana/types'
 import { HOOK_KEY, resolveDefaultSettings, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { loginSchema } from '@hana/validator'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
@@ -127,6 +127,8 @@ export class HanaCMS {
 
   async launch(): Promise<Hono> {
     this.registerThemes()
+
+    this.setupHealthRoute()
 
     const allSchemas = [
       ...this.plugins.flatMap((p) => (p.schema ? [p.schema] : [])),
@@ -563,6 +565,39 @@ export class HanaCMS {
       userId,
       siteId,
       role: 'admin',
+    })
+  }
+
+  private setupHealthRoute(): void {
+    this.app.get('/health', async (c) => {
+      const startedAt = Date.now()
+
+      try {
+        const db = this.db
+        if (db) {
+          await db.execute(sql`SELECT 1`)
+        }
+
+        return c.json({
+          status: 'ok',
+          db: db ? 'connected' : 'not_initialized',
+          uptime: process.uptime(),
+          timestamp: new Date().toISOString(),
+          latencyMs: Date.now() - startedAt,
+        })
+      } catch (error) {
+        return c.json(
+          {
+            status: 'error',
+            db: 'unreachable',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            uptime: process.uptime(),
+            timestamp: new Date().toISOString(),
+            latencyMs: Date.now() - startedAt,
+          },
+          503,
+        )
+      }
     })
   }
 
