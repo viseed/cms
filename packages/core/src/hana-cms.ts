@@ -1419,7 +1419,6 @@ export class HanaCMS {
 
     const adminPath = adminConfig.path ?? '/admin'
     const adminRoot = resolve(import.meta.dirname, '../dist/admin')
-    const adminIndex = resolve(adminRoot, 'index.html')
 
     console.log('Admin dist path:', adminRoot)
 
@@ -1431,8 +1430,11 @@ export class HanaCMS {
           path.startsWith(adminPath) ? path.slice(adminPath.length) || '/' : path,
       }),
     )
-    this.app.get(adminPath, serveStatic({ path: adminIndex }))
-    this.app.get(`${adminPath}/*`, serveStatic({ path: adminIndex }))
+    // Use root + relative path so hono resolves: adminRoot + '/' + 'index.html'
+    // Passing an absolute path to serveStatic({ path }) causes hono to strip the
+    // leading '/' and prepend './', doubling the cwd prefix (e.g. /app/app/...).
+    this.app.get(adminPath, serveStatic({ root: adminRoot, path: 'index.html' }))
+    this.app.get(`${adminPath}/*`, serveStatic({ root: adminRoot, path: 'index.html' }))
 
     console.log(
       `Admin UI serving at http://localhost:${this.config.server?.port ?? 3000}${adminPath}`,
