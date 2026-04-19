@@ -193,6 +193,25 @@ export class HanaCMS {
     return this.db
   }
 
+  async shutdown(): Promise<void> {
+    console.log('[HanaCMS] Graceful shutdown initiated...')
+
+    if (this.db) {
+      try {
+        const client = (this.db as unknown as { $client?: { close?: () => Promise<void> } }).$client
+        if (typeof client?.close === 'function') {
+          await client.close()
+          console.log('[HanaCMS] Database connection closed.')
+        }
+      } catch (error) {
+        console.error('[HanaCMS] Error closing database connection:', error)
+      }
+      this.db = null
+    }
+
+    console.log('[HanaCMS] Shutdown complete.')
+  }
+
   getPlugins(): CMSPlugin[] {
     return [...this.plugins]
   }
