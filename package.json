@@ -9,7 +9,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "turbo run build --filter='!@hana/docs'",
     "build:plugins": "turbo run build --filter=\"./plugins/*\"",
     "clean": "turbo run clean && rimraf .turbo node_modules/.cache",
     "dev:docs": "turbo run dev --filter=@hana/docs",
