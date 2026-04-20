@@ -43,7 +43,8 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy full source (node_modules excluded via .dockerignore)
 COPY --chown=appuser:appgroup . .
 
-
+# Pre-create uploads dir with correct ownership
+RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app/uploads
 
 USER appuser
 
