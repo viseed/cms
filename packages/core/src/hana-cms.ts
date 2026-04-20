@@ -638,22 +638,38 @@ export class HanaCMS {
 
     adminApi.use('*', async (c, next) => {
       const db = this.getDatabase()
-      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
 
-      if (!siteResolution.site) {
-        return c.json(
-          {
-            error: siteResolution.error ?? 'Unable to resolve site from Host header.',
-          },
-          400,
-        )
-      }
-
+      // Compute route identity first so setup/auth public routes can bypass
+      // the host-to-site mapping check (needed on fresh installs or custom
+      // domains not yet registered in the database).
       const routePath = c.req.path.startsWith('/api/admin')
         ? c.req.path.slice('/api/admin'.length) || '/'
         : c.req.path
       const routeKey = `${c.req.method.toUpperCase()} ${routePath}`
       const isPublicAuthRoute = PUBLIC_ADMIN_AUTH_ROUTES.has(routeKey)
+
+      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
+
+      if (!siteResolution.site) {
+        if (!isPublicAuthRoute) {
+          return c.json(
+            {
+              error: siteResolution.error ?? 'Unable to resolve site from Host header.',
+            },
+            400,
+          )
+        }
+        // Public setup/login routes must work even when the host is not yet
+        // mapped to any site (e.g. first-run wizard on a custom domain).
+        setRequestContext(c, {
+          site: { ...SINGLE_SITE_CONTEXT },
+          actor: null,
+          permissions: [],
+        })
+        await next()
+        return
+      }
+
       if (isPublicAuthRoute) {
         setRequestContext(c, {
           site: siteResolution.site,
