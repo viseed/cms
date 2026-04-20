@@ -75,8 +75,8 @@ const handleSetup = async () => {
         <h2>Site</h2>
 
         <label class="field">
-          <span>Site Name</span>
-          <input v-model="siteName" type="text" placeholder="My Website" required autocomplete="off">
+          <span>Site Name <small class="hint">(leave blank to use default)</small></span>
+          <input v-model="siteName" type="text" placeholder="My Website" autocomplete="off">
         </label>
 
         <label class="field">

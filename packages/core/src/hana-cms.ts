@@ -519,8 +519,14 @@ export class HanaCMS {
   private async ensureBootstrapAdmin(): Promise<void> {
     const configuredBootstrapAdmin = this.config.admin?.bootstrapAdmin
     const isDevelopment = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
+
+    // Auto-create a dev admin only when env vars are explicitly provided.
+    // Without explicit config or env vars, the setup wizard handles first-run setup.
+    const hasDevEnvVars = !!(
+      process.env.HANA_ADMIN_EMAIL?.trim() || process.env.HANA_ADMIN_PASSWORD?.trim()
+    )
     const defaultBootstrapAdmin =
-      isDevelopment && !configuredBootstrapAdmin
+      isDevelopment && !configuredBootstrapAdmin && hasDevEnvVars
         ? {
             email: process.env.HANA_ADMIN_EMAIL?.trim() || DEV_BOOTSTRAP_ADMIN_EMAIL,
             password: process.env.HANA_ADMIN_PASSWORD || DEV_BOOTSTRAP_ADMIN_PASSWORD,
