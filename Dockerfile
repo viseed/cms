@@ -29,8 +29,8 @@ RUN bun install
 FROM oven/bun:1-alpine AS runner
 RUN apk add --no-cache tzdata
 
-# Non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Non-root user for security — explicit UID/GID 1001 so host volume ownership is predictable
+RUN addgroup -S -g 1001 appgroup && adduser -S -u 1001 -G appgroup appuser
 
 WORKDIR /app
 
@@ -38,13 +38,10 @@ WORKDIR /app
 RUN chown appuser:appgroup /app
 
 # Copy installed node_modules (includes workspace symlinks) from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup --from=deps /app/node_modules ./node_modules
 
 # Copy full source (node_modules excluded via .dockerignore)
 COPY --chown=appuser:appgroup . .
-
-# Pre-create uploads dir with correct ownership
-RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app/uploads
 
 USER appuser
 
