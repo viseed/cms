@@ -156,6 +156,8 @@ router.beforeEach(async (to) => {
 })
 
 ;(async () => {
+  await registerPluginAdminRoutes(router)
+
   const app = createApp(App)
   app.component('ContentEditor', ContentEditor)
   app.use(router)
