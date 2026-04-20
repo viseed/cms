@@ -7,6 +7,7 @@
     <%= it.data.post ? it.data.post.title + ' — ' : '' %><%= it.settings['general.siteName'] || 'Insurance' %>
   </title>
   <% for (const url of (it.assets?.css ?? [])) { %><link rel="stylesheet" href="<%= url %>"><% } %>
+  <% if (it.settings['general.faviconUrl']) { %><link rel="icon" href="<%= it.settings['general.faviconUrl'] %>"><% } %>
 </head>
 <body>
   <%~ include('partials/header', it) %>

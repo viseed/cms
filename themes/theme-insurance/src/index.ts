@@ -35,6 +35,13 @@ export function insuranceTheme(): CMSTheme {
               type: 'image',
               description: 'URL to your logo image',
             },
+            {
+              key: 'faviconUrl',
+              label: 'Favicon',
+              type: 'image',
+              description: 'Browser tab icon (ICO, PNG 32×32 hoặc SVG)',
+              accept: ['image/x-icon', 'image/png', 'image/svg+xml'],
+            },
           ],
         },
         {
