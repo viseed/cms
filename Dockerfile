@@ -31,13 +31,19 @@ RUN apk add --no-cache tzdata
 
 # Non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 WORKDIR /app
+
+# Give appuser ownership of /app so it can create subdirs at runtime (e.g. uploads/)
+RUN chown appuser:appgroup /app
 
 # Copy installed node_modules (includes workspace symlinks) from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
 # Copy full source (node_modules excluded via .dockerignore)
 COPY --chown=appuser:appgroup . .
+
+
 
 USER appuser
 

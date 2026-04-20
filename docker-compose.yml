@@ -18,6 +18,7 @@ services:
       - TZ=Asia/Ho_Chi_Minh
     volumes:
       - ./ca-certificate.crt:/app/ca-certificate.crt:ro
+      - ./uploads:/app/uploads:rw
     restart: unless-stopped
     logging: *default-logging
     networks:
