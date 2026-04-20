@@ -4,6 +4,7 @@ import {
   installedPlugins,
   installedThemes,
   sessions,
+  siteDomains,
   sites,
   themeState,
   userSiteRoles,
@@ -20,7 +21,7 @@ import type {
 } from '@hana/types'
 import { HOOK_KEY, resolveDefaultSettings, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
 import { loginSchema } from '@hana/validator'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, count } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
@@ -59,7 +60,12 @@ const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
   '404': '/404',
 }
 
-const PUBLIC_ADMIN_AUTH_ROUTES = new Set(['POST /auth/login', 'POST /auth/logout'])
+const PUBLIC_ADMIN_AUTH_ROUTES = new Set([
+  'POST /auth/login',
+  'POST /auth/logout',
+  'GET /setup/status',
+  'POST /setup',
+])
 const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
 const DEV_BOOTSTRAP_ADMIN_EMAIL = 'admin@local.dev'
 const DEV_BOOTSTRAP_ADMIN_PASSWORD = '12345678'
@@ -836,6 +842,110 @@ export class HanaCMS {
       })
 
       return c.json({ message: 'Logged out.' })
+    })
+
+    registerPublicAdminRoute('GET', '/setup/status', async (c) => {
+      const db = this.getDatabase()
+      const countResult = await db.select({ total: count() }).from(users)
+      const userCount = countResult[0]?.total ?? 0
+      return c.json({ needsSetup: userCount === 0 })
+    })
+
+    registerPublicAdminRoute('POST', '/setup', async (c) => {
+      const db = this.getDatabase()
+
+      const countResult = await db.select({ total: count() }).from(users)
+      const userCount = countResult[0]?.total ?? 0
+      if (userCount > 0) {
+        return c.json({ error: 'Setup already completed.' }, 403)
+      }
+
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      const {
+        email: rawEmail,
+        password,
+        name: rawName,
+        siteName: rawSiteName,
+        domain: rawDomain,
+      } = body as Record<string, unknown>
+
+      const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : ''
+      const password_ = typeof password === 'string' ? password : ''
+      const name = typeof rawName === 'string' ? rawName.trim() : ''
+      const siteName = typeof rawSiteName === 'string' ? rawSiteName.trim() : ''
+      const domain = typeof rawDomain === 'string' ? rawDomain.trim().toLowerCase() : ''
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return c.json({ error: 'A valid email is required.' }, 400)
+      }
+      if (password_.length < 8) {
+        return c.json({ error: 'Password must be at least 8 characters.' }, 400)
+      }
+      if (!name) {
+        return c.json({ error: 'Admin name is required.' }, 400)
+      }
+
+      const [existingSite] = await db
+        .select()
+        .from(sites)
+        .where(eq(sites.id, SINGLE_SITE_CONTEXT.id))
+
+      if (!existingSite) {
+        await db.insert(sites).values({
+          id: SINGLE_SITE_CONTEXT.id,
+          name: siteName || SINGLE_SITE_CONTEXT.name,
+          slug: SINGLE_SITE_CONTEXT.slug,
+          status: 'active',
+        })
+      } else if (siteName) {
+        await db
+          .update(sites)
+          .set({ name: siteName, updatedAt: new Date() })
+          .where(eq(sites.id, SINGLE_SITE_CONTEXT.id))
+      }
+
+      const LOCALHOST_PATTERNS = new Set(['localhost', '127.0.0.1', '::1'])
+      const domainHost = domain.split(':').at(0) ?? ''
+      if (domain && !LOCALHOST_PATTERNS.has(domainHost)) {
+        const [existingDomain] = await db
+          .select()
+          .from(siteDomains)
+          .where(eq(siteDomains.domain, domain))
+        if (!existingDomain) {
+          await db.insert(siteDomains).values({
+            id: randomUUID(),
+            siteId: SINGLE_SITE_CONTEXT.id,
+            domain,
+            isPrimary: true,
+          })
+        }
+      }
+
+      const passwordHash = await Bun.password.hash(password_)
+      const userId = randomUUID()
+
+      await db.insert(users).values({
+        id: userId,
+        email,
+        name,
+        passwordHash,
+        role: 'admin',
+      })
+
+      await db.insert(userSiteRoles).values({
+        id: randomUUID(),
+        userId,
+        siteId: SINGLE_SITE_CONTEXT.id,
+        role: 'admin',
+      })
+
+      return c.json({ ok: true })
     })
 
     registerAdminRoute('GET', '/auth/context', 'site.content.read', (c) => {

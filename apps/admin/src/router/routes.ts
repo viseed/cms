@@ -103,6 +103,11 @@ export const adminRoutes: Array<RouteRecordRaw> = [
     }),
   },
   {
+    path: '/setup',
+    component: () => import('../views/SetupView.vue'),
+    meta: meta({ requiresAuth: false }),
+  },
+  {
     path: '/login',
     component: () => import('../views/LoginView.vue'),
     meta: meta({

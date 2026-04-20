@@ -16,6 +16,28 @@ const router = createRouter({
 
 let pluginRoutesRegistered = false
 
+let setupStatusCache: boolean | null = null
+
+export function markSetupComplete(): void {
+  setupStatusCache = false
+}
+
+async function checkNeedsSetup(): Promise<boolean> {
+  if (setupStatusCache !== null) return setupStatusCache
+  try {
+    const res = await fetch('/api/admin/setup/status', { credentials: 'include' })
+    if (!res.ok) {
+      setupStatusCache = false
+      return false
+    }
+    const data = (await res.json()) as { needsSetup: boolean }
+    setupStatusCache = data.needsSetup === true
+  } catch {
+    setupStatusCache = false
+  }
+  return setupStatusCache
+}
+
 function isAuthorizedForRoute(
   to: RouteLocationNormalized,
   context: AuthContextPayload | null,
@@ -82,6 +104,19 @@ async function registerPluginAdminRoutes(r: Router) {
 }
 
 router.beforeEach(async (to) => {
+  const needsSetup = await checkNeedsSetup()
+
+  if (needsSetup) {
+    if (to.path !== '/setup') {
+      return { path: '/setup', replace: true }
+    }
+    return true
+  }
+
+  if (to.path === '/setup') {
+    return { path: '/', replace: true }
+  }
+
   const auth = useAdminAuthContext()
   await auth.initialize()
   const context = getAuthContextPayload()
