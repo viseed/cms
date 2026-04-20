@@ -8,6 +8,7 @@ COPY package.json bun.lock turbo.json ./
 
 # Copy all workspace package.json files (needed for bun to resolve workspaces)
 COPY apps/starter/package.json          ./apps/starter/package.json
+COPY apps/admin/package.json            ./apps/admin/package.json
 COPY packages/cli/package.json          ./packages/cli/package.json
 COPY packages/config/package.json       ./packages/config/package.json
 COPY packages/core/package.json         ./packages/core/package.json
