@@ -9,7 +9,7 @@ const { activeSiteId } = useAdminSiteContext()
 const route = useRoute()
 
 const routeViewKey = computed(() => activeSiteId.value)
-const useAdminLayout = computed(() => route.path !== '/login')
+const useAdminLayout = computed(() => route.path !== '/login' && route.path !== '/setup')
 </script>
 
 <template>
