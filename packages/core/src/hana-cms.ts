@@ -19,9 +19,14 @@ import type {
   RequestContext,
   RequiredLayoutKey,
 } from '@hana/types'
-import { HOOK_KEY, resolveDefaultSettings, SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@hana/types'
+import {
+  HOOK_KEY,
+  resolveDefaultSettings,
+  SINGLE_SITE_CONTEXT,
+  toAuthContextPayload,
+} from '@hana/types'
 import { loginSchema } from '@hana/validator'
-import { eq, sql, count } from 'drizzle-orm'
+import { count, eq, sql } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
@@ -35,8 +40,8 @@ import {
 } from './admin-auth-policy'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
-import { LocalStorageAdapter } from './media-storage'
 import { setupMediaRoutes } from './media-routes'
+import { LocalStorageAdapter } from './media-storage'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
 import {
@@ -638,29 +643,12 @@ export class HanaCMS {
 
     adminApi.use('*', async (c, next) => {
       const db = this.getDatabase()
-
-      // Compute route identity first so setup/auth public routes can bypass
-      // the host-to-site mapping check (needed on fresh installs or custom
-      // domains not yet registered in the database).
       const routePath = c.req.path.startsWith('/api/admin')
         ? c.req.path.slice('/api/admin'.length) || '/'
         : c.req.path
       const routeKey = `${c.req.method.toUpperCase()} ${routePath}`
       const isPublicAuthRoute = PUBLIC_ADMIN_AUTH_ROUTES.has(routeKey)
-
-      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
-
-      if (!siteResolution.site) {
-        if (!isPublicAuthRoute) {
-          return c.json(
-            {
-              error: siteResolution.error ?? 'Unable to resolve site from Host header.',
-            },
-            400,
-          )
-        }
-        // Public setup/login routes must work even when the host is not yet
-        // mapped to any site (e.g. first-run wizard on a custom domain).
+      if (isPublicAuthRoute) {
         setRequestContext(c, {
           site: { ...SINGLE_SITE_CONTEXT },
           actor: null,
@@ -669,15 +657,15 @@ export class HanaCMS {
         await next()
         return
       }
+      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
 
-      if (isPublicAuthRoute) {
-        setRequestContext(c, {
-          site: siteResolution.site,
-          actor: null,
-          permissions: [],
-        })
-        await next()
-        return
+      if (!siteResolution.site) {
+        return c.json(
+          {
+            error: siteResolution.error ?? 'Unable to resolve site from Host header.',
+          },
+          400,
+        )
       }
 
       const sessionResolution = await resolveSessionActorContext(db, c, siteResolution.site)
@@ -802,7 +790,9 @@ export class HanaCMS {
         site.id === SINGLE_SITE_CONTEXT.id &&
         (usersTableRole === 'site_admin' || usersTableRole === 'site_content_writer')
       const hasSiteAccess =
-        roleRows.some((row: { role: string; siteId: string }) => row.role === 'admin' || row.siteId === site.id) ||
+        roleRows.some(
+          (row: { role: string; siteId: string }) => row.role === 'admin' || row.siteId === site.id,
+        ) ||
         usersTableRole === 'admin' ||
         usersTableGrantsDefaultSite
 
