@@ -43,6 +43,8 @@ COPY --chown=appuser:appgroup --from=deps /app/node_modules ./node_modules
 # Copy full source (node_modules excluded via .dockerignore)
 COPY --chown=appuser:appgroup . .
 
+RUN bun run build
+
 USER appuser
 
 ENV PORT=3000
