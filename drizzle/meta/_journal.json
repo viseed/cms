@@ -8,6 +8,13 @@
       "when": 1776579972562,
       "tag": "0000_milky_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776784588096,
+      "tag": "0001_ancient_gorilla_man",
+      "breakpoints": true
     }
   ]
 }
