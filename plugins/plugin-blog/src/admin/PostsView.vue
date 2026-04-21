@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MetaSeo, SchemaOrgItem } from '@hana/validator'
 import { computed, onMounted, ref } from 'vue'
 
 interface Post {
@@ -9,10 +10,14 @@ interface Post {
   excerpt: string | null
   status: string
   categoryId: string | null
+  metaSeo: MetaSeo | null
+  schemaOrg: SchemaOrgItem[] | null
   publishedAt: string | null
   createdAt: string
   updatedAt: string
 }
+
+type SettingsTab = 'general' | 'seo'
 
 interface Category {
   id: string
@@ -35,7 +40,11 @@ const form = ref({
   excerpt: '',
   status: 'draft' as 'draft' | 'published' | 'archived',
   categoryId: '',
+  metaSeo: {} as MetaSeo,
+  schemaOrg: [] as SchemaOrgItem[],
 })
+
+const activeTab = ref<SettingsTab>('general')
 
 const isEditing = computed(() => editingPost.value !== null)
 const formTitle = computed(() => (isEditing.value ? 'Edit Post' : 'New Post'))
@@ -58,7 +67,17 @@ function onTitleInput() {
 
 function openCreate() {
   editingPost.value = null
-  form.value = { title: '', slug: '', body: null, excerpt: '', status: 'draft', categoryId: '' }
+  form.value = {
+    title: '',
+    slug: '',
+    body: null,
+    excerpt: '',
+    status: 'draft',
+    categoryId: '',
+    metaSeo: {},
+    schemaOrg: [],
+  }
+  activeTab.value = 'general'
   showEditor.value = true
 }
 
@@ -71,7 +90,10 @@ function openEdit(post: Post) {
     excerpt: post.excerpt ?? '',
     status: post.status as 'draft' | 'published' | 'archived',
     categoryId: post.categoryId ?? '',
+    metaSeo: post.metaSeo ?? {},
+    schemaOrg: post.schemaOrg ?? [],
   }
+  activeTab.value = 'general'
   showEditor.value = true
 }
 
@@ -118,6 +140,8 @@ async function savePost() {
       excerpt: form.value.excerpt || null,
       status: form.value.status,
       categoryId: form.value.categoryId || null,
+      metaSeo: form.value.metaSeo,
+      schemaOrg: form.value.schemaOrg,
     }
 
     const url = isEditing.value ? `/api/blog/posts/${editingPost.value!.id}` : '/api/blog/posts'
@@ -264,35 +288,56 @@ onMounted(() => {
 
         <div class="editor-sidebar">
           <div class="sidebar-card">
-            <h3>Settings</h3>
-
-            <div class="form-group">
-              <label for="post-status">Status</label>
-              <select id="post-status" v-model="form.status">
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
-              </select>
+            <div class="tabs">
+              <button
+                type="button"
+                class="tab"
+                :class="{ active: activeTab === 'general' }"
+                @click="activeTab = 'general'"
+              >General</button>
+              <button
+                type="button"
+                class="tab"
+                :class="{ active: activeTab === 'seo' }"
+                @click="activeTab = 'seo'"
+              >SEO</button>
             </div>
 
-            <div class="form-group">
-              <label for="post-category">Category</label>
-              <select id="post-category" v-model="form.categoryId">
-                <option value="">No category</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                  {{ cat.name }}
-                </option>
-              </select>
+            <div v-if="activeTab === 'general'" class="tab-panel">
+              <div class="form-group">
+                <label for="post-status">Status</label>
+                <select id="post-status" v-model="form.status">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="post-category">Category</label>
+                <select id="post-category" v-model="form.categoryId">
+                  <option value="">No category</option>
+                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                    {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="post-excerpt">Excerpt</label>
+                <textarea
+                  id="post-excerpt"
+                  v-model="form.excerpt"
+                  rows="3"
+                  placeholder="Short summary of the post"
+                />
+              </div>
             </div>
 
-            <div class="form-group">
-              <label for="post-excerpt">Excerpt</label>
-              <textarea
-                id="post-excerpt"
-                v-model="form.excerpt"
-                rows="3"
-                placeholder="Short summary of the post"
-              />
+            <div v-else-if="activeTab === 'seo'" class="tab-panel seo-panel">
+              <MetaSeoEditor v-model="form.metaSeo" />
+              <div class="seo-divider" />
+              <SchemaOrgBuilder v-model="form.schemaOrg" />
             </div>
           </div>
         </div>
@@ -353,9 +398,10 @@ onMounted(() => {
 
 .editor-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 480px;
   gap: 1.5rem;
   align-items: start;
+  margin-bottom: 10rem;
 }
 
 .editor-main {
@@ -367,13 +413,46 @@ onMounted(() => {
 .sidebar-card {
   background: #fff;
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
 }
 .sidebar-card h3 {
   margin: 0 0 1rem;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+.tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover { color: #1e293b; background: #f3f4f6; }
+.tab.active {
+  color: #1a56db;
+  border-bottom-color: #1a56db;
+  background: #fff;
+}
+
+.tab-panel { padding: 1.25rem; }
+.tab-panel.seo-panel { display: flex; flex-direction: column; gap: 1rem; }
+.seo-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.25rem 0;
 }
 
 .form-group {

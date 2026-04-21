@@ -4,6 +4,8 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { createRouter, createWebHistory, type Router } from 'vue-router'
 import App from './App.vue'
 import ContentEditor from './components/ContentEditor.vue'
+import MetaSeoEditor from './components/MetaSeoEditor.vue'
+import SchemaOrgBuilder from './components/SchemaOrgBuilder.vue'
 import { getAuthContextPayload, useAdminAuthContext } from './composables/useAdminAuthContext'
 import { clearPluginManifestCache, fetchPluginManifest } from './composables/usePluginManifest'
 import { adminRoutes } from './router/routes'
@@ -160,6 +162,8 @@ router.beforeEach(async (to) => {
 
   const app = createApp(App)
   app.component('ContentEditor', ContentEditor)
+  app.component('MetaSeoEditor', MetaSeoEditor)
+  app.component('SchemaOrgBuilder', SchemaOrgBuilder)
   app.use(router)
   app.mount('#app')
 

@@ -98,6 +98,8 @@ export function setupBlogRoutes(
       status: result.data.status ?? 'draft',
       authorId: body.authorId ?? null,
       categoryId: body.categoryId ?? null,
+      metaSeo: result.data.metaSeo ?? null,
+      schemaOrg: result.data.schemaOrg ?? null,
       publishedAt: result.data.status === 'published' ? now : null,
       createdAt: now,
       updatedAt: now,
@@ -139,6 +141,8 @@ export function setupBlogRoutes(
     if (body.excerpt !== undefined) updates.excerpt = body.excerpt
     if (body.categoryId !== undefined) updates.categoryId = body.categoryId
     if (body.authorId !== undefined) updates.authorId = body.authorId
+    if (result.data.metaSeo !== undefined) updates.metaSeo = result.data.metaSeo
+    if (result.data.schemaOrg !== undefined) updates.schemaOrg = result.data.schemaOrg
 
     await db.update(posts).set(updates).where(eq(posts.id, id))
 

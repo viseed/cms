@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MetaSeo, SchemaOrgItem } from '@hana/validator'
 import { computed, onMounted, ref } from 'vue'
 
 interface Page {
@@ -8,10 +9,14 @@ interface Page {
   body: string | null
   excerpt: string | null
   status: string
+  metaSeo: MetaSeo | null
+  schemaOrg: SchemaOrgItem[] | null
   publishedAt: string | null
   createdAt: string
   updatedAt: string
 }
+
+type SettingsTab = 'general' | 'seo'
 
 const pages = ref<Page[]>([])
 const loading = ref(true)
@@ -26,7 +31,11 @@ const form = ref({
   body: null as string | null,
   excerpt: '',
   status: 'draft' as 'draft' | 'published' | 'archived',
+  metaSeo: {} as MetaSeo,
+  schemaOrg: [] as SchemaOrgItem[],
 })
+
+const activeTab = ref<SettingsTab>('general')
 
 const isEditing = computed(() => editingPage.value !== null)
 const formTitle = computed(() => (isEditing.value ? 'Edit Page' : 'New Page'))
@@ -49,7 +58,16 @@ function onTitleInput() {
 
 function openCreate() {
   editingPage.value = null
-  form.value = { title: '', slug: '', body: null, excerpt: '', status: 'draft' }
+  form.value = {
+    title: '',
+    slug: '',
+    body: null,
+    excerpt: '',
+    status: 'draft',
+    metaSeo: {},
+    schemaOrg: [],
+  }
+  activeTab.value = 'general'
   showEditor.value = true
 }
 
@@ -61,7 +79,10 @@ function openEdit(page: Page) {
     body: page.body,
     excerpt: page.excerpt ?? '',
     status: page.status as 'draft' | 'published' | 'archived',
+    metaSeo: page.metaSeo ?? {},
+    schemaOrg: page.schemaOrg ?? [],
   }
+  activeTab.value = 'general'
   showEditor.value = true
 }
 
@@ -96,6 +117,8 @@ async function savePage() {
       body: form.value.body,
       excerpt: form.value.excerpt || null,
       status: form.value.status,
+      metaSeo: form.value.metaSeo,
+      schemaOrg: form.value.schemaOrg,
     }
 
     const url = isEditing.value ? `/api/pages/${editingPage.value!.id}` : '/api/pages'
@@ -239,25 +262,46 @@ onMounted(fetchPages)
 
         <div class="editor-sidebar">
           <div class="sidebar-card">
-            <h3>Settings</h3>
-
-            <div class="form-group">
-              <label for="page-status">Status</label>
-              <select id="page-status" v-model="form.status">
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
-              </select>
+            <div class="tabs">
+              <button
+                type="button"
+                class="tab"
+                :class="{ active: activeTab === 'general' }"
+                @click="activeTab = 'general'"
+              >General</button>
+              <button
+                type="button"
+                class="tab"
+                :class="{ active: activeTab === 'seo' }"
+                @click="activeTab = 'seo'"
+              >SEO</button>
             </div>
 
-            <div class="form-group">
-              <label for="page-excerpt">Excerpt</label>
-              <textarea
-                id="page-excerpt"
-                v-model="form.excerpt"
-                rows="3"
-                placeholder="Short summary of the page"
-              />
+            <div v-if="activeTab === 'general'" class="tab-panel">
+              <div class="form-group">
+                <label for="page-status">Status</label>
+                <select id="page-status" v-model="form.status">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="page-excerpt">Excerpt</label>
+                <textarea
+                  id="page-excerpt"
+                  v-model="form.excerpt"
+                  rows="3"
+                  placeholder="Short summary of the page"
+                />
+              </div>
+            </div>
+
+            <div v-else-if="activeTab === 'seo'" class="tab-panel seo-panel">
+              <MetaSeoEditor v-model="form.metaSeo" />
+              <div class="seo-divider" />
+              <SchemaOrgBuilder v-model="form.schemaOrg" />
             </div>
           </div>
         </div>
@@ -318,9 +362,10 @@ onMounted(fetchPages)
 
 .editor-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 480px;
   gap: 1.5rem;
   align-items: start;
+  margin-bottom: 10rem;
 }
 
 .editor-main {
@@ -332,13 +377,46 @@ onMounted(fetchPages)
 .sidebar-card {
   background: #fff;
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  overflow: hidden;
 }
 .sidebar-card h3 {
   margin: 0 0 1rem;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+.tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab:hover { color: #1e293b; background: #f3f4f6; }
+.tab.active {
+  color: #1a56db;
+  border-bottom-color: #1a56db;
+  background: #fff;
+}
+
+.tab-panel { padding: 1.25rem; }
+.tab-panel.seo-panel { display: flex; flex-direction: column; gap: 1rem; }
+.seo-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 0.25rem 0;
 }
 
 .form-group {

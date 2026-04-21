@@ -90,6 +90,8 @@ export function setupPagesRoutes(
       excerpt: body.excerpt ?? null,
       status: result.data.status ?? 'draft',
       authorId: body.authorId ?? null,
+      metaSeo: result.data.metaSeo ?? null,
+      schemaOrg: result.data.schemaOrg ?? null,
       publishedAt: result.data.status === 'published' ? now : null,
       createdAt: now,
       updatedAt: now,
@@ -130,6 +132,8 @@ export function setupPagesRoutes(
     }
     if (body.excerpt !== undefined) updates.excerpt = body.excerpt
     if (body.authorId !== undefined) updates.authorId = body.authorId
+    if (result.data.metaSeo !== undefined) updates.metaSeo = result.data.metaSeo
+    if (result.data.schemaOrg !== undefined) updates.schemaOrg = result.data.schemaOrg
 
     await db.update(pages).set(updates).where(eq(pages.id, id))
 

@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import type { MetaSeo, SchemaOrgItem } from '@hana/validator'
+import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const pages = pgTable(
   'cms_pages',
@@ -13,6 +14,8 @@ export const pages = pgTable(
       .notNull()
       .default('draft'),
     authorId: text('author_id'),
+    metaSeo: jsonb('meta_seo').$type<MetaSeo>(),
+    schemaOrg: jsonb('schema_org').$type<SchemaOrgItem[]>(),
     publishedAt: timestamp('published_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),

@@ -12,6 +12,7 @@
   "dependencies": {
     "@hana/types": "workspace:*",
     "@hana/ui": "workspace:*",
+    "@hana/validator": "workspace:*",
     "@tiptap/extension-character-count": "^3.22.3",
     "@tiptap/extension-image": "^3.22.3",
     "@tiptap/extension-link": "^3.22.3",
@@ -20,6 +21,7 @@
     "@tiptap/pm": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
     "@tiptap/vue-3": "^3.22.3",
+    "schema-org-adapter": "^7.1.1",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
   },
