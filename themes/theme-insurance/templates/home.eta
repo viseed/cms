@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= it.settings['general.siteName'] || 'Insurance' %></title>
+  <%~ it.helpers.seoHead(it) %>
   <% for (const url of (it.assets?.css ?? [])) { %><link rel="stylesheet" href="<%= url %>"><% } %>
   <% if (it.settings['general.faviconUrl']) { %><link rel="icon" href="<%= it.settings['general.faviconUrl'] %>"><% } %>
 </head>

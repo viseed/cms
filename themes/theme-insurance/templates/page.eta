@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%~ it.helpers.seoHead(it) %>
+  <% for (const url of (it.assets?.css ?? [])) { %><link rel="stylesheet" href="<%= url %>"><% } %>
+  <% if (it.settings['general.faviconUrl']) { %><link rel="icon" href="<%= it.settings['general.faviconUrl'] %>"><% } %>
+</head>
+<body>
+  <%~ include('partials/header', it) %>
+
+  <div class="page-hero page-hero--small">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Trang chủ</a>
+        <span>›</span>
+        <span><%= it.data.page ? it.data.page.title : 'Trang' %></span>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container page-content">
+    <% if (it.data.page) { %>
+      <article class="page-article">
+        <header class="article-header">
+          <h1 class="article-title"><%= it.data.page.title %></h1>
+        </header>
+
+        <div class="article-body">
+          <%~ it.data.page.bodyHtml || '' %>
+        </div>
+      </article>
+    <% } else { %>
+      <div class="not-found-page">
+        <h1>Không tìm thấy trang</h1>
+        <p>Trang bạn đang tìm kiếm không tồn tại.</p>
+        <a href="/" class="btn-primary-link">Về trang chủ</a>
+      </div>
+    <% } %>
+  </main>
+
+  <%~ include('partials/footer', it) %>
+  <%~ include('partials/preview-inject', it) %>
+</body>
+</html>

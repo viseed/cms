@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Not Found — <%= it.settings.siteTitle || 'Hana Blog' %></title>
+  <%~ it.helpers.seoHead(it) %>
   <link rel="stylesheet" href="/theme/static/css/style.css">
   <% if (it.settings['general.brandColor']) { %>
     <style>:root { --brand: <%= it.settings['general.brandColor'] %>; }</style>

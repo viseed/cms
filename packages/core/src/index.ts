@@ -7,6 +7,7 @@ export type {
   CMSThemeHooks,
   ComponentRegistry,
   LayoutContext,
+  LayoutHelpers,
   PluginFactory,
   PluginManifest,
   ThemeAssets,
@@ -22,6 +23,7 @@ export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 export { setupMediaRoutes, type MediaRouteOptions } from './media-routes'
 export { PluginRouteRegistry } from './plugin-route-registry'
 export { renderBody } from './render-body'
+export { createLayoutHelpers, renderSeoHead } from './seo-head'
 export {
   createThemeRuntime,
   resolveTemplateDirFromAbsoluteRoot,

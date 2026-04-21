@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
 import { Eta } from 'eta'
 import type { HanaCMS } from './hana-cms'
+import { createLayoutHelpers } from './seo-head'
 
 export interface ThemeRenderOptions {
   /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
@@ -58,6 +59,7 @@ export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime 
         settings: context.settings,
         menus: context.menus,
         request: context.request,
+        helpers: createLayoutHelpers(context.request?.url ?? ''),
       }
 
       const templateRoot = options?.templateRoot ?? defaultTemplateDir

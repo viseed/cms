@@ -12,11 +12,31 @@ import type { ThemeSettingsSchema, ThemeSettingsValue } from './theme-settings'
 // Re-export so consumers can import ThemeSettingsValue from '@hana/types' directly.
 export type { ThemeMenuItem, ThemeSettingsSchema, ThemeSettingsValue }
 
+export interface LayoutHelpers {
+  /**
+   * Render a complete SEO `<head>` block (title, meta description, canonical,
+   * Open Graph, Twitter Card, JSON-LD) from the current layout context.
+   * Auto-detects context from `it.data.page` / `it.data.post` / `it.data.category`,
+   * falling back to site-level settings for home / 404.
+   */
+  seoHead: (context: LayoutContext) => string
+  /**
+   * Convert a relative path to an absolute URL using the current request origin.
+   * Returns the input untouched if it is already absolute (`http://`, `https://`, `//...`).
+   */
+  absoluteUrl: (pathOrUrl: string | null | undefined) => string
+  /** Strip HTML tags and truncate plain text. Useful for meta description fallbacks. */
+  excerpt: (input: string | null | undefined, maxLength?: number) => string
+  /** Escape `</script>` sequences so JSON-LD payloads cannot break out of a `<script>` tag. */
+  escapeJsonLd: (value: unknown) => string
+}
+
 export interface LayoutContext<TData = Record<string, unknown>> {
   data: TData
   settings: ThemeSettingsValue
   menus: Record<string, ThemeMenuItem[]>
   request: { url: string; params: Record<string, string> }
+  helpers: LayoutHelpers
 }
 
 export interface ThemeLayoutEntry<TData = Record<string, unknown>> {

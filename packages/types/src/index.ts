@@ -49,6 +49,7 @@ export type {
   CMSTheme,
   CMSThemeHooks,
   LayoutContext,
+  LayoutHelpers,
   ThemeAssets,
   ThemeFactory,
   ThemeLayoutEntry,
