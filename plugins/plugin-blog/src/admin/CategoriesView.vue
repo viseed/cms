@@ -25,6 +25,12 @@ const isEditing = computed(() => editingCategory.value !== null)
 const modalTitle = computed(() => (isEditing.value ? 'Edit Category' : 'New Category'))
 
 function slugify(text: string): string {
+  var from = 'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ',
+    to = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy'
+  for (let i = 0, l = from.length; i < l; i++) {
+    text = text.replace(RegExp(from[i] ?? '', 'gi'), to[i] ?? '')
+  }
+
   return text
     .toLowerCase()
     .trim()

@@ -1,8 +1,8 @@
-import type { DatabaseInstance } from './database'
-import type { CMSRouteContextHelpers } from '@hana/types'
 import { mediaFiles } from '@hana/schema'
+import type { CMSRouteContextHelpers } from '@hana/types'
 import { and, count, desc, eq, ilike, or } from 'drizzle-orm'
 import { Hono } from 'hono'
+import type { DatabaseInstance } from './database'
 import { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 
 export interface MediaRouteOptions {
@@ -11,6 +11,12 @@ export interface MediaRouteOptions {
 }
 
 function slugify(name: string): string {
+  var from = 'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ',
+    to = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy'
+  for (let i = 0, l = from.length; i < l; i++) {
+    name = name.replace(RegExp(from[i] ?? '', 'gi'), to[i] ?? '')
+  }
+
   return (
     name
       .replace(/\.[^.]+$/, '')
@@ -167,25 +173,26 @@ export function setupMediaRoutes(
     }
 
     const { site, actor } = helpers.resolveRequestContext(c)
-    
+
     // Extract base URL from request
     const requestUrl = new URL(c.req.url)
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
-    
+
     const inserted: object[] = []
 
     for (const file of fileList) {
       const id = crypto.randomUUID()
-      const uniqueName = `${Date.now()}-${file.name}`
+      const fileName = slugify(file.name)
+      const uniqueName = `${Date.now()}-${fileName}`
       const buffer = await file.arrayBuffer()
       const path = await adapter.save(uniqueName, buffer, site.id)
-      const autoSlug = await generateUniqueSlug(db, site.id, slugify(file.name))
+      const autoSlug = await generateUniqueSlug(db, site.id, fileName)
 
       await db.insert(mediaFiles).values({
         id,
         siteId: site.id,
         filename: uniqueName,
-        originalName: file.name,
+        originalName: fileName,
         mimeType: file.type,
         size: file.size,
         path,
@@ -225,8 +232,8 @@ export function setupMediaRoutes(
     const altRaw = formData.get('alt')
     const newFile = formData.get('file')
 
-    const newSlug = slugRaw !== null ? (String(slugRaw).trim() || null) : undefined
-    const newAlt = altRaw !== null ? (String(altRaw).trim() || null) : undefined
+    const newSlug = slugRaw !== null ? String(slugRaw).trim() || null : undefined
+    const newAlt = altRaw !== null ? String(altRaw).trim() || null : undefined
 
     if (newSlug !== undefined && newSlug !== null) {
       const [conflict] = await db
@@ -245,10 +252,7 @@ export function setupMediaRoutes(
 
     if (newFile instanceof File) {
       if (newFile.size > maxBytes) {
-        return c.json(
-          { error: `File exceeds the ${options?.maxFileSizeMb ?? 10} MB limit` },
-          413,
-        )
+        return c.json({ error: `File exceeds the ${options?.maxFileSizeMb ?? 10} MB limit` }, 413)
       }
       const uniqueName = `${Date.now()}-${newFile.name}`
       const buffer = await newFile.arrayBuffer()

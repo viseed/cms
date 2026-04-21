@@ -100,6 +100,7 @@ export function setupBlogRoutes(
       categoryId: body.categoryId ?? null,
       metaSeo: result.data.metaSeo ?? null,
       schemaOrg: result.data.schemaOrg ?? null,
+      tocEnabled: result.data.tocEnabled ?? false,
       publishedAt: result.data.status === 'published' ? now : null,
       createdAt: now,
       updatedAt: now,
@@ -143,6 +144,7 @@ export function setupBlogRoutes(
     if (body.authorId !== undefined) updates.authorId = body.authorId
     if (result.data.metaSeo !== undefined) updates.metaSeo = result.data.metaSeo
     if (result.data.schemaOrg !== undefined) updates.schemaOrg = result.data.schemaOrg
+    if (result.data.tocEnabled !== undefined) updates.tocEnabled = result.data.tocEnabled
 
     await db.update(posts).set(updates).where(eq(posts.id, id))
 

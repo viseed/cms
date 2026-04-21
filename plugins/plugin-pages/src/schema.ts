@@ -1,5 +1,5 @@
 import type { MetaSeo, SchemaOrgItem } from '@hana/validator'
-import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import { boolean, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const pages = pgTable(
   'cms_pages',
@@ -16,6 +16,7 @@ export const pages = pgTable(
     authorId: text('author_id'),
     metaSeo: jsonb('meta_seo').$type<MetaSeo>(),
     schemaOrg: jsonb('schema_org').$type<SchemaOrgItem[]>(),
+    tocEnabled: boolean('toc_enabled').notNull().default(false),
     publishedAt: timestamp('published_at'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),

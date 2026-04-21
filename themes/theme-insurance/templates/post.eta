@@ -31,15 +31,18 @@
           <header class="article-header">
             <h1 class="article-title"><%= it.data.post.title %></h1>
             <div class="article-meta">
-              <time class="article-date">
+              <!-- <time class="article-date">
                 <%= it.data.post.publishedAt ? new Date(it.data.post.publishedAt).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' }) : '' %>
-              </time>
+              </time> -->
             </div>
             <% if (it.data.post.excerpt) { %>
               <p class="article-lead"><%= it.data.post.excerpt %></p>
             <% } %>
           </header>
 
+          <% if (it.data.post.tocHtml) { %>
+            <%~ it.data.post.tocHtml %>
+          <% } %>
           <div class="article-body">
             <%~ it.data.post.bodyHtml || '' %>
           </div>

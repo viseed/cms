@@ -12,6 +12,7 @@ interface Post {
   categoryId: string | null
   metaSeo: MetaSeo | null
   schemaOrg: SchemaOrgItem[] | null
+  tocEnabled: boolean
   publishedAt: string | null
   createdAt: string
   updatedAt: string
@@ -42,6 +43,7 @@ const form = ref({
   categoryId: '',
   metaSeo: {} as MetaSeo,
   schemaOrg: [] as SchemaOrgItem[],
+  tocEnabled: false,
 })
 
 const activeTab = ref<SettingsTab>('general')
@@ -50,6 +52,12 @@ const isEditing = computed(() => editingPost.value !== null)
 const formTitle = computed(() => (isEditing.value ? 'Edit Post' : 'New Post'))
 
 function slugify(text: string): string {
+  var from = 'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ',
+    to = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy'
+  for (let i = 0, l = from.length; i < l; i++) {
+    text = text.replace(RegExp(from[i] ?? '', 'gi'), to[i] ?? '')
+  }
+  
   return text
     .toLowerCase()
     .trim()
@@ -76,6 +84,7 @@ function openCreate() {
     categoryId: '',
     metaSeo: {},
     schemaOrg: [],
+    tocEnabled: false,
   }
   activeTab.value = 'general'
   showEditor.value = true
@@ -92,6 +101,7 @@ function openEdit(post: Post) {
     categoryId: post.categoryId ?? '',
     metaSeo: post.metaSeo ?? {},
     schemaOrg: post.schemaOrg ?? [],
+    tocEnabled: post.tocEnabled ?? false,
   }
   activeTab.value = 'general'
   showEditor.value = true
@@ -142,6 +152,7 @@ async function savePost() {
       categoryId: form.value.categoryId || null,
       metaSeo: form.value.metaSeo,
       schemaOrg: form.value.schemaOrg,
+      tocEnabled: form.value.tocEnabled,
     }
 
     const url = isEditing.value ? `/api/blog/posts/${editingPost.value!.id}` : '/api/blog/posts'
@@ -156,10 +167,10 @@ async function savePost() {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       throw new Error(err.error ?? `HTTP ${res.status}`)
-    }
+    } 
 
-    closeEditor()
-    await fetchPosts()
+    // closeEditor()
+    // await fetchPosts()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to save post'
   } finally {
@@ -332,6 +343,17 @@ onMounted(() => {
                   placeholder="Short summary of the post"
                 />
               </div>
+
+              <div class="form-group form-check">
+                <label>
+                  <input
+                    type="checkbox"
+                    v-model="form.tocEnabled"
+                  />
+                  Show table of contents
+                </label>
+                <small class="form-help">Auto-generate a TOC from H1–H6 headings above the post.</small>
+              </div>
             </div>
 
             <div v-else-if="activeTab === 'seo'" class="tab-panel seo-panel">
@@ -485,6 +507,23 @@ onMounted(() => {
 }
 .form-group textarea {
   resize: vertical;
+}
+.form-check label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.form-check input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+.form-help {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
 }
 
 @media (max-width: 900px) {

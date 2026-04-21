@@ -15,6 +15,7 @@
   --color-bg: #f4f7fb;
   --color-bg-alt: #f4f7fb;
   --color-text: #232734;
+  --color-text-light: rgb(95, 117, 186);
   --color-text-muted: #5a6a8a;
   --color-border: #c4dbeb;
 
@@ -1280,4 +1281,74 @@ button {
   .error-code {
     font-size: 8rem; /* Full size */
   }
+}
+
+/* Table of Contents */
+.toc {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--color-primary, #1e40af);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.toc::before {
+  content: 'Mục lục';
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-light, #1e40af);
+}
+
+.toc ul {
+  list-style: none;
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.toc > ul.toc-list {
+  padding-left: 0;
+}
+
+.toc li {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.toc a {
+  color: #475569;
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--color-text-light, #1e40af);
+  text-decoration: underline;
+}
+
+/* Article tables */
+.article-body table,
+.tiptap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.95rem;
+}
+
+.article-body th,
+.article-body td,
+.tiptap-table th,
+.tiptap-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-body th,
+.tiptap-table th {
+  background: #f1f5f9;
+  font-weight: 600;
 }

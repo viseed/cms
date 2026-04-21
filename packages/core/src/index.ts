@@ -22,7 +22,8 @@ export { HookRegistry } from './hook-registry'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 export { setupMediaRoutes, type MediaRouteOptions } from './media-routes'
 export { PluginRouteRegistry } from './plugin-route-registry'
-export { renderBody } from './render-body'
+export { renderBody, renderBodyWithToc } from './render-body'
+export { annotateHeadings, buildTocHtml, type TocHeading } from './toc'
 export { createLayoutHelpers, renderSeoHead } from './seo-head'
 export {
   createThemeRuntime,

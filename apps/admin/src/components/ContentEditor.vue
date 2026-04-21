@@ -1,13 +1,38 @@
 <script setup lang="ts">
 import CharacterCount from '@tiptap/extension-character-count'
+import { Color } from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import { Table } from '@tiptap/extension-table'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { TableRow } from '@tiptap/extension-table-row'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
-import { onBeforeUnmount, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useMediaPicker } from '../composables/useMediaPicker'
+
+const COLOR_PALETTE = [
+  '#000000',
+  '#374151',
+  '#6b7280',
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#10b981',
+  '#06b6d4',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#ffffff',
+]
+
+const showColorMenu = ref(false)
 
 const props = defineProps<{
   modelValue: string | null
@@ -35,6 +60,12 @@ const editor = useEditor({
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     Underline,
     CharacterCount,
+    Table.configure({ resizable: true }),
+    TableRow,
+    TableHeader,
+    TableCell,
+    TextStyle,
+    Color,
   ],
   onUpdate({ editor: e }) {
     emit('update:modelValue', JSON.stringify(e.getJSON()))
@@ -75,6 +106,32 @@ async function addImage() {
   const url = await openMediaPicker()
   if (!url) return
   editor.value.chain().focus().setImage({ src: url }).run()
+}
+
+function insertTable() {
+  if (!editor.value) return
+  editor.value
+    .chain()
+    .focus()
+    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+    .run()
+}
+
+function setTextColor(color: string) {
+  if (!editor.value) return
+  editor.value.chain().focus().setColor(color).run()
+  showColorMenu.value = false
+}
+
+function unsetTextColor() {
+  if (!editor.value) return
+  editor.value.chain().focus().unsetColor().run()
+  showColorMenu.value = false
+}
+
+function onPickerInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target?.value) setTextColor(target.value)
 }
 </script>
 
@@ -224,6 +281,128 @@ async function addImage() {
         </button>
         <button type="button" title="Insert image" @click="addImage">
           Image
+        </button>
+      </div>
+
+      <span class="toolbar-divider" />
+
+      <div class="toolbar-group color-group">
+        <div class="color-picker-wrap">
+          <button
+            type="button"
+            title="Text color"
+            class="color-trigger"
+            @click="showColorMenu = !showColorMenu"
+          >
+            <span
+              class="color-swatch"
+              :style="{ background: editor.getAttributes('textStyle').color || '#1e293b' }"
+            />
+            A
+            <span class="caret">▾</span>
+          </button>
+          <div v-if="showColorMenu" class="color-menu" @click.stop>
+            <div class="color-palette">
+              <button
+                v-for="c in COLOR_PALETTE"
+                :key="c"
+                type="button"
+                class="color-cell"
+                :title="c"
+                :style="{ background: c }"
+                @click="setTextColor(c)"
+              />
+            </div>
+            <div class="color-actions">
+              <label class="color-custom">
+                <span>Custom</span>
+                <input
+                  type="color"
+                  :value="editor.getAttributes('textStyle').color || '#000000'"
+                  @input="onPickerInput"
+                >
+              </label>
+              <button type="button" class="color-reset" @click="unsetTextColor">
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span class="toolbar-divider" />
+
+      <div class="toolbar-group">
+        <button
+          type="button"
+          title="Insert table"
+          @click="insertTable"
+        >
+          ⊞ Table
+        </button>
+        <button
+          type="button"
+          title="Add column before"
+          :disabled="!editor.can().addColumnBefore()"
+          @click="editor.chain().focus().addColumnBefore().run()"
+        >
+          +Col◀
+        </button>
+        <button
+          type="button"
+          title="Add column after"
+          :disabled="!editor.can().addColumnAfter()"
+          @click="editor.chain().focus().addColumnAfter().run()"
+        >
+          +Col▶
+        </button>
+        <button
+          type="button"
+          title="Delete column"
+          :disabled="!editor.can().deleteColumn()"
+          @click="editor.chain().focus().deleteColumn().run()"
+        >
+          −Col
+        </button>
+        <button
+          type="button"
+          title="Add row before"
+          :disabled="!editor.can().addRowBefore()"
+          @click="editor.chain().focus().addRowBefore().run()"
+        >
+          +Row▲
+        </button>
+        <button
+          type="button"
+          title="Add row after"
+          :disabled="!editor.can().addRowAfter()"
+          @click="editor.chain().focus().addRowAfter().run()"
+        >
+          +Row▼
+        </button>
+        <button
+          type="button"
+          title="Delete row"
+          :disabled="!editor.can().deleteRow()"
+          @click="editor.chain().focus().deleteRow().run()"
+        >
+          −Row
+        </button>
+        <button
+          type="button"
+          title="Toggle header row"
+          :disabled="!editor.can().toggleHeaderRow()"
+          @click="editor.chain().focus().toggleHeaderRow().run()"
+        >
+          Header
+        </button>
+        <button
+          type="button"
+          title="Delete table"
+          :disabled="!editor.can().deleteTable()"
+          @click="editor.chain().focus().deleteTable().run()"
+        >
+          Del Table
         </button>
       </div>
 
@@ -392,6 +571,135 @@ async function addImage() {
   border: none;
   border-top: 2px solid #e2e8f0;
   margin: 1.5rem 0;
+}
+
+.editor-body :deep(table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.editor-body :deep(table td),
+.editor-body :deep(table th) {
+  border: 1px solid #cbd5e1;
+  padding: 8px 12px;
+  vertical-align: top;
+  position: relative;
+}
+
+.editor-body :deep(table th) {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: left;
+}
+
+.editor-body :deep(table .selectedCell::after) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 86, 219, 0.12);
+  pointer-events: none;
+}
+
+.editor-body :deep(table .column-resize-handle) {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #1a56db;
+  pointer-events: none;
+}
+
+.color-picker-wrap {
+  position: relative;
+}
+
+.color-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid #cbd5e1;
+}
+
+.color-trigger .caret {
+  font-size: 0.6rem;
+  color: #94a3b8;
+}
+
+.color-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  min-width: 200px;
+}
+
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.color-cell {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-cell:hover {
+  transform: scale(1.1);
+}
+
+.color-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  gap: 8px;
+}
+
+.color-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #475569;
+  cursor: pointer;
+}
+
+.color-custom input[type='color'] {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.color-reset {
+  font-size: 0.75rem;
+  color: #ef4444 !important;
 }
 
 .editor-footer {

@@ -65,6 +65,7 @@ export const createContentSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
   metaSeo: metaSeoSchema.optional(),
   schemaOrg: schemaOrgArraySchema.optional(),
+  tocEnabled: z.boolean().optional(),
 })
 
 export const updateContentSchema = createContentSchema.partial()

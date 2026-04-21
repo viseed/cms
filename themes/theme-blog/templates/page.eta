@@ -16,6 +16,9 @@
     <% if (it.data.page) { %>
       <article class="page-content">
         <h1><%= it.data.page.title %></h1>
+        <% if (it.data.page.tocHtml) { %>
+          <%~ it.data.page.tocHtml %>
+        <% } %>
         <div class="page-body">
           <%~ it.data.page.bodyHtml || '' %>
         </div>

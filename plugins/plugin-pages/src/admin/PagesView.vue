@@ -11,6 +11,7 @@ interface Page {
   status: string
   metaSeo: MetaSeo | null
   schemaOrg: SchemaOrgItem[] | null
+  tocEnabled: boolean
   publishedAt: string | null
   createdAt: string
   updatedAt: string
@@ -33,6 +34,7 @@ const form = ref({
   status: 'draft' as 'draft' | 'published' | 'archived',
   metaSeo: {} as MetaSeo,
   schemaOrg: [] as SchemaOrgItem[],
+  tocEnabled: false,
 })
 
 const activeTab = ref<SettingsTab>('general')
@@ -41,6 +43,12 @@ const isEditing = computed(() => editingPage.value !== null)
 const formTitle = computed(() => (isEditing.value ? 'Edit Page' : 'New Page'))
 
 function slugify(text: string): string {
+  var from = 'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ',
+    to = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy'
+  for (let i = 0, l = from.length; i < l; i++) {
+    text = text.replace(RegExp(from[i] ?? '', 'gi'), to[i] ?? '')
+  }
+  
   return text
     .toLowerCase()
     .trim()
@@ -66,6 +74,7 @@ function openCreate() {
     status: 'draft',
     metaSeo: {},
     schemaOrg: [],
+    tocEnabled: false,
   }
   activeTab.value = 'general'
   showEditor.value = true
@@ -81,6 +90,7 @@ function openEdit(page: Page) {
     status: page.status as 'draft' | 'published' | 'archived',
     metaSeo: page.metaSeo ?? {},
     schemaOrg: page.schemaOrg ?? [],
+    tocEnabled: page.tocEnabled ?? false,
   }
   activeTab.value = 'general'
   showEditor.value = true
@@ -119,6 +129,7 @@ async function savePage() {
       status: form.value.status,
       metaSeo: form.value.metaSeo,
       schemaOrg: form.value.schemaOrg,
+      tocEnabled: form.value.tocEnabled,
     }
 
     const url = isEditing.value ? `/api/pages/${editingPage.value!.id}` : '/api/pages'
@@ -296,6 +307,17 @@ onMounted(fetchPages)
                   placeholder="Short summary of the page"
                 />
               </div>
+
+              <div class="form-group form-check">
+                <label>
+                  <input
+                    type="checkbox"
+                    v-model="form.tocEnabled"
+                  />
+                  Show table of contents
+                </label>
+                <small class="form-help">Auto-generate a TOC from H1–H6 headings above the page.</small>
+              </div>
             </div>
 
             <div v-else-if="activeTab === 'seo'" class="tab-panel seo-panel">
@@ -449,6 +471,23 @@ onMounted(fetchPages)
 }
 .form-group textarea {
   resize: vertical;
+}
+.form-check label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.form-check input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+.form-help {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
 }
 
 @media (max-width: 900px) {

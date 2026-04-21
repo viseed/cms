@@ -86,6 +86,15 @@ async function handleLogout() {
   await router.push('/login')
 }
 
+async function handleClickMenuItem(event: MouseEvent, path: string) {
+  if (event.ctrlKey || event.metaKey) {
+    const routeData = router.resolve(path);
+    window.open(routeData.href, '_blank')
+    return
+  }
+  await router.push(path)
+}
+
 onMounted(() => {
   void ensureLoaded()
 })
@@ -104,7 +113,7 @@ onMounted(() => {
           type="button"
           class="nav-item"
           :class="{ active: isNavActive(item.path) }"
-          @click="router.push(item.path)"
+          @click="handleClickMenuItem($event, item.path)"
         >
           <span class="icon">{{ item.icon }}</span>
           {{ item.label }}

@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { type DatabaseInstance, renderBody } from '@hana/core'
+import { type DatabaseInstance, renderBody, renderBodyWithToc } from '@hana/core'
 import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
 import { and, desc, eq } from 'drizzle-orm'
 import { setupBlogRoutes } from './routes'
@@ -78,7 +78,10 @@ export function blogPlugin(): CMSPlugin {
               .where(and(eq(posts.slug, slug), eq(posts.status, 'published')))
 
             if (post) {
-              return { ...data, post: { ...post, bodyHtml: renderBody(post.body) } }
+              const { bodyHtml, tocHtml } = renderBodyWithToc(post.body, {
+                withToc: post.tocEnabled,
+              })
+              return { ...data, post: { ...post, bodyHtml, tocHtml } }
             }
             return { ...data, post: null }
           }

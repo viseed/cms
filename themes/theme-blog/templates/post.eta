@@ -21,6 +21,9 @@
             <time><%= it.data.post.publishedAt ? new Date(it.data.post.publishedAt).toLocaleDateString() : '' %></time>
           </div>
         </header>
+        <% if (it.data.post.tocHtml) { %>
+          <%~ it.data.post.tocHtml %>
+        <% } %>
         <div class="article-body">
           <%~ it.data.post.bodyHtml || '' %>
         </div>

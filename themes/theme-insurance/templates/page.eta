@@ -27,6 +27,9 @@
           <h1 class="article-title"><%= it.data.page.title %></h1>
         </header>
 
+        <% if (it.data.page.tocHtml) { %>
+          <%~ it.data.page.tocHtml %>
+        <% } %>
         <div class="article-body">
           <%~ it.data.page.bodyHtml || '' %>
         </div>
