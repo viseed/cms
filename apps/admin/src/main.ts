@@ -77,7 +77,10 @@ async function registerPluginAdminRoutes(r: Router) {
     let pluginModule: Record<string, unknown> | null = null
     if (plugin.admin.hasBundle) {
       try {
-        pluginModule = await import(/* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js`)
+        const v = encodeURIComponent(import.meta.env.VITE_ADMIN_PLUGIN_UI_BUILD_ID)
+        pluginModule = await import(
+          /* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js?v=${v}`
+        )
       } catch (err) {
         console.warn(`Failed to load admin bundle for plugin "${plugin.name}"`, err)
       }

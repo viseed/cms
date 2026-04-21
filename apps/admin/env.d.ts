@@ -1,5 +1,11 @@
 /// <reference types="vite/client" />
 
+// biome-ignore lint/correctness/noUnusedVariables: merges with vite/client ImportMetaEnv
+interface ImportMetaEnv {
+  /** Random id (10 hex chars) injected at each admin build for `?v=` on plugin ui.js URLs. */
+  readonly VITE_ADMIN_PLUGIN_UI_BUILD_ID: string
+}
+
 import type { Permission } from '@hana/types'
 
 declare module 'vue-router' {

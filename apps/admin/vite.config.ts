@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -5,6 +6,11 @@ import vue from '@vitejs/plugin-vue'
 import { defineConfig, type Plugin } from 'vite'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
+/** Query `v=` for plugin ui.js — random each admin build so CDN (e.g. Cloudflare) cache keys differ. */
+function randomAdminPluginUiBuildId(): string {
+  return randomBytes(5).toString('hex')
+}
 
 // Vendor entry points use predictable filenames (no hash) so the import map
 // can reference them at fixed URLs. Cache busting is handled by query-param
@@ -62,36 +68,43 @@ function hanaImportMapPlugin(): Plugin {
   }
 }
 
-export default defineConfig(() => ({
-  base: '/admin/',
-  plugins: [vue(), hanaImportMapPlugin()],
-  build: {
-    outDir: '../../packages/core/dist/admin',
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        index: join(__dirname, 'index.html'),
-        'vendor-vue': join(__dirname, 'src/vendor/vue.ts'),
-        'vendor-vue-router': join(__dirname, 'src/vendor/vue-router.ts'),
-      },
-      // Preserve all exports from the vendor entry points so plugin bundles
-      // can import any Vue/Vue Router API even if the admin SPA doesn't use it.
-      preserveEntrySignatures: 'exports-only',
-      output: {
-        // Vendor entries use fixed filenames (no hash) for predictable import map URLs.
-        // All other entries and chunks keep content-hashed filenames.
-        entryFileNames: (chunkInfo) =>
-          ['vendor-vue', 'vendor-vue-router'].includes(chunkInfo.name)
-            ? 'assets/[name].js'
-            : 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
+export default defineConfig(() => {
+  const adminPluginUiBuildId = randomAdminPluginUiBuildId()
+
+  return {
+    base: '/admin/',
+    define: {
+      'import.meta.env.VITE_ADMIN_PLUGIN_UI_BUILD_ID': JSON.stringify(adminPluginUiBuildId),
+    },
+    plugins: [vue(), hanaImportMapPlugin()],
+    build: {
+      outDir: '../../packages/core/dist/admin',
+      emptyOutDir: true,
+      rollupOptions: {
+        input: {
+          index: join(__dirname, 'index.html'),
+          'vendor-vue': join(__dirname, 'src/vendor/vue.ts'),
+          'vendor-vue-router': join(__dirname, 'src/vendor/vue-router.ts'),
+        },
+        // Preserve all exports from the vendor entry points so plugin bundles
+        // can import any Vue/Vue Router API even if the admin SPA doesn't use it.
+        preserveEntrySignatures: 'exports-only',
+        output: {
+          // Vendor entries use fixed filenames (no hash) for predictable import map URLs.
+          // All other entries and chunks keep content-hashed filenames.
+          entryFileNames: (chunkInfo) =>
+            ['vendor-vue', 'vendor-vue-router'].includes(chunkInfo.name)
+              ? 'assets/[name].js'
+              : 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+        },
       },
     },
-  },
-  server: {
-    proxy: {
-      '/api': 'http://localhost:3000',
-      '/uploads': 'http://localhost:3000',
+    server: {
+      proxy: {
+        '/api': 'http://localhost:3000',
+        '/uploads': 'http://localhost:3000',
+      },
     },
-  },
-}))
+  }
+})
