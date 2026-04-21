@@ -77,6 +77,13 @@ export interface CMSTheme {
   /** Structured schema describing all configurable settings for this theme. */
   settingsSchema?: ThemeSettingsSchema
   assets?: ThemeAssets
+  /**
+   * Optional `v=` query token for `/theme/static/*` URLs (cache busting).
+   * Set at theme build time (e.g. random hex, commit sha). When set, the server does not
+   * read static files to derive a fingerprint. When omitted, see `.hana-static-fingerprint`
+   * under `staticRoot` or a one-time content hash at theme runtime creation.
+   */
+  staticAssetFingerprint?: string
   hooks?: Partial<CMSThemeHooks>
   companionPlugin?: CMSPlugin
 }

@@ -13,6 +13,9 @@ export function blogTheme(): CMSTheme {
     version: '0.1.0',
     templateRoot: resolve(__dirname, '../templates'),
     staticRoot: resolve(__dirname, '../static'),
+    assets: {
+      css: ['css/style.css'],
+    },
     companionPlugin: blogCompanionPlugin(),
     layouts: {
       home: { template: 'home.eta' },

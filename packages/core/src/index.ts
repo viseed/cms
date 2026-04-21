@@ -19,16 +19,18 @@ export type {
 export { createDatabase, type DatabaseInstance } from './database'
 export { createCMS, HanaCMS } from './hana-cms'
 export { HookRegistry } from './hook-registry'
+export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
-export { setupMediaRoutes, type MediaRouteOptions } from './media-routes'
 export { PluginRouteRegistry } from './plugin-route-registry'
 export { renderBody, renderBodyWithToc } from './render-body'
-export { annotateHeadings, buildTocHtml, type TocHeading } from './toc'
 export { createLayoutHelpers, renderSeoHead } from './seo-head'
 export {
+  computeThemeAssetFingerprint,
   createThemeRuntime,
+  resolveStaticAssetFingerprint,
   resolveTemplateDirFromAbsoluteRoot,
   resolveThemeStaticDirFromRoot,
   type ThemeRenderOptions,
   type ThemeRuntime,
 } from './theme-runtime'
+export { annotateHeadings, buildTocHtml, type TocHeading } from './toc'

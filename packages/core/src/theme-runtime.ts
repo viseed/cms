@@ -1,5 +1,6 @@
-import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { createHash } from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
 import { Eta } from 'eta'
 import type { HanaCMS } from './hana-cms'
@@ -25,6 +26,8 @@ export interface ThemeRuntime {
 
 export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
+  /** One value per theme process lifetime — not recomputed per HTTP request. */
+  const assetFingerprint = resolveStaticAssetFingerprint(theme)
   const isDevelopment = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
   const defaultEta = new Eta({ views: defaultTemplateDir, cache: !isDevelopment })
   const etaByRoot = new Map<string, Eta>()
@@ -68,7 +71,7 @@ export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime 
       const html =
         eta.render(layout.template, {
           ...finalContext,
-          assets: buildAssetTags(theme.assets, options?.previewToken),
+          assets: buildAssetTags(theme.assets, options?.previewToken, assetFingerprint),
           previewToken: options?.previewToken ?? null,
         }) ?? ''
 
@@ -76,7 +79,7 @@ export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime 
     },
 
     buildAssetTags() {
-      return buildAssetTags(theme.assets)
+      return buildAssetTags(theme.assets, undefined, assetFingerprint)
     },
   }
 }
@@ -118,14 +121,75 @@ function resolveTemplateDir(theme: CMSTheme): string {
   return fallback
 }
 
+/**
+ * If `theme.staticAssetFingerprint` is unset, the server may read (once per process,
+ * when the theme runtime is created) either `staticRoot/.hana-static-fingerprint`
+ * (first line = token from your theme build/CI) or a short hash of `assets` file bytes.
+ */
+export function resolveStaticAssetFingerprint(theme: CMSTheme): string {
+  const explicit = theme.staticAssetFingerprint?.trim()
+  if (explicit) return explicit
+
+  const fromFile = readStaticFingerprintFile(theme)
+  if (fromFile) return fromFile
+
+  return computeThemeAssetFingerprint(theme)
+}
+
+function readStaticFingerprintFile(theme: CMSTheme): string {
+  const root = theme.staticRoot
+  if (!root) return ''
+  const p = join(root, '.hana-static-fingerprint')
+  if (!existsSync(p)) return ''
+  try {
+    const line = readFileSync(p, 'utf8').split(/\r?\n/)[0]?.trim() ?? ''
+    return line
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Short fingerprint of declared theme static files (css/js/fonts). Used only when
+ * neither `staticAssetFingerprint` nor `.hana-static-fingerprint` is provided.
+ */
+export function computeThemeAssetFingerprint(theme: CMSTheme): string {
+  const root = theme.staticRoot
+  const manifest = theme.assets
+  if (!root || !manifest) return ''
+
+  const rels = [...(manifest.css ?? []), ...(manifest.js ?? []), ...(manifest.fonts ?? [])].sort()
+  if (rels.length === 0) return ''
+
+  const h = createHash('sha1')
+  for (const rel of rels) {
+    const abs = join(root, rel)
+    h.update(rel)
+    if (!existsSync(abs)) {
+      h.update(':missing')
+      continue
+    }
+    h.update(readFileSync(abs))
+  }
+  return h.digest('hex').slice(0, 10)
+}
+
+function themeStaticQuery(previewToken?: string, assetFingerprint?: string): string {
+  const parts: string[] = []
+  if (previewToken) parts.push(`hana_preview=${encodeURIComponent(previewToken)}`)
+  if (assetFingerprint) parts.push(`v=${encodeURIComponent(assetFingerprint)}`)
+  return parts.length > 0 ? `?${parts.join('&')}` : ''
+}
+
 function buildAssetTags(
   assets?: ThemeAssets,
   previewToken?: string,
+  assetFingerprint?: string,
 ): { css: string[]; js: string[]; fonts: string[] } {
   if (!assets) return { css: [], js: [], fonts: [] }
 
   const base = '/theme/static'
-  const qs = previewToken ? `?hana_preview=${encodeURIComponent(previewToken)}` : ''
+  const qs = themeStaticQuery(previewToken, assetFingerprint)
   return {
     css: (assets.css ?? []).map((file) => `${base}/${file}${qs}`),
     js: (assets.js ?? []).map((file) => `${base}/${file}${qs}`),
