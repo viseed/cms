@@ -107,7 +107,29 @@ export function setupMenuRoutes(
 
     const existing = await db.select().from(menuItems).where(eq(menuItems.menuId, menuId))
     const existingIds = new Set(existing.map((i) => i.id))
-    const incomingIds = new Set(incomingItems.filter((i) => i.id).map((i) => i.id as string))
+
+    const normalizedIncoming = incomingItems.map((item, index) => ({
+      item,
+      incomingId: item.id ?? `__incoming-${index}`,
+      incomingParentId: item.parentId ?? null,
+    }))
+
+    const incomingIds = new Set(
+      normalizedIncoming
+        .map((entry) => entry.item.id)
+        .filter((id): id is string => typeof id === 'string')
+        .filter((id) => existingIds.has(id)),
+    )
+
+    const idMap = new Map<string, string>()
+    for (const entry of normalizedIncoming) {
+      const providedId = entry.item.id
+      if (providedId && existingIds.has(providedId)) {
+        idMap.set(entry.incomingId, providedId)
+      } else {
+        idMap.set(entry.incomingId, crypto.randomUUID())
+      }
+    }
 
     for (const id of existingIds) {
       if (!incomingIds.has(id)) {
@@ -115,28 +137,34 @@ export function setupMenuRoutes(
       }
     }
 
-    for (const item of incomingItems) {
-      if (item.id && existingIds.has(item.id)) {
+    for (const entry of normalizedIncoming) {
+      const persistedId = idMap.get(entry.incomingId)
+      if (!persistedId) continue
+
+      const resolvedParentId = entry.incomingParentId
+        ? (idMap.get(entry.incomingParentId) ?? entry.incomingParentId)
+        : null
+
+      if (existingIds.has(persistedId)) {
         await db
           .update(menuItems)
           .set({
-            parentId: item.parentId ?? null,
-            label: item.label,
-            url: item.url,
-            target: item.target ?? '_self',
-            sortOrder: item.sortOrder,
+            parentId: resolvedParentId,
+            label: entry.item.label,
+            url: entry.item.url,
+            target: entry.item.target ?? '_self',
+            sortOrder: entry.item.sortOrder,
           })
-          .where(eq(menuItems.id, item.id))
+          .where(eq(menuItems.id, persistedId))
       } else {
-        const newId = crypto.randomUUID()
         await db.insert(menuItems).values({
-          id: newId,
+          id: persistedId,
           menuId,
-          parentId: item.parentId ?? null,
-          label: item.label,
-          url: item.url,
-          target: item.target ?? '_self',
-          sortOrder: item.sortOrder,
+          parentId: resolvedParentId,
+          label: entry.item.label,
+          url: entry.item.url,
+          target: entry.item.target ?? '_self',
+          sortOrder: entry.item.sortOrder,
           createdAt: new Date(),
         })
       }

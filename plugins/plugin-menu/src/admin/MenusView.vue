@@ -13,7 +13,7 @@ interface MenuItem {
 }
 
 interface MenuItemNode {
-  id?: string
+  id: string
   label: string
   url: string
   target: string
@@ -44,8 +44,14 @@ const saving = ref(false)
 const error = ref('')
 const showCreateMenu = ref(false)
 const newMenuForm = ref({ name: '', zone: 'main' })
+let tempItemCounter = 0
 
 const selectedMenu = computed(() => menus.value.find((m) => m.id === selectedMenuId.value) ?? null)
+
+function createTempItemId(): string {
+  tempItemCounter += 1
+  return `temp-menu-item-${Date.now()}-${tempItemCounter}`
+}
 
 function buildTree(items: MenuItem[]): MenuItemNode[] {
   const roots: MenuItemNode[] = []
@@ -64,12 +70,18 @@ function buildTree(items: MenuItem[]): MenuItemNode[] {
   }
 
   for (const item of items) {
-    const node = byId.get(item.id)!
-    if (item.parentId && byId.has(item.parentId)) {
-      byId.get(item.parentId)!.children.push(node)
-    } else {
-      roots.push(node)
+    const node = byId.get(item.id)
+    if (!node) continue
+
+    if (item.parentId) {
+      const parent = byId.get(item.parentId)
+      if (parent) {
+        parent.children.push(node)
+        continue
+      }
     }
+
+    roots.push(node)
   }
 
   return roots
@@ -79,7 +91,7 @@ function flattenTree(nodes: MenuItemNode[], parentId: string | null = null): Men
   const result: MenuItemNode[] = []
   nodes.forEach((node, idx) => {
     result.push({ ...node, parentId, sortOrder: idx, children: [] })
-    result.push(...flattenTree(node.children, node.id ?? null))
+    result.push(...flattenTree(node.children, node.id))
   })
   return result
 }
@@ -170,6 +182,7 @@ async function deleteMenu(menu: Menu) {
 
 function addTopLevelItem() {
   treeItems.value.push({
+    id: createTempItemId(),
     label: 'New Item',
     url: '/',
     target: '_self',
@@ -182,11 +195,12 @@ function addTopLevelItem() {
 
 function addChildItem(parent: MenuItemNode) {
   parent.children.push({
+    id: createTempItemId(),
     label: 'New Sub-item',
     url: '/',
     target: '_self',
     sortOrder: parent.children.length,
-    parentId: parent.id ?? null,
+    parentId: parent.id,
     children: [],
     _isNew: true,
   })
@@ -356,7 +370,7 @@ onMounted(() => {
           <div v-else class="item-tree">
             <MenuItemRow
               v-for="item in treeItems"
-              :key="item.id ?? item.label + item.sortOrder"
+              :key="item.id"
               :item="item"
               :depth="0"
               @remove="removeItem(treeItems, $event)"

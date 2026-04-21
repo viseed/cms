@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface MenuItemNode {
-  id?: string
+  id: string
   label: string
   url: string
   target: string
@@ -51,7 +51,7 @@ const emit = defineEmits<{
     <!-- Recursive children -->
     <MenuItemRow
       v-for="child in props.item.children"
-      :key="child.id ?? child.label + child.sortOrder"
+      :key="child.id"
       :item="child"
       :depth="depth + 1"
       @remove="emit('remove', $event)"
