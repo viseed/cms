@@ -7,7 +7,6 @@ export default defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Plugins', link: '/plugins/overview' },
-      { text: 'API', link: '/api/core' },
     ],
     sidebar: {
       '/guide/': [
@@ -22,7 +21,16 @@ export default defineConfig({
           text: 'Core Concepts',
           items: [
             { text: 'Plugin System', link: '/guide/plugins' },
+            { text: 'Themes', link: '/guide/themes' },
             { text: 'Database', link: '/guide/database' },
+            { text: 'Media', link: '/guide/media' },
+          ],
+        },
+        {
+          text: 'Tooling',
+          items: [
+            { text: 'CLI Reference', link: '/guide/cli' },
+            { text: 'Deployment', link: '/guide/deployment' },
           ],
         },
       ],
@@ -31,13 +39,10 @@ export default defineConfig({
           text: 'Plugins',
           items: [
             { text: 'Overview', link: '/plugins/overview' },
-            { text: 'Auth', link: '/plugins/auth' },
-            { text: 'Blog', link: '/plugins/blog' },
-            { text: 'Media', link: '/plugins/media' },
           ],
         },
       ],
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/hana-cms/hana' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/hanano-cms/hanano' }],
   },
 })

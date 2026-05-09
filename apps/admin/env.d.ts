@@ -1,4 +1,4 @@
-/// <reference types="vite/client" />
+﻿/// <reference types="vite/client" />
 
 // biome-ignore lint/correctness/noUnusedVariables: merges with vite/client ImportMetaEnv
 interface ImportMetaEnv {
@@ -6,7 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_ADMIN_PLUGIN_UI_BUILD_ID: string
 }
 
-import type { Permission } from '@hana/types'
+import type { Permission } from '@hanano/types'
 
 declare module 'vue-router' {
   interface RouteMeta {

@@ -1,4 +1,4 @@
-# Hana CMS Starter
+﻿# Hana CMS Starter
 
 A starter template for building with Hana CMS.
 
@@ -18,13 +18,13 @@ bun run build
 ## Add Plugins
 
 ```bash
-bun add @hana/plugin-media
+bun add @hanano/plugin-media
 ```
 
 Then register in `src/index.ts`:
 
 ```typescript
-import { mediaPlugin } from '@hana/plugin-media'
+import { mediaPlugin } from '@hanano/plugin-media'
 
 cms.use(mediaPlugin())
 ```

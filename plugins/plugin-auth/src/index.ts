@@ -1,4 +1,4 @@
-import type { CMSPlugin } from '@hana/types'
+﻿import type { CMSPlugin } from '@hanano/types'
 import { setupAuthRoutes } from './routes'
 import { authSchema } from './schema'
 

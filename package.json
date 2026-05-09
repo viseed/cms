@@ -1,5 +1,5 @@
 {
-  "name": "hana-cms",
+  "name": "hanano-cms",
   "private": true,
   "packageManager": "bun@1.3.10",
   "workspaces": [
@@ -9,12 +9,12 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "turbo run build --filter='!@hana/docs'",
+    "build": "turbo run build --filter=!@hanano/docs",
     "build:plugins": "turbo run build --filter=\"./plugins/*\"",
-    "clean": "turbo run clean && rimraf .turbo node_modules/.cache",
-    "dev:docs": "turbo run dev --filter=@hana/docs",
-    "dev": "turbo run dev --filter=@hana/schema --filter=@hana/types --filter=@hana/validator --filter=@hana/core --filter=@hana/admin --filter=@hana/starter --filter=@hana/theme-blog",
-    "dev:insurance": "turbo run dev --filter=@hana/schema --filter=@hana/types --filter=@hana/validator --filter=@hana/core --filter=@hana/admin --filter=@hana/starter --filter=@hana/theme-insurance",
+    "clean:all": "turbo run clean && rimraf .turbo node_modules/.cache",
+    "dev:docs": "turbo run dev --filter=@hanano/docs",
+    "dev": "turbo run dev --filter=@hanano/schema --filter=@hanano/types --filter=@hanano/validator --filter=@hanano/core --filter=@hanano/admin --filter=@hanano/starter --filter=hanano-theme-blog",
+    "dev:insurance": "turbo run dev --filter=@hanano/schema --filter=@hanano/types --filter=@hanano/validator --filter=@hanano/core --filter=@hanano/admin --filter=@hanano/starter --filter=hanano-theme-insurance",
     "test": "turbo run test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -34,7 +34,7 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "rimraf": "^6.1.3",
-    "turbo": "^2.5.0",
+    "turbo": "^2.9.12",
     "typescript": "^5.8.0",
     "vite-plugin-css-injected-by-js": "^4.0.1"
   },

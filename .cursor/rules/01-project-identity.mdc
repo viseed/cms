@@ -1,4 +1,4 @@
----
+﻿---
 description: Project identity — Tên, scope, runtime, và các thông tin cốt lõi của Hana CMS
 alwaysApply: false
 ---
@@ -6,9 +6,14 @@ alwaysApply: false
 
 ## Tên & Package Scope
 
-- **Project name**: Hana CMS (tên codebase là `hana-cms`)
-- **Package scope**: `@hana/*` — tất cả internal packages dùng prefix này
-- **Repo type**: Private monorepo (không publish lên npm public registry hiện tại)
+- **Project name**: Hanano CMS
+- **Umbrella package**: `hanano` — end-user install `bun add hanano`
+- **Core package scope**: `@hanano/*` — tất cả internal core packages
+- **Plugin packages**: `hanano-plugin-*` (unscoped) — e.g. `hanano-plugin-auth`
+- **Theme packages**: `hanano-theme-*` (unscoped) — e.g. `hanano-theme-blog`
+- **CLI binary**: `hanano` (exposed qua `hanano` package bin)
+- **Npm org**: `@hanano` (cần tạo free org trên npmjs.com trước khi publish lần đầu)
+- **Repo type**: Private monorepo, publish lên npm public registry qua Changesets
 
 ## Runtime
 
@@ -31,4 +36,5 @@ alwaysApply: false
 
 ## Last updated
 
+2026-05-09 — Renamed scope `@hana/` → `@hanano/`, added umbrella `hanano` package, plugins `hanano-plugin-*`, themes `hanano-theme-*`. Publish flow via Changesets.
 2026-03-21 — Initial creation

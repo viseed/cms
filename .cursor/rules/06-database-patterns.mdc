@@ -1,4 +1,4 @@
----
+﻿---
 description: Database patterns — Drizzle ORM conventions, schema design, PostgreSQL driver
 globs: ["packages/schema/**", "packages/core/src/database.ts", "plugins/**"]
 alwaysApply: false
@@ -67,7 +67,7 @@ const categories = pgTable('blog_categories', ...) // prefix: blog_
 const posts = pgTable('posts', ...)
 ```
 
-- **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@hana/schema`):
+- **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@hanano/schema`):
 
 ```typescript
 // ✅ Đúng — plugin content table with site_id
@@ -84,8 +84,8 @@ export const posts = pgTable(
   }),
 )
 
-// ❌ Sai — không import @hana/schema trong plugin (vi phạm dependency rules)
-import { sites } from '@hana/schema'
+// ❌ Sai — không import @hanano/schema trong plugin (vi phạm dependency rules)
+import { sites } from '@hanano/schema'
 siteId: text('site_id').references(() => sites.id)  // ❌
 ```
 
@@ -186,7 +186,7 @@ bunx hanabi db migrate
 ```
 
 CLI tự động:
-1. Phát hiện `@hana/plugin-*` packages đã cài
+1. Phát hiện `@hanano/plugin-*` packages đã cài
 2. Generate barrel file `.hana/_schema.ts` re-export tất cả schemas
 3. Generate `.hana/drizzle.config.ts` trỏ vào barrel file
 4. Chạy `bunx drizzle-kit` với config tạm

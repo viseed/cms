@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+﻿import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export const mediaFiles = pgTable('media_files', {
   id: text('id').primaryKey(),
@@ -13,3 +13,4 @@ export const mediaFiles = pgTable('media_files', {
   uploadedBy: text('uploaded_by'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
+

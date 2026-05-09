@@ -1,4 +1,4 @@
----
+﻿---
 description: Coding standards — TypeScript conventions, code style theo Biome config thực tế
 globs: ["**/*.ts", "**/*.vue", "**/*.tsx"]
 alwaysApply: false
@@ -22,7 +22,7 @@ Ví dụ đúng:
 
 ```typescript
 // ✅ no semicolons, single quotes, 2-space indent
-import type { CMSPlugin } from '@hana/types'
+import type { CMSPlugin } from '@hanano/types'
 
 export function createPlugin(name: string): CMSPlugin {
   return {
@@ -50,7 +50,7 @@ export default HanaCMS
 
 ```typescript
 // ✅ Dùng import type khi chỉ cần type
-import type { CMSPlugin, CMSConfig } from '@hana/types'
+import type { CMSPlugin, CMSConfig } from '@hanano/types'
 import type { Hono } from 'hono'
 
 // ✅ Import value khi cần runtime

@@ -1,11 +1,19 @@
-{
+﻿{
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@hana/core", "@hana/types", "@hana/schema", "@hana/validator", "@hana/registry"]],
+  "linked": [
+    ["@hanano/core", "@hanano/schema", "@hanano/types", "@hanano/validator", "@hanano/ui", "@hanano/registry"]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@hana/admin", "@hana/docs"]
+  "ignore": [
+    "@hanano/cli",
+    "@hanano/config",
+    "@hanano/admin",
+    "@hanano/docs",
+    "@hanano/starter"
+  ]
 }

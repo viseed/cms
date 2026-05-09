@@ -1,4 +1,4 @@
-export type {
+﻿export type {
   CMSConfig,
   CMSHookName,
   CMSPlugin,
@@ -15,9 +15,9 @@ export type {
   ThemeLayoutEntry,
   ThemeMenuItem,
   ThemeSettingsValue,
-} from '@hana/types'
+} from '@hanano/types'
 export { createDatabase, type DatabaseInstance } from './database'
-export { createCMS, HanaCMS } from './hana-cms'
+export { createCMS, HananoCMS } from './hanano-cms'
 export { HookRegistry } from './hook-registry'
 export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'

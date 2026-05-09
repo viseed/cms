@@ -1,4 +1,4 @@
-import type { LayoutContext, LayoutHelpers } from '@hana/types'
+﻿import type { LayoutContext, LayoutHelpers } from '@hanano/types'
 
 /**
  * Subset of the SEO meta-tag shape persisted by plugin-pages / plugin-blog.

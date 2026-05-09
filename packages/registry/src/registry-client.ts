@@ -1,11 +1,11 @@
-import type {
+﻿import type {
   PluginManifest,
   PluginRegistryEntry,
   PluginRegistryResponse,
   ThemeManifest,
   ThemeRegistryEntry,
   ThemeRegistryResponse,
-} from '@hana/types'
+} from '@hanano/types'
 import { verifyBundleIntegrity } from './integrity'
 
 export interface RegistryClientOptions {

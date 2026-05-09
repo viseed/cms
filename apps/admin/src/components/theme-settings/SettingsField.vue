@@ -1,11 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import type {
   ThemeSettingsField,
   ThemeSettingsItemField,
   ThemeSettingsItemListField,
   ThemeSettingsLinkItem,
   ThemeSettingsSelectField,
-} from '@hana/types'
+} from '@hanano/types'
 import { computed, ref } from 'vue'
 import { useMediaPicker } from '../../composables/useMediaPicker'
 

@@ -1,6 +1,6 @@
-import { dirname, resolve } from 'node:path'
+﻿import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { CMSTheme } from '@hana/types'
+import type { CMSTheme } from '@hanano/types'
 import { blogCompanionPlugin } from './companion-plugin'
 
 export { blogCompanionPlugin }

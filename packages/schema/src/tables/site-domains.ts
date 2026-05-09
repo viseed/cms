@@ -1,8 +1,8 @@
-import { boolean, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+﻿import { boolean, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 
 export const siteDomains = pgTable(
-  'hana_site_domains',
+  'hanano_site_domains',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -14,10 +14,11 @@ export const siteDomains = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
-    domainUnique: uniqueIndex('hana_site_domains_domain_unique').on(table.domain),
-    siteDomainUnique: uniqueIndex('hana_site_domains_site_domain_unique').on(
+    domainUnique: uniqueIndex('hanano_site_domains_domain_unique').on(table.domain),
+    siteDomainUnique: uniqueIndex('hanano_site_domains_site_domain_unique').on(
       table.siteId,
       table.domain,
     ),
   }),
 )
+

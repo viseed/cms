@@ -4,37 +4,37 @@ overview: Mở rộng VitePress site tại `apps/docs` thành tài liệu core g
 todos:
   - id: audit-existing
     content: Đọc và audit nội dung các file docs hiện có để giữ lại phần đúng
-    status: pending
+    status: completed
   - id: update-getting-started
     content: Viết/update guide/getting-started.md — hanabi init flow + manual install
-    status: pending
+    status: completed
   - id: update-configuration
     content: Viết/update guide/configuration.md — CMSConfig đầy đủ + env vars
-    status: pending
+    status: completed
   - id: update-database
     content: Viết/update guide/database.md — db push vs generate/migrate, schema merging
-    status: pending
+    status: completed
   - id: update-plugins-guide
     content: Viết/update guide/plugins.md — cms.use() API, plugin lifecycle, danh sách built-in plugins
-    status: pending
+    status: completed
   - id: new-themes-guide
     content: Viết mới guide/themes.md — CMSTheme interface, multi-theme, hot-swap
-    status: pending
+    status: completed
   - id: new-cli
     content: Viết mới guide/cli.md — tất cả hanabi commands
-    status: pending
+    status: completed
   - id: new-media
     content: Viết mới guide/media.md — media upload config và API
-    status: pending
+    status: completed
   - id: new-deployment
     content: Viết mới guide/deployment.md — Docker, env vars, nginx
-    status: pending
+    status: completed
   - id: update-homepage
     content: Update index.md — homepage hero + feature highlights
-    status: pending
+    status: completed
   - id: update-vitepress-config
     content: Update .vitepress/config.ts — sidebar/nav cho cấu trúc mới
-    status: pending
+    status: completed
 isProject: false
 ---
 

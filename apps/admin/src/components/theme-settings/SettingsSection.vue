@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { ThemeSettingsSection } from '@hana/types'
+﻿<script setup lang="ts">
+import type { ThemeSettingsSection } from '@hanano/types'
 import SettingsField from './SettingsField.vue'
 
 const props = defineProps<{

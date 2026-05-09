@@ -1,12 +1,12 @@
-import type { DatabaseInstance } from '@hana/core'
-import type { CMSRouteContextHelpers } from '@hana/types'
+﻿import type { DatabaseInstance } from '@hanano/core'
+import type { CMSRouteContextHelpers } from '@hanano/types'
 import {
   contentQuerySchema,
   createCategorySchema,
   createContentSchema,
   updateCategorySchema,
   updateContentSchema,
-} from '@hana/validator'
+} from '@hanano/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { categories, posts } from './schema'

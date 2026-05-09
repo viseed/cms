@@ -1,5 +1,5 @@
 import type { Context, Hono } from 'hono'
-import type { HanaCMS, HOOK_KEY, Permission, RequestContext } from './cms'
+import type { HananoCMS, HOOK_KEY, Permission, RequestContext } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
@@ -18,8 +18,8 @@ export interface CMSRouteContextHelpers {
 export interface PluginLifecycle {
   onInstall?: (db: unknown) => void | Promise<void>
   onUninstall?: (db: unknown) => void | Promise<void>
-  onEnable?: (cms: HanaCMS) => void | Promise<void>
-  onDisable?: (cms: HanaCMS) => void | Promise<void>
+  onEnable?: (cms: HananoCMS) => void | Promise<void>
+  onDisable?: (cms: HananoCMS) => void | Promise<void>
 }
 
 export interface PluginAdminMenuItem {
@@ -53,7 +53,7 @@ export interface CMSPlugin {
 }
 
 export interface CMSPluginHooks {
-  [HOOK_KEY.CMS_INIT]: (cms: HanaCMS) => void | Promise<void>
+  [HOOK_KEY.CMS_INIT]: (cms: HananoCMS) => void | Promise<void>
   [HOOK_KEY.CMS_READY]: (app: Hono) => void | Promise<void>
   [HOOK_KEY.ADMIN_REGISTER]: (registry: ComponentRegistry) => void
   [HOOK_KEY.THEME_MOUNT]: (theme: CMSTheme) => void | Promise<void>

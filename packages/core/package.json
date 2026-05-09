@@ -1,5 +1,5 @@
 {
-  "name": "@hana/core",
+  "name": "@hanano/core",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -21,9 +21,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hana/schema": "workspace:*",
-    "@hana/types": "workspace:*",
-    "@hana/validator": "workspace:*",
+    "@hanano/schema": "workspace:*",
+    "@hanano/types": "workspace:*",
+    "@hanano/validator": "workspace:*",
     "@tiptap/extension-color": "^3.22.3",
     "@tiptap/extension-image": "^3.22.3",
     "@tiptap/extension-link": "^3.22.3",
@@ -42,7 +42,7 @@
     "hono": "^4.7.0"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*",
+    "@hanano/config": "workspace:*",
     "@types/node": "^25.5.0"
   }
 }

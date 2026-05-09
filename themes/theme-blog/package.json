@@ -1,5 +1,5 @@
 {
-  "name": "@hana/theme-blog",
+  "name": "hanano-theme-blog",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -21,9 +21,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hana/types": "workspace:*"
+    "@hanano/types": "workspace:*"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*"
+    "@hanano/config": "workspace:*"
   }
 }

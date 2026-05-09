@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { ThemeSettingsSchema } from '@hana/types'
+﻿<script setup lang="ts">
+import type { ThemeSettingsSchema } from '@hanano/types'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { adminFetch } from '../../lib/admin-api'
 import SettingsSection from './SettingsSection.vue'

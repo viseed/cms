@@ -14,18 +14,18 @@
         "dotenv": "^17.4.2",
         "drizzle-kit": "^0.31.10",
         "rimraf": "^6.1.3",
-        "turbo": "^2.5.0",
+        "turbo": "^2.9.12",
         "typescript": "^5.8.0",
         "vite-plugin-css-injected-by-js": "^4.0.1",
       },
     },
     "apps/admin": {
-      "name": "@hana/admin",
+      "name": "@hanano/admin",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
-        "@hana/ui": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/ui": "workspace:*",
+        "@hanano/validator": "workspace:*",
         "@tiptap/extension-character-count": "^3.22.3",
         "@tiptap/extension-color": "^3.22.3",
         "@tiptap/extension-image": "^3.22.3",
@@ -45,13 +45,13 @@
         "vue-router": "^4.5.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
       },
     },
     "apps/docs": {
-      "name": "@hana/docs",
+      "name": "@hanano/docs",
       "version": "0.1.0",
       "devDependencies": {
         "vitepress": "^1.6.0",
@@ -59,46 +59,46 @@
       },
     },
     "apps/starter": {
-      "name": "@hana/starter",
+      "name": "@hanano/starter",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/core": "workspace:*",
-        "@hana/plugin-auth": "workspace:*",
-        "@hana/plugin-blog": "workspace:*",
-        "@hana/plugin-menu": "workspace:*",
-        "@hana/plugin-pages": "workspace:*",
+        "@hanano/core": "workspace:*",
+        "hanano-plugin-auth": "workspace:*",
+        "hanano-plugin-blog": "workspace:*",
+        "hanano-plugin-menu": "workspace:*",
+        "hanano-plugin-pages": "workspace:*",
       },
       "devDependencies": {
-        "@hana/theme-blog": "workspace:*",
-        "@hana/theme-insurance": "workspace:*",
+        "hanano-theme-blog": "workspace:*",
+        "hanano-theme-insurance": "workspace:*",
       },
     },
     "packages/cli": {
-      "name": "@hana/cli",
+      "name": "@hanano/cli",
       "version": "0.1.0",
       "bin": {
         "hana": "./dist/index.js",
       },
       "dependencies": {
-        "@hana/types": "workspace:*",
+        "@hanano/types": "workspace:*",
         "drizzle-kit": "^0.31.10",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
         "@types/node": "^25.5.0",
       },
     },
     "packages/config": {
-      "name": "@hana/config",
+      "name": "@hanano/config",
       "version": "0.1.0",
     },
     "packages/core": {
-      "name": "@hana/core",
+      "name": "@hanano/core",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/schema": "workspace:*",
-        "@hana/types": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/schema": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/validator": "workspace:*",
         "@tiptap/extension-color": "^3.22.3",
         "@tiptap/extension-image": "^3.22.3",
         "@tiptap/extension-link": "^3.22.3",
@@ -117,103 +117,119 @@
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
         "@types/node": "^25.5.0",
       },
     },
+    "packages/hanano": {
+      "name": "hanano",
+      "version": "0.1.0",
+      "bin": {
+        "hanano": "./dist/cli.js",
+      },
+      "dependencies": {
+        "@hanano/cli": "workspace:*",
+        "@hanano/core": "workspace:*",
+        "@hanano/registry": "workspace:*",
+        "@hanano/schema": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/ui": "workspace:*",
+        "@hanano/validator": "workspace:*",
+      },
+    },
     "packages/registry": {
-      "name": "@hana/registry",
+      "name": "@hanano/registry",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/validator": "workspace:*",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
     "packages/schema": {
-      "name": "@hana/schema",
+      "name": "@hanano/schema",
       "version": "0.1.0",
       "dependencies": {
         "drizzle-orm": "^0.44.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
-        "@hana/types": "workspace:*",
+        "@hanano/config": "workspace:*",
+        "@hanano/types": "workspace:*",
       },
     },
     "packages/types": {
-      "name": "@hana/types",
+      "name": "@hanano/types",
       "version": "0.1.0",
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
     "packages/ui": {
-      "name": "@hana/ui",
+      "name": "@hanano/ui",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
+        "@hanano/types": "workspace:*",
         "vue": "^3.5.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
     "packages/validator": {
-      "name": "@hana/validator",
+      "name": "@hanano/validator",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^3.24.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
-        "@hana/types": "workspace:*",
+        "@hanano/config": "workspace:*",
+        "@hanano/types": "workspace:*",
       },
     },
     "plugins/plugin-auth": {
-      "name": "@hana/plugin-auth",
+      "name": "hanano-plugin-auth",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/schema": "workspace:*",
-        "@hana/types": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/schema": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
     "plugins/plugin-blog": {
-      "name": "@hana/plugin-blog",
+      "name": "hanano-plugin-blog",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
-        "@hana/core": "workspace:*",
+        "@hanano/config": "workspace:*",
+        "@hanano/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
       },
     },
     "plugins/plugin-menu": {
-      "name": "@hana/plugin-menu",
+      "name": "hanano-plugin-menu",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
+        "@hanano/types": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
-        "@hana/core": "workspace:*",
+        "@hanano/config": "workspace:*",
+        "@hanano/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vite-plugin-css-injected-by-js": "^3.5.2",
@@ -221,40 +237,40 @@
       },
     },
     "plugins/plugin-pages": {
-      "name": "@hana/plugin-pages",
+      "name": "hanano-plugin-pages",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
-        "@hana/validator": "workspace:*",
+        "@hanano/types": "workspace:*",
+        "@hanano/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
-        "@hana/core": "workspace:*",
+        "@hanano/config": "workspace:*",
+        "@hanano/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
       },
     },
     "themes/theme-blog": {
-      "name": "@hana/theme-blog",
+      "name": "hanano-theme-blog",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
+        "@hanano/types": "workspace:*",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
     "themes/theme-insurance": {
-      "name": "@hana/theme-insurance",
+      "name": "hanano-theme-insurance",
       "version": "0.1.0",
       "dependencies": {
-        "@hana/types": "workspace:*",
+        "@hanano/types": "workspace:*",
       },
       "devDependencies": {
-        "@hana/config": "workspace:*",
+        "@hanano/config": "workspace:*",
       },
     },
   },
@@ -439,39 +455,27 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
 
-    "@hana/admin": ["@hana/admin@workspace:apps/admin"],
+    "@hanano/admin": ["@hanano/admin@workspace:apps/admin"],
 
-    "@hana/cli": ["@hana/cli@workspace:packages/cli"],
+    "@hanano/cli": ["@hanano/cli@workspace:packages/cli"],
 
-    "@hana/config": ["@hana/config@workspace:packages/config"],
+    "@hanano/config": ["@hanano/config@workspace:packages/config"],
 
-    "@hana/core": ["@hana/core@workspace:packages/core"],
+    "@hanano/core": ["@hanano/core@workspace:packages/core"],
 
-    "@hana/docs": ["@hana/docs@workspace:apps/docs"],
+    "@hanano/docs": ["@hanano/docs@workspace:apps/docs"],
 
-    "@hana/plugin-auth": ["@hana/plugin-auth@workspace:plugins/plugin-auth"],
+    "@hanano/registry": ["@hanano/registry@workspace:packages/registry"],
 
-    "@hana/plugin-blog": ["@hana/plugin-blog@workspace:plugins/plugin-blog"],
+    "@hanano/schema": ["@hanano/schema@workspace:packages/schema"],
 
-    "@hana/plugin-menu": ["@hana/plugin-menu@workspace:plugins/plugin-menu"],
+    "@hanano/starter": ["@hanano/starter@workspace:apps/starter"],
 
-    "@hana/plugin-pages": ["@hana/plugin-pages@workspace:plugins/plugin-pages"],
+    "@hanano/types": ["@hanano/types@workspace:packages/types"],
 
-    "@hana/registry": ["@hana/registry@workspace:packages/registry"],
+    "@hanano/ui": ["@hanano/ui@workspace:packages/ui"],
 
-    "@hana/schema": ["@hana/schema@workspace:packages/schema"],
-
-    "@hana/starter": ["@hana/starter@workspace:apps/starter"],
-
-    "@hana/theme-blog": ["@hana/theme-blog@workspace:themes/theme-blog"],
-
-    "@hana/theme-insurance": ["@hana/theme-insurance@workspace:themes/theme-insurance"],
-
-    "@hana/types": ["@hana/types@workspace:packages/types"],
-
-    "@hana/ui": ["@hana/ui@workspace:packages/ui"],
-
-    "@hana/validator": ["@hana/validator@workspace:packages/validator"],
+    "@hanano/validator": ["@hanano/validator@workspace:packages/validator"],
 
     "@iconify-json/simple-icons": ["@iconify-json/simple-icons@1.2.74", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-yqaohfY6jnYjTVpuTkaBQHrWbdUrQyWXhau0r/0EZiNWYXPX/P8WWwl1DoLH5CbvDjjcWQw5J0zADhgCUklOqA=="],
 
@@ -765,6 +769,18 @@
 
     "@tiptap/vue-3": ["@tiptap/vue-3@3.22.3", "", { "optionalDependencies": { "@tiptap/extension-bubble-menu": "^3.22.3", "@tiptap/extension-floating-menu": "^3.22.3" }, "peerDependencies": { "@floating-ui/dom": "^1.0.0", "@tiptap/core": "^3.22.3", "@tiptap/pm": "^3.22.3", "vue": "^3.0.0" } }, "sha512-wOGZiBwIJYCZXts5VWWGgseGCRMc8tO46tgaOXNyMLVl2h2cO6/CNEcPO2pgtuoLIHoV4KYvfpw6n+XqR9cqbA=="],
 
+    "@turbo/darwin-64": ["@turbo/darwin-64@2.9.12", "", { "os": "darwin", "cpu": "x64" }, "sha512-eu3eFRmE9NjgZ0wPdRJ44l+LGSeIky+tz5ZQd8zQkw/Yqi+BM7wq+8nbabeoiVUcICi/IZweMOKl/MCmkrd1+g=="],
+
+    "@turbo/darwin-arm64": ["@turbo/darwin-arm64@2.9.12", "", { "os": "darwin", "cpu": "arm64" }, "sha512-RUkAE404z/J8NsyrUosMcBaXT6M4bRFxTQrmkDQBLQVXaC8Jl0e9bMvYDSX0GW7Ffm2m3j9y7RXgR1foeUAM9w=="],
+
+    "@turbo/linux-64": ["@turbo/linux-64@2.9.12", "", { "os": "linux", "cpu": "x64" }, "sha512-InIUtH7cw/vqXNX1Gr7QgWfmw3ct08pV5CpfdEOR48z2u2rzdmpIuk00B/Q2xCb0PMWtKgiMQynfuphmEuUyTQ=="],
+
+    "@turbo/linux-arm64": ["@turbo/linux-arm64@2.9.12", "", { "os": "linux", "cpu": "arm64" }, "sha512-lC6nD//Xh67fmJM0LKaLsg74Wry0aYrgMklpiNgCbUaMdPIOqj0A00iri3NU7Lb7pZHx8ViisgpeDKlpSgFUCA=="],
+
+    "@turbo/windows-64": ["@turbo/windows-64@2.9.12", "", { "os": "win32", "cpu": "x64" }, "sha512-conYri8VUl72JOdYnLDPYwzqbPcY5ECoHmo9FWoKznemhaAIilj4maHqs9Uar0aKfNoZIULniy+6iWaLtLO34A=="],
+
+    "@turbo/windows-arm64": ["@turbo/windows-arm64@2.9.12", "", { "os": "win32", "cpu": "arm64" }, "sha512-XoR4bsg62/L/esRVcmoMESEiNZ36+YmyjYGLpoqk8nwMgXzzVjNOgX0lRSz5w/U/ajLGv3nhMsS0Q2QOdvp2AQ=="],
+
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
     "@types/bun": ["@types/bun@1.3.11", "", { "dependencies": { "bun-types": "1.3.11" } }, "sha512-5vPne5QvtpjGpsGYXiFyycfpDF2ECyPcTSsFBMa0fraoxiQyMJ3SmuQIGhzPg2WJuWxVBoxWJ2kClYTcw/4fAg=="],
@@ -984,6 +1000,20 @@
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
 
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
+
+    "hanano": ["hanano@workspace:packages/hanano"],
+
+    "hanano-plugin-auth": ["hanano-plugin-auth@workspace:plugins/plugin-auth"],
+
+    "hanano-plugin-blog": ["hanano-plugin-blog@workspace:plugins/plugin-blog"],
+
+    "hanano-plugin-menu": ["hanano-plugin-menu@workspace:plugins/plugin-menu"],
+
+    "hanano-plugin-pages": ["hanano-plugin-pages@workspace:plugins/plugin-pages"],
+
+    "hanano-theme-blog": ["hanano-theme-blog@workspace:themes/theme-blog"],
+
+    "hanano-theme-insurance": ["hanano-theme-insurance@workspace:themes/theme-insurance"],
 
     "happy-dom": ["happy-dom@20.8.9", "", { "dependencies": { "@types/node": ">=20.0.0", "@types/whatwg-mimetype": "^3.0.2", "@types/ws": "^8.18.1", "entities": "^7.0.1", "whatwg-mimetype": "^3.0.0", "ws": "^8.18.3" } }, "sha512-Tz23LR9T9jOGVZm2x1EPdXqwA37G/owYMxRwU0E4miurAtFsPMQ1d2Jc2okUaSjZqAFz2oEn3FLXC5a0a+siyA=="],
 
@@ -1335,19 +1365,7 @@
 
     "tsx": ["tsx@4.21.0", "", { "dependencies": { "esbuild": "~0.27.0", "get-tsconfig": "^4.7.5" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "bin": { "tsx": "dist/cli.mjs" } }, "sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw=="],
 
-    "turbo": ["turbo@2.8.17", "", { "optionalDependencies": { "turbo-darwin-64": "2.8.17", "turbo-darwin-arm64": "2.8.17", "turbo-linux-64": "2.8.17", "turbo-linux-arm64": "2.8.17", "turbo-windows-64": "2.8.17", "turbo-windows-arm64": "2.8.17" }, "bin": { "turbo": "bin/turbo" } }, "sha512-YwPsNSqU2f/RXU/+Kcb7cPkPZARxom4+me7LKEdN5jsvy2tpfze3zDZ4EiGrJnvOm9Avu9rK0aaYsP7qZ3iz7A=="],
-
-    "turbo-darwin-64": ["turbo-darwin-64@2.8.17", "", { "os": "darwin", "cpu": "x64" }, "sha512-ZFkv2hv7zHpAPEXBF6ouRRXshllOavYc+jjcrYyVHvxVTTwJWsBZwJ/gpPzmOKGvkSjsEyDO5V6aqqtZzwVF+Q=="],
-
-    "turbo-darwin-arm64": ["turbo-darwin-arm64@2.8.17", "", { "os": "darwin", "cpu": "arm64" }, "sha512-5DXqhQUt24ycEryXDfMNKEkW5TBHs+QmU23a2qxXwwFDaJsWcPo2obEhBxxdEPOv7qmotjad+09RGeWCcJ9JDw=="],
-
-    "turbo-linux-64": ["turbo-linux-64@2.8.17", "", { "os": "linux", "cpu": "x64" }, "sha512-KLUbz6w7F73D/Ihh51hVagrKR0/CTsPEbRkvXLXvoND014XJ4BCrQUqSxlQ4/hu+nqp1v5WlM85/h3ldeyujuA=="],
-
-    "turbo-linux-arm64": ["turbo-linux-arm64@2.8.17", "", { "os": "linux", "cpu": "arm64" }, "sha512-pJK67XcNJH40lTAjFu7s/rUlobgVXyB3A3lDoq+/JccB3hf+SysmkpR4Itlc93s8LEaFAI4mamhFuTV17Z6wOg=="],
-
-    "turbo-windows-64": ["turbo-windows-64@2.8.17", "", { "os": "win32", "cpu": "x64" }, "sha512-EijeQ6zszDMmGZLP2vT2RXTs/GVi9rM0zv2/G4rNu2SSRSGFapgZdxgW4b5zUYLVaSkzmkpWlGfPfj76SW9yUg=="],
-
-    "turbo-windows-arm64": ["turbo-windows-arm64@2.8.17", "", { "os": "win32", "cpu": "arm64" }, "sha512-crpfeMPkfECd4V1PQ/hMoiyVcOy04+bWedu/if89S15WhOalHZ2BYUi6DOJhZrszY+mTT99OwpOsj4wNfb/GHQ=="],
+    "turbo": ["turbo@2.9.12", "", { "optionalDependencies": { "@turbo/darwin-64": "2.9.12", "@turbo/darwin-arm64": "2.9.12", "@turbo/linux-64": "2.9.12", "@turbo/linux-arm64": "2.9.12", "@turbo/windows-64": "2.9.12", "@turbo/windows-arm64": "2.9.12" }, "bin": { "turbo": "bin/turbo" } }, "sha512-lCPgus1NuTiBdaITWqzSH/Ff6HVL8HHGBtOXHg1dHRfcshN79XkygSdh0M6g8b0td91ILLG5MTkLOkp5UvyPJw=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
@@ -1407,8 +1425,6 @@
 
     "@esbuild-kit/core-utils/esbuild": ["esbuild@0.18.20", "", { "optionalDependencies": { "@esbuild/android-arm": "0.18.20", "@esbuild/android-arm64": "0.18.20", "@esbuild/android-x64": "0.18.20", "@esbuild/darwin-arm64": "0.18.20", "@esbuild/darwin-x64": "0.18.20", "@esbuild/freebsd-arm64": "0.18.20", "@esbuild/freebsd-x64": "0.18.20", "@esbuild/linux-arm": "0.18.20", "@esbuild/linux-arm64": "0.18.20", "@esbuild/linux-ia32": "0.18.20", "@esbuild/linux-loong64": "0.18.20", "@esbuild/linux-mips64el": "0.18.20", "@esbuild/linux-ppc64": "0.18.20", "@esbuild/linux-riscv64": "0.18.20", "@esbuild/linux-s390x": "0.18.20", "@esbuild/linux-x64": "0.18.20", "@esbuild/netbsd-x64": "0.18.20", "@esbuild/openbsd-x64": "0.18.20", "@esbuild/sunos-x64": "0.18.20", "@esbuild/win32-arm64": "0.18.20", "@esbuild/win32-ia32": "0.18.20", "@esbuild/win32-x64": "0.18.20" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA=="],
 
-    "@hana/plugin-menu/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
-
     "@manypkg/find-root/@types/node": ["@types/node@12.20.55", "", {}, "sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ=="],
 
     "@manypkg/find-root/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
@@ -1420,6 +1436,8 @@
     "bun-types/@types/node": ["@types/node@12.20.55", "", {}, "sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ=="],
 
     "cross-fetch/node-fetch": ["node-fetch@2.7.0", "", { "dependencies": { "whatwg-url": "^5.0.0" }, "peerDependencies": { "encoding": "^0.1.0" }, "optionalPeers": ["encoding"] }, "sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A=="],
+
+    "hanano-plugin-menu/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
 
     "ky-universal/node-fetch": ["node-fetch@3.0.0-beta.9", "", { "dependencies": { "data-uri-to-buffer": "^3.0.1", "fetch-blob": "^2.1.1" } }, "sha512-RdbZCEynH2tH46+tj0ua9caUHVWrd/RHnRfvly2EVdqGmI3ndS1Vn/xjm5KuGejDt2RNDQsVRLPNd2QPwcewVg=="],
 

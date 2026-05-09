@@ -1,4 +1,4 @@
-import type { CMSHookName, CMSPluginHooks } from '@hana/types'
+﻿import type { CMSHookName, CMSPluginHooks } from '@hanano/types'
 
 type HookHandler = CMSPluginHooks[CMSHookName]
 

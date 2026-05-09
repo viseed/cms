@@ -1,4 +1,4 @@
-import type { ThemeExtensionSlotId, ThemeExtensionWidgetRegistration } from '@hana/types'
+﻿import type { ThemeExtensionSlotId, ThemeExtensionWidgetRegistration } from '@hanano/types'
 
 const registry = new Map<string, Map<string, ThemeExtensionWidgetRegistration>>()
 

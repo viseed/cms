@@ -1,5 +1,5 @@
 {
-  "name": "@hana/plugin-auth",
+  "name": "hanano-plugin-auth",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -23,13 +23,13 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hana/types": "workspace:*",
-    "@hana/schema": "workspace:*",
-    "@hana/validator": "workspace:*",
+    "@hanano/types": "workspace:*",
+    "@hanano/schema": "workspace:*",
+    "@hanano/validator": "workspace:*",
     "hono": "^4.7.0",
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*"
+    "@hanano/config": "workspace:*"
   }
 }

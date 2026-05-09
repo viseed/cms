@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { MetaSeo, SchemaOrgItem } from '@hana/validator'
+﻿<script setup lang="ts">
+import type { MetaSeo, SchemaOrgItem } from '@hanano/validator'
 import { computed, onMounted, ref } from 'vue'
 
 interface Post {

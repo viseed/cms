@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+﻿import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const STARTER_PACKAGE_JSON = (name: string): string =>
@@ -12,34 +12,34 @@ const STARTER_PACKAGE_JSON = (name: string): string =>
         build: 'bun build src/index.ts --outdir dist --target bun',
       },
       dependencies: {
-        '@hana/core': 'latest',
-        '@hana/plugin-auth': 'latest',
-        '@hana/plugin-blog': 'latest',
+        '@hanano/core': 'latest',
+        'hanano-plugin-auth': 'latest',
+        'hanano-plugin-blog': 'latest',
       },
       devDependencies: {
-        '@hana/cli': 'latest',
+        hanano: 'latest',
       },
     },
     null,
     2,
   )
 
-const STARTER_INDEX = `import { createCMS } from '@hana/core'
-import { authPlugin } from '@hana/plugin-auth'
-import { blogPlugin } from '@hana/plugin-blog'
+const STARTER_INDEX = `import { createCMS } from '@hanano/core'
+import { authPlugin } from 'hanano-plugin-auth'
+import { blogPlugin } from 'hanano-plugin-blog'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hanano',
   },
   admin: {
     bootstrapAdmin:
-      process.env.HANA_ADMIN_EMAIL && process.env.HANA_ADMIN_PASSWORD
+      process.env.HANANO_ADMIN_EMAIL && process.env.HANANO_ADMIN_PASSWORD
         ? {
-            email: process.env.HANA_ADMIN_EMAIL,
-            password: process.env.HANA_ADMIN_PASSWORD,
-            name: process.env.HANA_ADMIN_NAME ?? 'Administrator',
+            email: process.env.HANANO_ADMIN_EMAIL,
+            password: process.env.HANANO_ADMIN_PASSWORD,
+            name: process.env.HANANO_ADMIN_NAME ?? 'Administrator',
           }
         : undefined,
   },
@@ -87,12 +87,12 @@ export async function initProject(projectName: string): Promise<void> {
   console.log(`  cd ${projectName}`)
   console.log(`  bun install`)
   console.log(`  # Set your PostgreSQL connection string:`)
-  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/hana"`)
+  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/hanano"`)
   console.log(`  # Push schema to database:`)
-  console.log(`  bunx hanabi db push`)
+  console.log(`  bunx hanano db push`)
   console.log(`  # Dev default admin is auto-seeded on first run:`)
   console.log(`  # email: admin@local.dev`)
   console.log(`  # password: 12345678`)
-  console.log(`  # Optional override: HANA_ADMIN_EMAIL / HANA_ADMIN_PASSWORD / HANA_ADMIN_NAME`)
+  console.log(`  # Optional override: HANANO_ADMIN_EMAIL / HANANO_ADMIN_PASSWORD / HANANO_ADMIN_NAME`)
   console.log(`  bun run dev`)
 }

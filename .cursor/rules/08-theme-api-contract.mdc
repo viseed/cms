@@ -1,4 +1,4 @@
----
+﻿---
 description: Theme API contract — CMSTheme interface, layout/region/slot vocabulary, boundary với Plugin
 globs: ["packages/types/src/theme.ts", "packages/types/src/theme-extension-points.ts", "packages/core/src/theme*", "packages/schema/src/theme*", "packages/ui/src/theme-widget-registry.ts"]
 alwaysApply: false
@@ -77,7 +77,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 
 ### Extension points (regions / slots / widgets) — official contract
 
-- **Types**: `@hana/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
+- **Types**: `@hanano/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
 - **Theme**: `CMSTheme.extensionPoints?` — optional manifest (`slots[]`) mô tả slot id theme thực sự render trong `.eta`.
 - **Nguyên tắc**: Plugin cung cấp **logic hoặc component identity** (`ThemeExtensionWidgetDescriptor` / registration với `source`); **theme quyết định vị trí** bằng cách khai báo slot và gọi render hook trong template.
 - **Admin UI registry** (Vue): `packages/ui/src/theme-widget-registry.ts` — `themeWidgetRegistry` giữ đăng ký widget theo `source` + `id`, query theo `slot` qua `getWidgetsForSlot` (không dùng `component-registry` cho mục đích này).

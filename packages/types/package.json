@@ -1,5 +1,5 @@
 {
-  "name": "@hana/types",
+  "name": "@hanano/types",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -21,6 +21,6 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*"
+    "@hanano/config": "workspace:*"
   }
 }

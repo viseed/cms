@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { adminFetch } from '../lib/admin-api'
 
@@ -23,21 +23,21 @@ onMounted(async () => {
     // API not available during static dev
     plugins.value = [
       {
-        name: '@hana/plugin-auth',
+        name: '@hanano/plugin-auth',
         version: '0.1.0',
         description: 'Authentication & session management',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hana/plugin-blog',
+        name: '@hanano/plugin-blog',
         version: '0.1.0',
         description: 'Blog posts & categories',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hana/plugin-media',
+        name: '@hanano/plugin-media',
         version: '0.1.0',
         description: 'File upload & media management',
         installed: false,

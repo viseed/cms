@@ -1,10 +1,10 @@
-import { createCMS } from '@hana/core'
-import { authPlugin } from '@hana/plugin-auth'
-import { blogPlugin } from '@hana/plugin-blog'
-import { menuPlugin } from '@hana/plugin-menu'
-import { pagesPlugin } from '@hana/plugin-pages'
-import { blogTheme } from '@hana/theme-blog'
-import { insuranceTheme } from '@hana/theme-insurance'
+﻿import { createCMS } from '@hanano/core'
+import { authPlugin } from 'hanano-plugin-auth'
+import { blogPlugin } from 'hanano-plugin-blog'
+import { menuPlugin } from 'hanano-plugin-menu'
+import { pagesPlugin } from 'hanano-plugin-pages'
+import { blogTheme } from 'hanano-theme-blog'
+import { insuranceTheme } from 'hanano-theme-insurance'
 
 const cms = createCMS({
   db: {

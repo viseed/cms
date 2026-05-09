@@ -1,8 +1,8 @@
-import { boolean, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+﻿import { boolean, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 
 export const installedThemes = pgTable(
-  'hana_installed_themes',
+  'hanano_installed_themes',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -28,9 +28,10 @@ export const installedThemes = pgTable(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteNameUnique: uniqueIndex('hana_installed_themes_site_name_unique').on(
+    siteNameUnique: uniqueIndex('hanano_installed_themes_site_name_unique').on(
       table.siteId,
       table.name,
     ),
   }),
 )
+

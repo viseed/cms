@@ -1,4 +1,4 @@
-import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hana/types'
+﻿import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hanano/types'
 
 export function blogCompanionPlugin(): CMSPlugin {
   return {

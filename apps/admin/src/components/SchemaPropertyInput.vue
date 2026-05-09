@@ -1,7 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { type SchemaTermSummary, useSchemaOrg } from '../composables/useSchemaOrg'
-import type { SchemaOrgItem, SchemaOrgValue } from '@hana/validator'
+import type { SchemaOrgItem, SchemaOrgValue } from '@hanano/validator'
 
 // Recursive: SchemaPropertyInput → SchemaItemEditor → SchemaPropertyInput
 const SchemaItemEditor = defineAsyncComponent(() => import('./SchemaItemEditor.vue'))

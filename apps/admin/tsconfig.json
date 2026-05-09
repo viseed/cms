@@ -1,5 +1,5 @@
-{
-  "extends": "@hana/config/tsconfig.app.json",
+﻿{
+  "extends": "@hanano/config/tsconfig.app.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "preserve",

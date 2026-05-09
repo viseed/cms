@@ -1,6 +1,6 @@
-import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+﻿import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const users = pgTable('hana_users', {
+export const users = pgTable('hanano_users', {
   id: text('id').primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
@@ -11,3 +11,4 @@ export const users = pgTable('hana_users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
+

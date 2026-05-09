@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Theme extension points — regions, slots, and widget contracts.
  *
  * Plugins contribute widget metadata (logic / component identity); themes decide
@@ -83,6 +83,6 @@ export interface ThemeExtensionWidgetDescriptor {
  * Fully qualified widget registration including plugin source (after core normalizes).
  */
 export interface ThemeExtensionWidgetRegistration extends ThemeExtensionWidgetDescriptor {
-  /** npm scope or plugin id, e.g. `@hana/plugin-blog`. */
+  /** npm scope or plugin id, e.g. `@hanano/plugin-blog`. */
   source: string
 }

@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { SchemaOrgItem } from '@hana/validator'
+﻿<script setup lang="ts">
+import type { SchemaOrgItem } from '@hanano/validator'
 import { computed } from 'vue'
 import SchemaItemEditor from './SchemaItemEditor.vue'
 

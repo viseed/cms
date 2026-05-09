@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import type { Permission } from '@hana/types'
+﻿<script setup lang="ts">
+import type { Permission } from '@hanano/types'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminSiteContext } from '../composables/useAdminSiteContext'

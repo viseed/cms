@@ -1,7 +1,7 @@
-import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+﻿import { jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const sites = pgTable(
-  'hana_sites',
+  'hanano_sites',
   {
     id: text('id').primaryKey(),
     name: text('name').notNull(),
@@ -14,6 +14,7 @@ export const sites = pgTable(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    slugUnique: uniqueIndex('hana_sites_slug_unique').on(table.slug),
+    slugUnique: uniqueIndex('hanano_sites_slug_unique').on(table.slug),
   }),
 )
+

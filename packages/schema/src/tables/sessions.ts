@@ -1,9 +1,9 @@
-import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+﻿import { pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 import { users } from './users'
 
 export const sessions = pgTable(
-  'hana_sessions',
+  'hanano_sessions',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -18,6 +18,7 @@ export const sessions = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteTokenUnique: uniqueIndex('hana_sessions_site_token_unique').on(table.siteId, table.token),
+    siteTokenUnique: uniqueIndex('hanano_sessions_site_token_unique').on(table.siteId, table.token),
   }),
 )
+

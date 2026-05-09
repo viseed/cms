@@ -1,5 +1,5 @@
-import { coreSchema, mergeSchemas } from '@hana/schema'
-import type { DatabaseConfig } from '@hana/types'
+﻿import { coreSchema, mergeSchemas } from '@hanano/schema'
+import type { DatabaseConfig } from '@hanano/types'
 import { drizzle } from 'drizzle-orm/bun-sql'
 
 export type DatabaseInstance = ReturnType<typeof drizzle>

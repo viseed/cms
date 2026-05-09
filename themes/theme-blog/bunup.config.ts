@@ -1,6 +1,6 @@
-import { defineConfig } from 'bunup'
+﻿import { defineConfig } from 'bunup'
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  external: ['@hana/types'],
+  external: ['@hanano/types'],
 })

@@ -1,9 +1,10 @@
 {
-  "name": "@hana/cli",
+  "name": "@hanano/cli",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "bin": {
-    "hana": "./dist/index.js"
+    "hanano": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -21,11 +22,11 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hana/types": "workspace:*",
+    "@hanano/types": "workspace:*",
     "drizzle-kit": "^0.31.10"
   },
   "devDependencies": {
-    "@hana/config": "workspace:*",
+    "@hanano/config": "workspace:*",
     "@types/node": "^25.5.0"
   }
 }

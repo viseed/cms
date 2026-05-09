@@ -1,8 +1,8 @@
-import { describe, expect, test } from 'bun:test'
+﻿import { describe, expect, test } from 'bun:test'
 import { randomUUID } from 'node:crypto'
-import { sessions, siteDomains, userSiteRoles, users } from '@hana/schema'
+import { sessions, siteDomains, userSiteRoles, users } from '@hanano/schema'
 import { eq } from 'drizzle-orm'
-import { createCMS } from './hana-cms'
+import { createCMS } from './hanano-cms'
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
 const DEFAULT_SITE_ID = 'default'

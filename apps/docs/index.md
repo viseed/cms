@@ -10,12 +10,18 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/hana-cms/hana
+      link: https://github.com/hanano-cms/hanano
 features:
   - title: Plugin Architecture
-    details: Extend everything with official and community plugins. Install from NPM or dynamically from CDN.
+    details: Add capabilities with official plugins for auth, blog, menus, and pages. Register via cms.use() — no configuration files needed.
   - title: Bun-Native Performance
-    details: Built for Bun runtime. Lightning-fast startup, PostgreSQL-powered, and zero cold starts.
+    details: Built for the Bun runtime with its built-in PostgreSQL driver. Fast startup, zero cold starts, and no separate pg client required.
+  - title: Theme System
+    details: Swap themes at runtime from the admin panel. Themes use Eta templates and can carry companion plugins for their own data needs.
   - title: Admin Dashboard
-    details: Beautiful Vue 3 admin panel with plugin marketplace, content management, and media library.
+    details: Built-in Vue 3 admin panel for managing content, media, menus, plugins, and themes — served at /admin with zero extra setup.
+  - title: Media Library
+    details: Upload, serve, and manage files out of the box. The media API is built into core — no plugin installation required.
+  - title: Developer-First CLI
+    details: Scaffold projects, push schemas, generate migrations, and manage plugins with the hanabi CLI.
 ---

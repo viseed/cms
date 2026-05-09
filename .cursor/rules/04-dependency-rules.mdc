@@ -1,4 +1,4 @@
----
+﻿---
 description: Dependency rules — Import graph, ngăn circular dependency giữa các packages
 alwaysApply: false
 ---
@@ -10,28 +10,30 @@ alwaysApply: false
 ## Dependency Graph (chiều mũi tên = "được phép import từ")
 
 ```
-@hana/config    ←── (không import từ ai, chỉ là tsconfig)
+@hanano/config    ←── (không import từ ai, chỉ là tsconfig)
 
-@hana/types     ←── (không import từ bất kỳ @hana/* nào)
+@hanano/types     ←── (không import từ bất kỳ @hanano/* nào)
                      └── Mọi package khác đều import từ đây
 
-@hana/validator ←── @hana/types
+@hanano/validator ←── @hanano/types
 
-@hana/schema    ←── @hana/types
+@hanano/schema    ←── @hanano/types
 
-@hana/registry  ←── @hana/types
+@hanano/registry  ←── @hanano/types
 
-@hana/core      ←── @hana/types, @hana/validator, @hana/schema, @hana/registry
+@hanano/core      ←── @hanano/types, @hanano/validator, @hanano/schema, @hanano/registry
 
-@hana/ui        ←── @hana/types, @hana/registry
+@hanano/ui        ←── @hanano/types, @hanano/registry
 
-@hana/cli       ←── @hana/core
+@hanano/cli       ←── @hanano/core
 
-plugins/*       ←── @hana/types, @hana/core, @hana/ui  (KHÔNG import từ nhau)
+hanano-plugin-* ←── @hanano/types, @hanano/core, @hanano/ui  (KHÔNG import từ nhau)
 
-themes/*        ←── @hana/types  (CHỈ import types, KHÔNG import core/schema/plugin)
+hanano-theme-*  ←── @hanano/types  (CHỈ import types, KHÔNG import core/schema/plugin)
 
-apps/*          ←── bất kỳ package nào, themes/* (apps là leaf node)
+hanano          ←── @hanano/core, @hanano/schema, @hanano/types, @hanano/validator, @hanano/ui, @hanano/registry, @hanano/cli
+
+apps/*          ←── bất kỳ package nào, hanano-theme-* (apps là leaf node)
 ```
 
 ## Quy tắc cứng
@@ -39,39 +41,39 @@ apps/*          ←── bất kỳ package nào, themes/* (apps là leaf node)
 ### Được phép ✅
 
 ```typescript
-// Trong @hana/validator — import types
-import type { CMSPlugin } from '@hana/types'
+// Trong @hanano/validator — import types
+import type { CMSPlugin } from '@hanano/types'
 
-// Trong @hana/core — import từ các packages thấp hơn
-import { mergeSchemas } from '@hana/schema'
-import type { CMSConfig } from '@hana/types'
+// Trong @hanano/core — import từ các packages thấp hơn
+import { mergeSchemas } from '@hanano/schema'
+import type { CMSConfig } from '@hanano/types'
 
 // Trong plugin — import từ types và core
-import type { CMSPlugin } from '@hana/types'
-import { HanaCMS } from '@hana/core'
+import type { CMSPlugin } from '@hanano/types'
+import { HanaCMS } from '@hanano/core'
 ```
 
 ### Không được phép ❌
 
 ```typescript
-// @hana/types import từ bất kỳ @hana/* nào
-import { something } from '@hana/core'  // ❌ circular
+// @hanano/types import từ bất kỳ @hanano/* nào
+import { something } from '@hanano/core'  // ❌ circular
 
-// @hana/schema import từ @hana/core
-import { HanaCMS } from '@hana/core'    // ❌ circular
+// @hanano/schema import từ @hanano/core
+import { HanaCMS } from '@hanano/core'    // ❌ circular
 
 // Plugin import từ plugin khác
 // plugins/plugin-blog import từ plugins/plugin-auth ❌
 
-// @hana/core import từ @hana/ui
-import { ComponentRegistry } from '@hana/ui'  // ❌ circular
+// @hanano/core import từ @hanano/ui
+import { ComponentRegistry } from '@hanano/ui'  // ❌ circular
 
-// Theme import từ @hana/core hoặc @hana/schema
-import { HanaCMS } from '@hana/core'    // ❌
-import { themeState } from '@hana/schema' // ❌
+// Theme import từ @hanano/core hoặc @hanano/schema
+import { HanaCMS } from '@hanano/core'    // ❌
+import { themeState } from '@hanano/schema' // ❌
 
 // Theme import từ plugin
-import { blogPlugin } from '@hana/plugin-blog' // ❌
+import { blogPlugin } from 'hanano-plugin-blog' // ❌
 ```
 
 ## Import Type-Only
@@ -80,10 +82,10 @@ Khi chỉ cần interface/type (không cần runtime value), **luôn dùng `impo
 
 ```typescript
 // ✅ Đúng — chỉ dùng type lúc compile
-import type { CMSPlugin, CMSConfig } from '@hana/types'
+import type { CMSPlugin, CMSConfig } from '@hanano/types'
 
 // ❌ Sai — tạo runtime dependency không cần thiết
-import { CMSPlugin } from '@hana/types'
+import { CMSPlugin } from '@hanano/types'
 ```
 
 ## Workspace References
@@ -93,14 +95,15 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
 ```json
 {
   "dependencies": {
-    "@hana/types": "workspace:*",
-    "@hana/schema": "workspace:*"
+    "@hanano/types": "workspace:*",
+    "@hanano/schema": "workspace:*"
   }
 }
 ```
 
 ## Last updated
 
-2026-04-16 — `@hana/schema` now exports `mediaFiles` (part of `coreSchema`). `@hana/core` exports `LocalStorageAdapter`, `StorageAdapter`, `setupMediaRoutes`. `plugin-media` re-exports these from `@hana/core` and `@hana/schema` (no direct schema or route logic).
-2026-04-10 — Added `themes/*` dependency rule (only `@hana/types`)
+2026-05-09 — Updated plugin/theme names to `hanano-plugin-*` / `hanano-theme-*`. Added `hanano` umbrella to graph.
+2026-04-16 — `@hanano/schema` now exports `mediaFiles` (part of `coreSchema`). `@hanano/core` exports `LocalStorageAdapter`, `StorageAdapter`, `setupMediaRoutes`. `plugin-media` re-exports these from `@hanano/core` and `@hanano/schema` (no direct schema or route logic).
+2026-04-10 — Added `themes/*` dependency rule (only `@hanano/types`)
 2026-03-21 — Initial creation

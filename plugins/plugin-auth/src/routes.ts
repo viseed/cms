@@ -1,4 +1,4 @@
-import { loginSchema } from '@hana/validator'
+﻿import { loginSchema } from '@hanano/validator'
 import { Hono } from 'hono'
 
 export function setupAuthRoutes(app: Hono): void {

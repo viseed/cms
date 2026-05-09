@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test'
-import { createCMS } from '@hana/core'
+﻿import { describe, expect, test } from 'bun:test'
+import { createCMS } from '@hanano/core'
 import { blogPlugin } from './index'
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'

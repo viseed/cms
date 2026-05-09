@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto'
+﻿import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import type { CMSTheme, LayoutContext, ThemeAssets } from '@hana/types'
+import type { CMSTheme, LayoutContext, ThemeAssets } from '@hanano/types'
 import { Eta } from 'eta'
-import type { HanaCMS } from './hana-cms'
+import type { HananoCMS } from './hanano-cms'
 import { createLayoutHelpers } from './seo-head'
 
 export interface ThemeRenderOptions {
@@ -24,7 +24,7 @@ export interface ThemeRuntime {
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }
 }
 
-export function createThemeRuntime(theme: CMSTheme, cms: HanaCMS): ThemeRuntime {
+export function createThemeRuntime(theme: CMSTheme, cms: HananoCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
   /** One value per theme process lifetime — not recomputed per HTTP request. */
   const assetFingerprint = resolveStaticAssetFingerprint(theme)

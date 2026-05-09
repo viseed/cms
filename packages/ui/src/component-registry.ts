@@ -1,4 +1,4 @@
-import type { ComponentEntry, ComponentRegistry } from '@hana/types'
+﻿import type { ComponentEntry, ComponentRegistry } from '@hanano/types'
 import { type Component, type ShallowRef, shallowRef } from 'vue'
 
 const registry = new Map<string, { component: ShallowRef<Component>; source: string }>()

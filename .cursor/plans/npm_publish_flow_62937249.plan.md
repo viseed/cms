@@ -4,34 +4,34 @@ overview: Đổi scope toàn project từ `@hana/` → `@hanano/`, sau đó tạ
 todos:
   - id: rename-scope
     content: Chạy PowerShell global find-replace @hana/ → @hanano/ toàn project, sau đó bun install + verify build
-    status: in_progress
+    status: completed
   - id: create-hana-cms-pkg
     content: Tạo packages/hanano/ với package.json, src/index.ts, src/cli.ts, bunup.config.ts, turbo.json
-    status: pending
+    status: completed
   - id: mark-private
     content: Thêm private:true vào @hanano/cli và @hanano/config
-    status: pending
+    status: completed
   - id: rename-plugins
     content: Đổi "name" field của 4 plugins từ @hanano/plugin-* → hanano-plugin-*
-    status: pending
+    status: completed
   - id: rename-themes
     content: Đổi "name" field của 2 themes từ @hanano/theme-* → hanano-theme-*
-    status: pending
+    status: completed
   - id: update-changeset-config
     content: Cập nhật .changeset/config.json — linked @hanano/* core, ignore cli/config/admin/docs/starter
-    status: pending
+    status: completed
   - id: update-turbo-root
     content: Thêm publish task vào turbo.json root, thêm packages/hana-cms vào workspace
-    status: pending
+    status: completed
   - id: add-npmrc
     content: Tạo .npmrc với access=public
-    status: pending
+    status: completed
   - id: update-rules
     content: Cập nhật .cursor/rules/*.mdc — đổi @hana/ → @hanano/ và thêm hana-cms, hana-plugin-*, hana-theme-* vào package map
-    status: pending
+    status: completed
   - id: github-actions
     content: Tạo .github/workflows/publish.yml theo Changesets pattern
-    status: pending
+    status: completed
 isProject: false
 ---
 
