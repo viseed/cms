@@ -1,35 +1,35 @@
 ﻿# CLI Reference
 
-The `hanabi` CLI is the companion tool for Hana CMS projects. It handles project scaffolding, database management, and plugin/theme management.
+The `viseedbi` CLI is the companion tool for Viseed CMS projects. It handles project scaffolding, database management, and plugin/theme management.
 
 ## Installation
 
-The CLI is available as `@hanano/cli`. You can use it without installing via `bunx`:
+The CLI is available as `@viseed/cli`. You can use it without installing via `bunx`:
 
 ```bash
-bunx hanabi <command>
+bunx viseedbi <command>
 ```
 
 Or install it as a dev dependency in your project:
 
 ```bash
-bun add -d @hanano/cli
+bun add -d @viseed/cli
 ```
 
 ---
 
-## `hanabi init`
+## `viseedbi init`
 
-Scaffold a new Hana CMS project.
+Scaffold a new Viseed CMS project.
 
 ```bash
-hanabi init <project-name>
+viseedbi init <project-name>
 ```
 
 **Example:**
 
 ```bash
-bunx hanabi init my-blog
+bunx viseedbi init my-blog
 cd my-blog
 bun install
 ```
@@ -48,46 +48,46 @@ The generated `src/index.ts` is pre-configured with `authPlugin` and `blogPlugin
 
 ---
 
-## `hanabi db`
+## `viseedbi db`
 
 Manage your database schema using Drizzle.
 
 All `db` subcommands require `DATABASE_URL` to be set:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
+export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
 ```
 
-### `hanabi db push`
+### `viseedbi db push`
 
 Push the current schema directly to the database. Intended for **development only**.
 
 ```bash
-bunx hanabi db push
+bunx viseedbi db push
 ```
 
 - Fast — no migration files generated
 - May drop or alter columns to match the schema
 - Not safe for production databases with live data
 
-### `hanabi db generate`
+### `viseedbi db generate`
 
 Generate SQL migration files from the current schema. Intended for **production**.
 
 ```bash
-bunx hanabi db generate
+bunx viseedbi db generate
 ```
 
 - Creates timestamped `.sql` files in `drizzle/`
 - Safe to review and commit to source control
 - Does not apply changes to the database
 
-### `hanabi db migrate`
+### `viseedbi db migrate`
 
 Apply pending migration files to the database.
 
 ```bash
-bunx hanabi db migrate
+bunx viseedbi db migrate
 ```
 
 - Reads migration files from `drizzle/`
@@ -96,18 +96,18 @@ bunx hanabi db migrate
 
 ### How it works
 
-The CLI scans your `package.json` for `hanano-plugin-*` dependencies and auto-generates a schema barrel file at `.hana/_schema.ts`. This file is used by `drizzle-kit` to run the requested operation. The `.hana/` directory is automatically added to `.gitignore`.
+The CLI scans your `package.json` for `viseed-plugin-*` dependencies and auto-generates a schema barrel file at `.viseed/_schema.ts`. This file is used by `drizzle-kit` to run the requested operation. The `.viseed/` directory is automatically added to `.gitignore`.
 
 ---
 
-## `hanabi plugin`
+## `viseedbi plugin`
 
 Manage plugins in your project.
 
-### `hanabi plugin install`
+### `viseedbi plugin install`
 
 ```bash
-hanabi plugin install <package-name>
+viseedbi plugin install <package-name>
 ```
 
 Installs the package via `bun add` and prints a reminder to restart the server.
@@ -115,54 +115,54 @@ Installs the package via `bun add` and prints a reminder to restart the server.
 **Example:**
 
 ```bash
-bunx hanabi plugin install hanano-plugin-pages
+bunx viseedbi plugin install viseed-plugin-pages
 ```
 
 After installing, register the plugin in your `src/index.ts`:
 
 ```typescript
-import { pagesPlugin } from 'hanano-plugin-pages'
+import { pagesPlugin } from 'viseed-plugin-pages'
 cms.use(pagesPlugin())
 ```
 
 Then push the updated schema:
 
 ```bash
-bunx hanabi db push   # development
+bunx viseedbi db push   # development
 # or
-bunx hanabi db generate && bunx hanabi db migrate   # production
+bunx viseedbi db generate && bunx viseedbi db migrate   # production
 ```
 
-### `hanabi plugin uninstall`
+### `viseedbi plugin uninstall`
 
 ```bash
-hanabi plugin uninstall <package-name>
+viseedbi plugin uninstall <package-name>
 ```
 
 Removes the package via `bun remove`.
 
 ---
 
-## `hanabi theme`
+## `viseedbi theme`
 
 Manage themes in your project.
 
-### `hanabi theme install`
+### `viseedbi theme install`
 
 ```bash
-hanabi theme install <package-name>
+viseedbi theme install <package-name>
 ```
 
 **Example:**
 
 ```bash
-bunx hanabi theme install hanano-theme-blog
+bunx viseedbi theme install viseed-theme-blog
 ```
 
 After installing, register the theme in your config:
 
 ```typescript
-import { blogTheme } from 'hanano-theme-blog'
+import { blogTheme } from 'viseed-theme-blog'
 
 const cms = createCMS({
   themes: [blogTheme()],
@@ -171,10 +171,10 @@ const cms = createCMS({
 })
 ```
 
-### `hanabi theme uninstall`
+### `viseedbi theme uninstall`
 
 ```bash
-hanabi theme uninstall <package-name>
+viseedbi theme uninstall <package-name>
 ```
 
 ---
@@ -183,11 +183,11 @@ hanabi theme uninstall <package-name>
 
 | Command                                   | Description                             |
 |-------------------------------------------|-----------------------------------------|
-| `hanabi init <name>`                      | Scaffold a new project                  |
-| `hanabi db push`                          | Push schema to DB (dev)                 |
-| `hanabi db generate`                      | Generate SQL migration files (prod)     |
-| `hanabi db migrate`                       | Apply pending migrations (prod)         |
-| `hanabi plugin install <package>`         | Install a plugin                        |
-| `hanabi plugin uninstall <package>`       | Uninstall a plugin                      |
-| `hanabi theme install <package>`          | Install a theme                         |
-| `hanabi theme uninstall <package>`        | Uninstall a theme                       |
+| `viseedbi init <name>`                      | Scaffold a new project                  |
+| `viseedbi db push`                          | Push schema to DB (dev)                 |
+| `viseedbi db generate`                      | Generate SQL migration files (prod)     |
+| `viseedbi db migrate`                       | Apply pending migrations (prod)         |
+| `viseedbi plugin install <package>`         | Install a plugin                        |
+| `viseedbi plugin uninstall <package>`       | Uninstall a plugin                      |
+| `viseedbi theme install <package>`          | Install a theme                         |
+| `viseedbi theme uninstall <package>`        | Uninstall a theme                       |

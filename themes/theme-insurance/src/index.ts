@@ -1,6 +1,6 @@
 ﻿import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { CMSTheme } from '@hanano/types'
+import type { CMSTheme } from '@viseed/types'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 

@@ -1,6 +1,6 @@
-﻿import { siteDomains, sites } from '@hanano/schema'
-import type { SiteContext } from '@hanano/types'
-import { SINGLE_SITE_CONTEXT } from '@hanano/types'
+﻿import { siteDomains, sites } from '@viseed/schema'
+import type { SiteContext } from '@viseed/types'
+import { SINGLE_SITE_CONTEXT } from '@viseed/types'
 import { eq } from 'drizzle-orm'
 import type { DatabaseInstance } from './database'
 

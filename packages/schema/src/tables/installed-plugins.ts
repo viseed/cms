@@ -2,7 +2,7 @@
 import { sites } from './sites'
 
 export const installedPlugins = pgTable(
-  'hanano_installed_plugins',
+  'viseed_installed_plugins',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -20,7 +20,7 @@ export const installedPlugins = pgTable(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteNameUnique: uniqueIndex('hanano_installed_plugins_site_name_unique').on(
+    siteNameUnique: uniqueIndex('viseed_installed_plugins_site_name_unique').on(
       table.siteId,
       table.name,
     ),

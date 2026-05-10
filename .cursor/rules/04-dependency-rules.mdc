@@ -10,30 +10,30 @@ alwaysApply: false
 ## Dependency Graph (chiều mũi tên = "được phép import từ")
 
 ```
-@hanano/config    ←── (không import từ ai, chỉ là tsconfig)
+@viseed/config    ←── (không import từ ai, chỉ là tsconfig)
 
-@hanano/types     ←── (không import từ bất kỳ @hanano/* nào)
+@viseed/types     ←── (không import từ bất kỳ @viseed/* nào)
                      └── Mọi package khác đều import từ đây
 
-@hanano/validator ←── @hanano/types
+@viseed/validator ←── @viseed/types
 
-@hanano/schema    ←── @hanano/types
+@viseed/schema    ←── @viseed/types
 
-@hanano/registry  ←── @hanano/types
+@viseed/registry  ←── @viseed/types
 
-@hanano/core      ←── @hanano/types, @hanano/validator, @hanano/schema, @hanano/registry
+@viseed/core      ←── @viseed/types, @viseed/validator, @viseed/schema, @viseed/registry
 
-@hanano/ui        ←── @hanano/types, @hanano/registry
+@viseed/ui        ←── @viseed/types, @viseed/registry
 
-@hanano/cli       ←── @hanano/core
+@viseed/cli       ←── @viseed/core
 
-hanano-plugin-* ←── @hanano/types, @hanano/core, @hanano/ui  (KHÔNG import từ nhau)
+@viseed/plugin-* ←── @viseed/types, @viseed/core, @viseed/ui  (KHÔNG import từ nhau)
 
-hanano-theme-*  ←── @hanano/types  (CHỈ import types, KHÔNG import core/schema/plugin)
+@viseed/theme-*  ←── @viseed/types  (CHỈ import types, KHÔNG import core/schema/plugin)
 
-hanano          ←── @hanano/core, @hanano/schema, @hanano/types, @hanano/validator, @hanano/ui, @hanano/registry, @hanano/cli
+@viseed/cms      ←── @viseed/core, @viseed/schema, @viseed/types, @viseed/validator, @viseed/ui, @viseed/registry, @viseed/cli
 
-apps/*          ←── bất kỳ package nào, hanano-theme-* (apps là leaf node)
+apps/*          ←── bất kỳ package nào, @viseed/theme-* (apps là leaf node)
 ```
 
 ## Quy tắc cứng
@@ -41,39 +41,39 @@ apps/*          ←── bất kỳ package nào, hanano-theme-* (apps là leaf
 ### Được phép ✅
 
 ```typescript
-// Trong @hanano/validator — import types
-import type { CMSPlugin } from '@hanano/types'
+// Trong @viseed/validator — import types
+import type { CMSPlugin } from '@viseed/types'
 
-// Trong @hanano/core — import từ các packages thấp hơn
-import { mergeSchemas } from '@hanano/schema'
-import type { CMSConfig } from '@hanano/types'
+// Trong @viseed/core — import từ các packages thấp hơn
+import { mergeSchemas } from '@viseed/schema'
+import type { CMSConfig } from '@viseed/types'
 
 // Trong plugin — import từ types và core
-import type { CMSPlugin } from '@hanano/types'
-import { HanaCMS } from '@hanano/core'
+import type { CMSPlugin } from '@viseed/types'
+import { ViseedCMS } from '@viseed/core'
 ```
 
 ### Không được phép ❌
 
 ```typescript
-// @hanano/types import từ bất kỳ @hanano/* nào
-import { something } from '@hanano/core'  // ❌ circular
+// @viseed/types import từ bất kỳ @viseed/* nào
+import { something } from '@viseed/core'  // ❌ circular
 
-// @hanano/schema import từ @hanano/core
-import { HanaCMS } from '@hanano/core'    // ❌ circular
+// @viseed/schema import từ @viseed/core
+import { ViseedCMS } from '@viseed/core'    // ❌ circular
 
 // Plugin import từ plugin khác
 // plugins/plugin-blog import từ plugins/plugin-auth ❌
 
-// @hanano/core import từ @hanano/ui
-import { ComponentRegistry } from '@hanano/ui'  // ❌ circular
+// @viseed/core import từ @viseed/ui
+import { ComponentRegistry } from '@viseed/ui'  // ❌ circular
 
-// Theme import từ @hanano/core hoặc @hanano/schema
-import { HanaCMS } from '@hanano/core'    // ❌
-import { themeState } from '@hanano/schema' // ❌
+// Theme import từ @viseed/core hoặc @viseed/schema
+import { ViseedCMS } from '@viseed/core'    // ❌
+import { themeState } from '@viseed/schema' // ❌
 
 // Theme import từ plugin
-import { blogPlugin } from 'hanano-plugin-blog' // ❌
+import { blogPlugin } from '@viseed/plugin-blog' // ❌
 ```
 
 ## Import Type-Only
@@ -82,10 +82,10 @@ Khi chỉ cần interface/type (không cần runtime value), **luôn dùng `impo
 
 ```typescript
 // ✅ Đúng — chỉ dùng type lúc compile
-import type { CMSPlugin, CMSConfig } from '@hanano/types'
+import type { CMSPlugin, CMSConfig } from '@viseed/types'
 
 // ❌ Sai — tạo runtime dependency không cần thiết
-import { CMSPlugin } from '@hanano/types'
+import { CMSPlugin } from '@viseed/types'
 ```
 
 ## Workspace References
@@ -95,15 +95,16 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
 ```json
 {
   "dependencies": {
-    "@hanano/types": "workspace:*",
-    "@hanano/schema": "workspace:*"
+    "@viseed/types": "workspace:*",
+    "@viseed/schema": "workspace:*"
   }
 }
 ```
 
 ## Last updated
 
-2026-05-09 — Updated plugin/theme names to `hanano-plugin-*` / `hanano-theme-*`. Added `hanano` umbrella to graph.
-2026-04-16 — `@hanano/schema` now exports `mediaFiles` (part of `coreSchema`). `@hanano/core` exports `LocalStorageAdapter`, `StorageAdapter`, `setupMediaRoutes`. `plugin-media` re-exports these from `@hanano/core` and `@hanano/schema` (no direct schema or route logic).
-2026-04-10 — Added `themes/*` dependency rule (only `@hanano/types`)
+2026-05-10 — Đổi plugin/theme/umbrella sang @viseed org scope: `@viseed/plugin-*`, `@viseed/theme-*`, `@viseed/cms`.
+2026-05-09 — Updated plugin/theme names to `viseed-plugin-*` / `viseed-theme-*`. Added `viseed` umbrella to graph.
+2026-04-16 — `@viseed/schema` now exports `mediaFiles` (part of `coreSchema`). `@viseed/core` exports `LocalStorageAdapter`, `StorageAdapter`, `setupMediaRoutes`. `plugin-media` re-exports these from `@viseed/core` and `@viseed/schema` (no direct schema or route logic).
+2026-04-10 — Added `themes/*` dependency rule (only `@viseed/types`)
 2026-03-21 — Initial creation

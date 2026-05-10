@@ -2,7 +2,7 @@
 description: Package map — Danh sách đầy đủ packages, plugins, apps và vai trò của từng phần
 alwaysApply: false
 ---
-# Package Map — Hana CMS Monorepo
+# Package Map — Viseed CMS Monorepo
 
 > **Khi thêm/xoá package, plugin, hoặc app → cập nhật file này ngay.**
 
@@ -10,15 +10,15 @@ alwaysApply: false
 
 | Package | Npm scope | Mô tả | Được import bởi |
 |---|---|---|---|
-| `packages/hanano` | `hanano` | **Umbrella package** — re-export từ tất cả `@hanano/*` core, include admin dist, expose CLI bin `hanano` | end-users |
-| `packages/types` | `@hanano/types` | TypeScript interfaces/types ONLY — không có runtime logic | Tất cả packages, plugins, apps |
-| `packages/validator` | `@hanano/validator` | Zod schemas cho content, user, media, plugin | `@hanano/core`, plugins, admin |
-| `packages/schema` | `@hanano/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`), `mergeSchemas()` helper | `@hanano/core`, plugins |
-| `packages/core` | `@hanano/core` | `HanaCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve | plugins, apps, CLI |
-| `packages/registry` | `@hanano/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@hanano/core`, `@hanano/ui` |
-| `packages/ui` | `@hanano/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
-| `packages/cli` | `@hanano/cli` | CLI commands: `hanano init`, `hanano db push/generate/migrate`, `hanano plugin install/uninstall`. **Private** — exposed via `hanano` bin, không publish riêng | standalone binary |
-| `packages/config` | `@hanano/config` | Shared tsconfig (`tsconfig.base.json`, `tsconfig.app.json`, `tsconfig.lib.json`). **Private** | Tất cả packages |
+| `packages/viseed` | `@viseed/cms` | **Umbrella package** — re-export từ tất cả `@viseed/*` core, include admin dist, expose CLI bin `viseed` | end-users |
+| `packages/types` | `@viseed/types` | TypeScript interfaces/types ONLY — không có runtime logic | Tất cả packages, plugins, apps |
+| `packages/validator` | `@viseed/validator` | Zod schemas cho content, user, media, plugin | `@viseed/core`, plugins, admin |
+| `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`), `mergeSchemas()` helper | `@viseed/core`, plugins |
+| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve | plugins, apps, CLI |
+| `packages/registry` | `@viseed/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@viseed/core`, `@viseed/ui` |
+| `packages/ui` | `@viseed/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
+| `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Private** — exposed via `@viseed/cms` bin, không publish riêng | standalone binary |
+| `packages/config` | `@viseed/config` | Shared tsconfig (`tsconfig.base.json`, `tsconfig.app.json`, `tsconfig.lib.json`). **Private** | Tất cả packages |
 
 ## Plugins (`plugins/`)
 
@@ -27,10 +27,10 @@ alwaysApply: false
 
 | Plugin | Npm package | Tính năng |
 |---|---|---|
-| `plugins/plugin-auth` | `hanano-plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
-| `plugins/plugin-blog` | `hanano-plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
-| `plugins/plugin-menu` | `hanano-plugin-menu` | Menu management — schema + CRUD REST routes + admin view (MenusView). Injects `menuMain`/`menuFooter` into theme context via `theme:beforeRender` hook |
-| `plugins/plugin-pages` | `hanano-plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
+| `plugins/plugin-auth` | `@viseed/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
+| `plugins/plugin-blog` | `@viseed/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
+| `plugins/plugin-menu` | `@viseed/plugin-menu` | Menu management — schema + CRUD REST routes + admin view (MenusView). Injects `menuMain`/`menuFooter` into theme context via `theme:beforeRender` hook |
+| `plugins/plugin-pages` | `@viseed/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
 
 ## Themes (`themes/`)
 
@@ -39,16 +39,16 @@ alwaysApply: false
 
 | Theme | Npm package | Mô tả |
 |---|---|---|
-| `themes/theme-blog` | `hanano-theme-blog` | Blog theme — Eta templates, settings schema, static assets. Factory `blogTheme()` |
-| `themes/theme-insurance` | `hanano-theme-insurance` | Insurance product theme — Eta templates (home/category/post/404), companion plugin for home carousel, full settings schema. Factory `insuranceTheme()` |
+| `themes/theme-blog` | `@viseed/theme-blog` | Blog theme — Eta templates, settings schema, static assets. Factory `blogTheme()` |
+| `themes/theme-insurance` | `@viseed/theme-insurance` | Insurance product theme — Eta templates (home/category/post/404), companion plugin for home carousel, full settings schema. Factory `insuranceTheme()` |
 
 ## Apps (`apps/`)
 
 | App | Filter name | Mô tả | Port mặc định |
 |---|---|---|---|
-| `apps/admin` | `@hanano/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin` | 5173 (dev) |
-| `apps/docs` | `@hanano/docs` | VitePress documentation site | 5174 |
-| `apps/starter` | `@hanano/starter` | Template project cho end-users clone | — |
+| `apps/admin` | `@viseed/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin` | 5173 (dev) |
+| `apps/docs` | `@viseed/docs` | VitePress documentation site | 5174 |
+| `apps/starter` | `@viseed/starter` | Template project cho end-users clone | — |
 
 ## Theme System
 
@@ -58,19 +58,19 @@ alwaysApply: false
 - Theme chịu trách nhiệm cho layout, styling, và template rendering (Eta).
 - Một thời điểm chỉ có **đúng 1 theme active**.
 - Theme **không** đăng ký routes hay schema tables riêng — chỉ cung cấp `.eta` templates, static assets, và optional `data()` hook.
-- Types cho theme nằm trong `@hanano/types`, persistence trong `@hanano/schema`, runtime mounting trong `@hanano/core`.
+- Types cho theme nằm trong `@viseed/types`, persistence trong `@viseed/schema`, runtime mounting trong `@viseed/core`.
 - `CMSConfig.themes[]` đăng ký nhiều theme; `CMSConfig.defaultTheme` chỉ định fallback.
 - Hot-swap: activate theme khác qua admin API không cần restart server.
 
 ## Entry Points Quan Trọng
 
 ```
-packages/core/src/hana-cms.ts       → HanaCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle, plugin-manifest + bundle-serving APIs
+packages/core/src/viseed-cms.ts       → ViseedCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle, plugin-manifest + bundle-serving APIs
 packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
 packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
-packages/cli/src/commands/db.ts     → hanabi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
+packages/cli/src/commands/db.ts     → viseedbi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
 packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
@@ -87,8 +87,9 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
-2026-05-09 — Renamed scope `@hana/` → `@hanano/` toàn project. Thêm `packages/hanano` (umbrella package). Đổi plugin names → `hanano-plugin-*`, theme names → `hanano-theme-*`. Đánh `private: true` cho `@hanano/cli`, `@hanano/config`. CLI bin đổi từ `hana`/`hanabi` → `hanano`.
-2026-04-17 — Added `createCategorySchema`, `updateCategorySchema` to `@hanano/validator`; added `PUT /categories/:id` + `DELETE /categories/:id` to `plugin-blog` routes; rewrote `CategoriesView.vue` with full CRUD (create/edit modal + delete).
-2026-04-16 — Integrated media into `@hanano/core`: `media_files` table in `@hanano/schema`, `LocalStorageAdapter` + media routes in `@hanano/core`. `plugin-media` is now a backward-compat shim.
+2026-05-10 — Đổi tất cả plugins/themes/umbrella sang @viseed org scope: `@viseed/cms`, `@viseed/plugin-*`, `@viseed/theme-*`.
+2026-05-09 — Renamed scope, added umbrella package `viseed`, plugins `viseed-plugin-*`, themes `viseed-theme-*`. Private: `@viseed/cli`, `@viseed/config`.
+2026-04-17 — Added `createCategorySchema`, `updateCategorySchema` to `@viseed/validator`; added `PUT /categories/:id` + `DELETE /categories/:id` to `plugin-blog` routes; rewrote `CategoriesView.vue` with full CRUD (create/edit modal + delete).
+2026-04-16 — Integrated media into `@viseed/core`: `media_files` table in `@viseed/schema`, `LocalStorageAdapter` + media routes in `@viseed/core`. `plugin-media` is now a backward-compat shim.
 2026-04-14 — Added `theme-insurance` (insurance product theme with companion plugin) and `plugin-menu` (menu management plugin).
-2026-04-14 — Renamed `@hanano/theme-news` → `@hanano/theme-blog`, `newsTheme()` → `blogTheme()`.
+2026-04-14 — Renamed `@viseed/theme-news` → `@viseed/theme-blog`, `newsTheme()` → `blogTheme()`.

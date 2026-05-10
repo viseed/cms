@@ -1,18 +1,18 @@
 ---
 name: default news theme
-overview: Ship one official built-in News theme for Hana CMS as the default experience for new installs, with enough content/domain support to render real home/post/category/page flows out of the box. Keep the architecture extensible so additional default themes can be added later without reworking core packaging.
+overview: Ship one official built-in News theme for Viseed CMS as the default experience for new installs, with enough content/domain support to render real home/post/category/page flows out of the box. Keep the architecture extensible so additional default themes can be added later without reworking core packaging.
 todos:
   - id: theme-runtime-foundation
     content: Enable official package-based themes to provide templates/static assets/settings at runtime without relying on cwd-only theme folders.
     status: pending
   - id: news-theme-package
-    content: Create the official `@hana/theme-news` package with Eta templates, static assets, settings schema, and theme factory export.
+    content: Create the official `@viseed/theme-news` package with Eta templates, static assets, settings schema, and theme factory export.
     status: pending
   - id: content-domain-minimum
     content: "Complete the minimum content plugins needed for a usable news site: real blog reads plus a dedicated pages plugin and basic media persistence integration."
     status: pending
   - id: default-install-wiring
-    content: Wire the default News theme and required plugins into starter and CLI init so fresh Hana installs boot with the theme automatically.
+    content: Wire the default News theme and required plugins into starter and CLI init so fresh Viseed installs boot with the theme automatically.
     status: pending
   - id: tests-and-rules
     content: Add focused verification and update project rules/docs for new package/plugin and any theme API/runtime contract changes.
@@ -22,7 +22,7 @@ isProject: false
 
 # Default News Theme Implementation Plan
 
-**Goal:** Ship one official built-in `News` theme as Hana CMS's default frontend for new installs, with real `home`, `post`, `category`, and `page` rendering backed by minimal usable content plugins.
+**Goal:** Ship one official built-in `News` theme as Viseed CMS's default frontend for new installs, with real `home`, `post`, `category`, and `page` rendering backed by minimal usable content plugins.
 
 **Scope lock:** Only one default theme in this phase. The product/subscription theme is deferred. The design should stay extensible for future official themes.
 
@@ -30,7 +30,7 @@ isProject: false
 
 - Ship the theme as an official workspace package, not a scaffolded local folder.
 - Make the News theme usable on day one, not just a visual shell.
-- Add a dedicated `@hana/plugin-pages` instead of stretching `@hana/plugin-blog` to own static pages.
+- Add a dedicated `@viseed/plugin-pages` instead of stretching `@viseed/plugin-blog` to own static pages.
 - Keep theme/business boundaries clean: theme owns presentation; plugins own schema/routes/content retrieval.
 
 ## Non-goals
@@ -41,9 +41,9 @@ isProject: false
 
 ## Current Constraints To Design Around
 
-- In [packages/core/src/hana-cms.ts](packages/core/src/hana-cms.ts), `launch()` only mounts a theme when `config.theme` is explicitly provided, and `setupThemeRoutes()` currently renders with empty `settings` and `menus`.
+- In [packages/core/src/viseed-cms.ts](packages/core/src/viseed-cms.ts), `launch()` only mounts a theme when `config.theme` is explicitly provided, and `setupThemeRoutes()` currently renders with empty `settings` and `menus`.
 - In [packages/core/src/theme-runtime.ts](packages/core/src/theme-runtime.ts), template discovery is effectively cwd-based (`process.cwd()/themes/...`), which blocks clean shipping of official theme packages.
-- In [packages/cli/src/commands/init.ts](packages/cli/src/commands/init.ts) and [apps/starter/src/index.ts](apps/starter/src/index.ts), new installs currently bootstrap only `@hana/plugin-auth` and `@hana/plugin-blog`, with no theme at all.
+- In [packages/cli/src/commands/init.ts](packages/cli/src/commands/init.ts) and [apps/starter/src/index.ts](apps/starter/src/index.ts), new installs currently bootstrap only `@viseed/plugin-auth` and `@viseed/plugin-blog`, with no theme at all.
 - In [plugins/plugin-blog/src/routes.ts](plugins/plugin-blog/src/routes.ts), blog endpoints are still TODO stubs, so the News theme cannot yet render real content.
 - Theme contract requires `home`, `post`, `category`, `page`, and `404` layouts per [packages/types/src/theme-layout.ts](packages/types/src/theme-layout.ts) and  [.cursor/rules/08-theme-api-contract.mdc](.cursor/rules/08-theme-api-contract.mdc).
 
@@ -57,7 +57,7 @@ Files to modify:
 
 - [packages/types/src/theme.ts](packages/types/src/theme.ts)
 - [packages/core/src/theme-runtime.ts](packages/core/src/theme-runtime.ts)
-- [packages/core/src/hana-cms.ts](packages/core/src/hana-cms.ts)
+- [packages/core/src/viseed-cms.ts](packages/core/src/viseed-cms.ts)
 - [packages/types/src/cms.ts](packages/types/src/cms.ts) if a small helper type is needed
 - [.cursor/rules/08-theme-api-contract.mdc](.cursor/rules/08-theme-api-contract.mdc) if the `CMSTheme` contract changes
 
@@ -70,7 +70,7 @@ Plan:
 
 Acceptance:
 
-- `@hana/theme-news` can be imported as a dependency and render without copying files into the consumer app's cwd.
+- `@viseed/theme-news` can be imported as a dependency and render without copying files into the consumer app's cwd.
 - Existing preview-path behavior still works.
 
 ### Workstream B: Minimum News Content Domain
@@ -88,7 +88,7 @@ Files to create/modify:
 Plan:
 
 - Finish the read side of `plugin-blog` first: published post listing for home/category, single post by slug, and category lookup.
-- Add `@hana/plugin-pages` with minimal schema + slug-based read/write routes so the required `page` layout has a real source.
+- Add `@viseed/plugin-pages` with minimal schema + slug-based read/write routes so the required `page` layout has a real source.
 - Decide a minimal content shape for News MVP: headline, slug, excerpt, body, category, publishedAt, hero image reference if media is wired.
 - If media is part of the usable News experience, complete the missing persistence path so uploaded assets can actually be referenced by posts/pages.
 - Keep write/admin complexity minimal; this phase needs usable content plumbing, not a full editorial workflow.
@@ -102,7 +102,7 @@ Acceptance:
 
 ### Workstream C: Official News Theme Package
 
-**Outcome:** A reusable `@hana/theme-news` package exists and is the default frontend experience.
+**Outcome:** A reusable `@viseed/theme-news` package exists and is the default frontend experience.
 
 Files to create:
 
@@ -114,7 +114,7 @@ Files to create:
 
 Plan:
 
-- Package name: `@hana/theme-news` under `packages/theme-news` to align with current workspaces.
+- Package name: `@viseed/theme-news` under `packages/theme-news` to align with current workspaces.
 - Export a theme factory, for example `newsTheme()` returning `CMSTheme` with its runtime roots, settings schema, menu zones, and required layouts.
 - Build required layouts: `home`, `post`, `category`, `page`, `404`.
 - Keep the visual system editorial/news-focused: homepage hero + post list, article layout, category archive, simple page template, basic footer/header navigation.
@@ -128,7 +128,7 @@ Acceptance:
 
 ### Workstream D: Default Install Wiring
 
-**Outcome:** New Hana consumers get the News theme by default.
+**Outcome:** New Viseed consumers get the News theme by default.
 
 Files to modify:
 
@@ -138,14 +138,14 @@ Files to modify:
 
 Plan:
 
-- Add `@hana/theme-news` and `@hana/plugin-pages` to the default starter/init dependency set.
+- Add `@viseed/theme-news` and `@viseed/plugin-pages` to the default starter/init dependency set.
 - Import the theme in generated starter code and pass it into `createCMS({ theme: newsTheme(), ... })`.
 - Keep `auth`, `blog`, and any required content/media plugin registrations aligned between the monorepo starter and CLI-generated app.
 - Make sure the generated app still works with Bun and the existing package distribution model.
 
 Acceptance:
 
-- `hana init <project>` produces a project that boots directly into the News theme.
+- `viseed init <project>` produces a project that boots directly into the News theme.
 - `apps/starter` mirrors that same default stack for local repo development.
 
 ### Workstream E: Testing, Rules, and Documentation
@@ -162,7 +162,7 @@ Files to modify:
 Plan:
 
 - Add focused tests for theme runtime path resolution, theme render context, blog/page query behavior, and starter/CLI smoke-level config generation where practical.
-- Update package map for `@hana/theme-news` and `@hana/plugin-pages`.
+- Update package map for `@viseed/theme-news` and `@viseed/plugin-pages`.
 - Update dependency graph so the new package/plugin import boundaries are explicit and safe.
 - If `CMSTheme` changes, document the new package-runtime contract immediately.
 
@@ -187,15 +187,15 @@ Then converge on:
 ## Suggested Sequence
 
 1. Lock the runtime contract for package-based themes.
-2. Create `@hana/plugin-pages` and finish the minimum read paths in `plugin-blog`.
-3. Build `@hana/theme-news` against those data contracts.
+2. Create `@viseed/plugin-pages` and finish the minimum read paths in `plugin-blog`.
+3. Build `@viseed/theme-news` against those data contracts.
 4. Wire the theme/plugins into starter and CLI init defaults.
 5. Add focused verification and update rules/docs.
 
 ## Delivery Checklist
 
-- New package: `@hana/theme-news`
-- New plugin: `@hana/plugin-pages`
+- New package: `@viseed/theme-news`
+- New plugin: `@viseed/plugin-pages`
 - Starter and CLI init default to the News theme
 - Real blog/category/post/page rendering works
 - Theme runtime no longer depends solely on cwd theme folders

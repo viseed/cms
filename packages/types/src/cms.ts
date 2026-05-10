@@ -168,8 +168,8 @@ export interface CMSConfig {
   }
 }
 
-export interface HananoCMS {
-  use(plugin: CMSPlugin): HananoCMS
+export interface ViseedCMS {
+  use(plugin: CMSPlugin): ViseedCMS
   launch(): unknown
   getDatabase(): unknown
   getPlugins(): Array<CMSPlugin>

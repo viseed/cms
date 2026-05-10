@@ -1,10 +1,10 @@
 ﻿import { describe, expect, test } from 'bun:test'
 import { randomUUID } from 'node:crypto'
-import { sessions, siteDomains, userSiteRoles, users } from '@hanano/schema'
+import { sessions, siteDomains, userSiteRoles, users } from '@viseed/schema'
 import { eq } from 'drizzle-orm'
-import { createCMS } from './hanano-cms'
+import { createCMS } from './viseed-cms'
 
-const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed_test'
 const DEFAULT_SITE_ID = 'default'
 
 describe('admin runtime tenancy and guards', () => {
@@ -36,7 +36,7 @@ describe('admin runtime tenancy and guards', () => {
 
     await db.insert(users).values({
       id: adminUserId,
-      email: `admin-${randomUUID()}@hana.dev`,
+      email: `admin-${randomUUID()}@viseed.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -72,7 +72,7 @@ describe('admin runtime tenancy and guards', () => {
 
     await db.insert(users).values({
       id: writerUserId,
-      email: `writer-${randomUUID()}@hana.dev`,
+      email: `writer-${randomUUID()}@viseed.dev`,
       name: 'Writer',
       passwordHash: 'hashed',
       role: 'site_content_writer',
@@ -116,7 +116,7 @@ describe('admin runtime tenancy and guards', () => {
 
     await db.insert(users).values({
       id: adminUserId,
-      email: `admin-${randomUUID()}@hana.dev`,
+      email: `admin-${randomUUID()}@viseed.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -155,7 +155,7 @@ describe('admin runtime tenancy and guards', () => {
 
     await db.insert(users).values({
       id: adminUserId,
-      email: `admin-${randomUUID()}@hana.dev`,
+      email: `admin-${randomUUID()}@viseed.dev`,
       name: 'Admin',
       passwordHash: 'hashed',
       role: 'admin',
@@ -197,7 +197,7 @@ describe('admin runtime tenancy and guards', () => {
     const userId = randomUUID()
     const password = 'super-secure-password'
     const passwordHash = await Bun.password.hash(password)
-    const email = `login-${randomUUID()}@hana.dev`
+    const email = `login-${randomUUID()}@viseed.dev`
 
     await db.insert(users).values({
       id: userId,
@@ -223,7 +223,7 @@ describe('admin runtime tenancy and guards', () => {
 
     expect(loginResponse.status).toBe(200)
     const sessionCookie = loginResponse.headers.get('set-cookie')
-    expect(sessionCookie?.includes('hana_admin_session=')).toBe(true)
+    expect(sessionCookie?.includes('viseed_admin_session=')).toBe(true)
 
     const contextResponse = await app.request('http://localhost/api/admin/auth/context', {
       headers: {
@@ -237,7 +237,7 @@ describe('admin runtime tenancy and guards', () => {
   })
 
   test('bootstraps initial admin when configured on first launch', async () => {
-    const bootstrapEmail = `bootstrap-${randomUUID()}@hana.dev`
+    const bootstrapEmail = `bootstrap-${randomUUID()}@viseed.dev`
     const cms = createCMS({
       db: { driver: 'postgres', url: DATABASE_URL },
       admin: {

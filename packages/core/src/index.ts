@@ -15,9 +15,9 @@
   ThemeLayoutEntry,
   ThemeMenuItem,
   ThemeSettingsValue,
-} from '@hanano/types'
+} from '@viseed/types'
 export { createDatabase, type DatabaseInstance } from './database'
-export { createCMS, HananoCMS } from './hanano-cms'
+export { createCMS, ViseedCMS } from './viseed-cms'
 export { HookRegistry } from './hook-registry'
 export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'

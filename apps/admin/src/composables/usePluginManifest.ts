@@ -1,4 +1,4 @@
-﻿import type { PluginAdminMenuItem } from '@hanano/types'
+﻿import type { PluginAdminMenuItem } from '@viseed/types'
 import { adminFetch } from '../lib/admin-api'
 
 export interface PluginManifestEntry {

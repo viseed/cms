@@ -11,7 +11,7 @@ Define stable contracts for site-aware requests and authorization so all later p
 ## Target Files
 - `packages/types/src/cms.ts`
 - `packages/types/src/plugin.ts`
-- `packages/core/src/hana-cms.ts`
+- `packages/core/src/viseed-cms.ts`
 
 ## Design Output
 - New shared types:
@@ -35,7 +35,7 @@ Define stable contracts for site-aware requests and authorization so all later p
 - Define one permission-check helper contract used by core and plugins.
 
 ## Acceptance Criteria
-- Types compile without circular dependency violations across `@hana/*`.
+- Types compile without circular dependency violations across `@viseed/*`.
 - Existing single-site boot still works without requiring site arguments everywhere.
 - A single permission matrix exists and is imported by both API guards and UI gating code (later phase).
 

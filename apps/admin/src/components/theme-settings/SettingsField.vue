@@ -5,7 +5,7 @@ import type {
   ThemeSettingsItemListField,
   ThemeSettingsLinkItem,
   ThemeSettingsSelectField,
-} from '@hanano/types'
+} from '@viseed/types'
 import { computed, ref } from 'vue'
 import { useMediaPicker } from '../../composables/useMediaPicker'
 

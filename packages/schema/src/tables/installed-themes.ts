@@ -2,7 +2,7 @@
 import { sites } from './sites'
 
 export const installedThemes = pgTable(
-  'hanano_installed_themes',
+  'viseed_installed_themes',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -28,7 +28,7 @@ export const installedThemes = pgTable(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteNameUnique: uniqueIndex('hanano_installed_themes_site_name_unique').on(
+    siteNameUnique: uniqueIndex('viseed_installed_themes_site_name_unique').on(
       table.siteId,
       table.name,
     ),

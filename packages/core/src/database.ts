@@ -1,5 +1,5 @@
-﻿import { coreSchema, mergeSchemas } from '@hanano/schema'
-import type { DatabaseConfig } from '@hanano/types'
+﻿import { coreSchema, mergeSchemas } from '@viseed/schema'
+import type { DatabaseConfig } from '@viseed/types'
 import { drizzle } from 'drizzle-orm/bun-sql'
 
 export type DatabaseInstance = ReturnType<typeof drizzle>

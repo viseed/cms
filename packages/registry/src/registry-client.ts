@@ -5,7 +5,7 @@
   ThemeManifest,
   ThemeRegistryEntry,
   ThemeRegistryResponse,
-} from '@hanano/types'
+} from '@viseed/types'
 import { verifyBundleIntegrity } from './integrity'
 
 export interface RegistryClientOptions {

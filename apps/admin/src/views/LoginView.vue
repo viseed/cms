@@ -57,7 +57,7 @@ async function handleLogin() {
   <div class="login-page">
     <form class="login-card" @submit.prevent="handleLogin">
       <h1>Admin Login</h1>
-      <p class="subtitle">Sign in to Hana CMS admin.</p>
+      <p class="subtitle">Sign in to Viseed CMS admin.</p>
 
       <label class="field">
         <span>Email</span>

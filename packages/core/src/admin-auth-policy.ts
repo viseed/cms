@@ -1,12 +1,12 @@
-﻿import { sessions, userSiteRoles, users } from '@hanano/schema'
-import type { ActorContext, Permission, RBACRole, RequestContext, SiteContext } from '@hanano/types'
-import { resolvePermissionsForRoles } from '@hanano/types'
+﻿import { sessions, userSiteRoles, users } from '@viseed/schema'
+import type { ActorContext, Permission, RBACRole, RequestContext, SiteContext } from '@viseed/types'
+import { resolvePermissionsForRoles } from '@viseed/types'
 import { and, eq, gt } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { getCookie } from 'hono/cookie'
 import type { DatabaseInstance } from './database'
 
-export const REQUEST_CONTEXT_KEY = 'hana.requestContext'
+export const REQUEST_CONTEXT_KEY = 'viseed.requestContext'
 
 interface SessionResolutionSuccess {
   actor: ActorContext
@@ -83,12 +83,12 @@ export function getSessionToken(c: Context): string | null {
     }
   }
 
-  const cookieToken = getCookie(c, 'hana_admin_session')
+  const cookieToken = getCookie(c, 'viseed_admin_session')
   if (cookieToken?.trim()) {
     return cookieToken.trim()
   }
 
-  const headerToken = c.req.header('x-hana-session-token')
+  const headerToken = c.req.header('x-viseed-session-token')
   if (headerToken?.trim()) {
     return headerToken.trim()
   }

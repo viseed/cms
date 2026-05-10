@@ -10,7 +10,7 @@ alwaysApply: false
 
 ## Driver — PostgreSQL only
 
-Hana CMS sử dụng **PostgreSQL** duy nhất, qua stack:
+Viseed CMS sử dụng **PostgreSQL** duy nhất, qua stack:
 
 - **Client**: `bun:sql` (Bun built-in PostgreSQL driver)
 - **ORM**: `drizzle-orm/bun-sql`
@@ -33,7 +33,7 @@ Config:
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
   },
 })
 ```
@@ -67,7 +67,7 @@ const categories = pgTable('blog_categories', ...) // prefix: blog_
 const posts = pgTable('posts', ...)
 ```
 
-- **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@hanano/schema`):
+- **Plugin content tables phải có `site_id`** (plain text, default `'default'`, không dùng `.references()` vì plugin không được import `@viseed/schema`):
 
 ```typescript
 // ✅ Đúng — plugin content table with site_id
@@ -84,15 +84,15 @@ export const posts = pgTable(
   }),
 )
 
-// ❌ Sai — không import @hanano/schema trong plugin (vi phạm dependency rules)
-import { sites } from '@hanano/schema'
+// ❌ Sai — không import @viseed/schema trong plugin (vi phạm dependency rules)
+import { sites } from '@viseed/schema'
 siteId: text('site_id').references(() => sites.id)  // ❌
 ```
 
 ### Schema Merge Flow
 
 ```
-HanaCMS.launch()
+ViseedCMS.launch()
   └─ await createDatabase(config, pluginSchemas)
        └─ mergeSchemas(coreSchema, ...pluginSchemas)
             ├─ Throw nếu có key trùng nhau
@@ -176,19 +176,19 @@ const client = new SQL(...)  // ❌
 
 ```bash
 # Development — push schema trực tiếp
-bunx hanabi db push
+bunx viseedbi db push
 
 # Production — generate SQL migration files
-bunx hanabi db generate
+bunx viseedbi db generate
 
 # Production — apply pending migrations
-bunx hanabi db migrate
+bunx viseedbi db migrate
 ```
 
 CLI tự động:
-1. Phát hiện `@hanano/plugin-*` packages đã cài
-2. Generate barrel file `.hana/_schema.ts` re-export tất cả schemas
-3. Generate `.hana/drizzle.config.ts` trỏ vào barrel file
+1. Phát hiện `@viseed/plugin-*` packages đã cài
+2. Generate barrel file `.viseed/_schema.ts` re-export tất cả schemas
+3. Generate `.viseed/drizzle.config.ts` trỏ vào barrel file
 4. Chạy `bunx drizzle-kit` với config tạm
 
 Source: `packages/cli/src/commands/db.ts`

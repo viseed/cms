@@ -7,10 +7,10 @@
 
 ## Quick Start
 
-The fastest way to create a new Hana CMS project is with the `hanabi` CLI.
+The fastest way to create a new Viseed CMS project is with the `viseedbi` CLI.
 
 ```bash
-bunx @hanano/cli init my-site
+bunx @viseed/cli init my-site
 cd my-site
 bun install
 ```
@@ -18,13 +18,13 @@ bun install
 Set your database connection string:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
+export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
 ```
 
 Push the schema to your database and start the server:
 
 ```bash
-bunx hanabi db push
+bunx viseedbi db push
 bun run dev
 ```
 
@@ -56,21 +56,21 @@ If you prefer to scaffold the project yourself instead of using the CLI:
 ```bash
 mkdir my-site && cd my-site
 bun init -y
-bun add @hanano/core hanano-plugin-auth hanano-plugin-blog
-bun add -d @hanano/cli
+bun add @viseed/core viseed-plugin-auth viseed-plugin-blog
+bun add -d @viseed/cli
 ```
 
 Create `src/index.ts`:
 
 ```typescript
-import { createCMS } from '@hanano/core'
-import { authPlugin } from 'hanano-plugin-auth'
-import { blogPlugin } from 'hanano-plugin-blog'
+import { createCMS } from '@viseed/core'
+import { authPlugin } from 'viseed-plugin-auth'
+import { blogPlugin } from 'viseed-plugin-blog'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
   },
   admin: {
     bootstrapAdmin:
@@ -98,8 +98,8 @@ export default {
 Push schema and run:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
-bunx hanabi db push
+export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
+bunx viseedbi db push
 bun run src/index.ts
 ```
 
@@ -107,7 +107,7 @@ bun run src/index.ts
 
 ## Project Structure
 
-A minimal Hana CMS project looks like this:
+A minimal Viseed CMS project looks like this:
 
 ```
 my-site/
@@ -117,7 +117,7 @@ my-site/
 └── tsconfig.json
 ```
 
-The CLI-generated project (`hanabi init`) produces the same structure with sensible defaults already configured.
+The CLI-generated project (`viseedbi init`) produces the same structure with sensible defaults already configured.
 
 ---
 
@@ -126,4 +126,4 @@ The CLI-generated project (`hanabi init`) produces the same structure with sensi
 - [Configuration](/guide/configuration) — all `CMSConfig` options
 - [Plugin System](/guide/plugins) — add built-in and custom plugins
 - [Themes](/guide/themes) — set up and switch themes
-- [CLI Reference](/guide/cli) — all `hanabi` commands
+- [CLI Reference](/guide/cli) — all `viseedbi` commands

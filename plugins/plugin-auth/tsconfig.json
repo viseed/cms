@@ -1,4 +1,4 @@
 ﻿{
-  "extends": "@hanano/config/tsconfig.lib.json",
+  "extends": "@viseed/config/tsconfig.lib.json",
   "include": ["src"]
 }

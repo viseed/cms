@@ -1,18 +1,18 @@
 ﻿---
-description: Project identity — Tên, scope, runtime, và các thông tin cốt lõi của Hana CMS
+description: Project identity — Tên, scope, runtime, và các thông tin cốt lõi của Viseed CMS
 alwaysApply: false
 ---
-# Project Identity — Hana CMS
+# Project Identity — Viseed CMS
 
 ## Tên & Package Scope
 
-- **Project name**: Hanano CMS
-- **Umbrella package**: `hanano` — end-user install `bun add hanano`
-- **Core package scope**: `@hanano/*` — tất cả internal core packages
-- **Plugin packages**: `hanano-plugin-*` (unscoped) — e.g. `hanano-plugin-auth`
-- **Theme packages**: `hanano-theme-*` (unscoped) — e.g. `hanano-theme-blog`
-- **CLI binary**: `hanano` (exposed qua `hanano` package bin)
-- **Npm org**: `@hanano` (cần tạo free org trên npmjs.com trước khi publish lần đầu)
+- **Project name**: Viseed CMS
+- **Umbrella package**: `@viseed/cms` — end-user install `bun add @viseed/cms`
+- **Core package scope**: `@viseed/*` — tất cả internal core packages
+- **Plugin packages**: `@viseed/plugin-*` — e.g. `@viseed/plugin-auth`
+- **Theme packages**: `@viseed/theme-*` — e.g. `@viseed/theme-blog`
+- **CLI binary**: `viseed` (exposed qua `@viseed/cms` package bin)
+- **Npm org**: `@viseed` (cần tạo free org trên npmjs.com trước khi publish lần đầu)
 - **Repo type**: Private monorepo, publish lên npm public registry qua Changesets
 
 ## Runtime
@@ -36,5 +36,6 @@ alwaysApply: false
 
 ## Last updated
 
-2026-05-09 — Renamed scope `@hana/` → `@hanano/`, added umbrella `hanano` package, plugins `hanano-plugin-*`, themes `hanano-theme-*`. Publish flow via Changesets.
+2026-05-10 — Moved umbrella package to `@viseed/cms`, plugins to `@viseed/plugin-*`, themes to `@viseed/theme-*` (all under @viseed npm org scope).
+2026-05-09 — Renamed scope, added umbrella `viseed` package, plugins `viseed-plugin-*`, themes `viseed-theme-*`. Publish flow via Changesets.
 2026-03-21 — Initial creation

@@ -1,10 +1,10 @@
 {
-  "name": "@hanano/cli",
+  "name": "@viseed/cli",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "bin": {
-    "hanano": "./dist/index.js"
+    "viseed": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -22,11 +22,11 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanano/types": "workspace:*",
+    "@viseed/types": "workspace:*",
     "drizzle-kit": "^0.31.10"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*",
+    "@viseed/config": "workspace:*",
     "@types/node": "^25.5.0"
   }
 }

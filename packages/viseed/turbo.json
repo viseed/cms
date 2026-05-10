@@ -2,7 +2,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["@hanano/admin#build", "^build"]
+      "dependsOn": ["@viseed/admin#build", "^build"]
     }
   }
 }

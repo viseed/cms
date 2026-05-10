@@ -3,10 +3,10 @@ name: Plugin Admin Menu System
 overview: "Two-layer plugin admin system: (1) server-side manifest in CMSPlugin served via API; (2) plugin self-builds admin ESM bundle, core serves it, admin dynamic-imports at runtime via Import Map. Official and community plugins use the same flow -- admin has zero dependency on any plugin."
 todos:
   - id: types-admin-config
-    content: Add PluginAdminConfig, PluginAdminMenuItem interfaces to @hana/types and extend CMSPlugin
+    content: Add PluginAdminConfig, PluginAdminMenuItem interfaces to @viseed/types and extend CMSPlugin
     status: completed
   - id: core-manifest-api
-    content: Add GET /api/admin/plugin-manifest endpoint in hana-cms.ts setupAdminApi()
+    content: Add GET /api/admin/plugin-manifest endpoint in viseed-cms.ts setupAdminApi()
     status: completed
   - id: core-serve-bundle
     content: Add GET /api/admin/plugins/:name/ui.js endpoint to serve plugin admin bundles
@@ -57,7 +57,7 @@ isProject: false
 sequenceDiagram
     participant Plugin as Plugin Build
     participant CMSPlugin as CMSPlugin Config
-    participant Core as HanaCMS
+    participant Core as ViseedCMS
     participant AdminSPA as Admin SPA
 
     Plugin->>Plugin: bun build src/admin → dist/admin/index.js (ESM, vue external)
@@ -78,7 +78,7 @@ sequenceDiagram
 
 ## Layer 1: Server-Side Manifest + Bundle Serving
 
-### 1.1 New types in `@hana/types`
+### 1.1 New types in `@viseed/types`
 
 Add to [packages/types/src/plugin.ts](packages/types/src/plugin.ts):
 
@@ -115,7 +115,7 @@ export interface CMSPlugin {
 
 ### 1.2 Manifest API -- `GET /api/admin/plugin-manifest`
 
-In [packages/core/src/hana-cms.ts](packages/core/src/hana-cms.ts) `setupAdminApi()`, add after existing `GET /plugins`:
+In [packages/core/src/viseed-cms.ts](packages/core/src/viseed-cms.ts) `setupAdminApi()`, add after existing `GET /plugins`:
 
 ```typescript
 registerAdminRoute('GET', '/plugin-manifest', 'site.content.read', (c) => {
@@ -137,7 +137,7 @@ Note: `bundlePath` (filesystem path) is NOT exposed to the client. Only `hasBund
 
 ### 1.3 Bundle serving -- `GET /api/admin/plugins/:name/ui.js`
 
-New public admin route in [packages/core/src/hana-cms.ts](packages/core/src/hana-cms.ts):
+New public admin route in [packages/core/src/viseed-cms.ts](packages/core/src/viseed-cms.ts):
 
 ```typescript
 registerAdminRoute('GET', '/plugins/:name/ui.js', 'site.content.read', async (c) => {
@@ -348,7 +348,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   base: '/admin/',
-  plugins: [vue(), hanaImportMapPlugin()],
+  plugins: [vue(), viseedImportMapPlugin()],
   build: {
     outDir: '../../packages/core/dist/admin',
     emptyOutDir: true,
@@ -366,7 +366,7 @@ export default defineConfig({
 })
 ```
 
-`hanaImportMapPlugin()` is a small Vite plugin that:
+`viseedImportMapPlugin()` is a small Vite plugin that:
 1. At build time: finds the Vue chunk filename (e.g., `vendor-vue-abc123.js`)
 2. Injects `<script type="importmap">` into `index.html` before other scripts:
 
@@ -438,7 +438,7 @@ Key points:
 - `import(/* @vite-ignore */ url)` -- dynamic ESM import from API URL
 - Browser resolves `vue` in the loaded bundle via Import Map
 - If bundle fails to load or component not found, falls back to `GenericPluginView`
-- **Admin never imports from `@hana/plugin-*`** -- it imports from a URL served by core
+- **Admin never imports from `@viseed/plugin-*`** -- it imports from a URL served by core
 
 ### 3.4 GenericPluginView fallback
 
@@ -476,10 +476,10 @@ Admin has **zero dependency** on any plugin. All plugin UI is loaded at runtime.
 ```mermaid
 graph TD
     Admin["apps/admin"]
-    Core["@hana/core"]
+    Core["@viseed/core"]
     PluginBlog["plugin-blog"]
     PluginPages["plugin-pages"]
-    Types["@hana/types"]
+    Types["@viseed/types"]
 
     Admin --> Types
     Admin -.->|"runtime: fetch manifest"| Core
@@ -498,8 +498,8 @@ graph TD
 
 ## Files Changed Summary
 
-- **`@hana/types`**: `plugin.ts` -- add `PluginAdminConfig`, `PluginAdminMenuItem`, `componentExport` field; `index.ts` -- re-export new types
-- **`@hana/core`**: `hana-cms.ts` -- add `GET /plugin-manifest` and `GET /plugins/:name/ui.js` endpoints
+- **`@viseed/types`**: `plugin.ts` -- add `PluginAdminConfig`, `PluginAdminMenuItem`, `componentExport` field; `index.ts` -- re-export new types
+- **`@viseed/core`**: `viseed-cms.ts` -- add `GET /plugin-manifest` and `GET /plugins/:name/ui.js` endpoints
 - **`plugin-blog`**: `index.ts` -- add `admin` config with `bundlePath`; new `src/admin/` directory with Vue views; new `build-admin.ts`; `package.json` -- add `build:admin` script + vue/vite devDeps
 - **`plugin-pages`**: same pattern as plugin-blog
 - **`apps/admin`**: `vite.config.ts` -- add `manualChunks` + import map plugin; `main.ts` -- add dynamic route registration; new `usePluginManifest.ts` composable; new `GenericPluginView.vue`; `AdminLayout.vue` -- add order sorting; `routes.ts` -- add `order` to existing route metas

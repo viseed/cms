@@ -83,6 +83,6 @@ export interface ThemeExtensionWidgetDescriptor {
  * Fully qualified widget registration including plugin source (after core normalizes).
  */
 export interface ThemeExtensionWidgetRegistration extends ThemeExtensionWidgetDescriptor {
-  /** npm scope or plugin id, e.g. `@hanano/plugin-blog`. */
+  /** npm scope or plugin id, e.g. `@viseed/plugin-blog`. */
   source: string
 }

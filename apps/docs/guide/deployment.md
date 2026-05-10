@@ -1,6 +1,6 @@
 # Deployment
 
-This guide covers deploying Hana CMS to a production server using Docker.
+This guide covers deploying Viseed CMS to a production server using Docker.
 
 ---
 
@@ -45,13 +45,13 @@ The repository includes a production-ready `Dockerfile` (multi-stage Bun Alpine 
 ### Build and run
 
 ```bash
-docker build -t hanano-cms .
+docker build -t viseed-cms .
 docker run -d \
-  --name hanano-cms \
+  --name viseed-cms \
   -p 3000:3000 \
   --env-file .env \
   -v $(pwd)/uploads:/app/uploads \
-  hanano-cms
+  viseed-cms
 ```
 
 ### Apply migrations before first start
@@ -61,7 +61,7 @@ Run migrations against your production database before starting the container:
 ```bash
 docker run --rm \
   --env-file .env \
-  hanano-cms \
+  viseed-cms \
   bun run packages/cli/src/index.ts db migrate
 ```
 
@@ -69,7 +69,7 @@ Or from your local machine with `DATABASE_URL` pointing to production:
 
 ```bash
 export DATABASE_URL="postgresql://user:pass@prod-host:5432/db"
-bunx hanabi db migrate
+bunx viseedbi db migrate
 ```
 
 ---
@@ -134,7 +134,7 @@ docker compose logs -f app
 
 ## Nginx Configuration
 
-A minimal Nginx config for proxying to Hana CMS:
+A minimal Nginx config for proxying to Viseed CMS:
 
 ```nginx
 events {

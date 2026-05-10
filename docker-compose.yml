@@ -1,4 +1,4 @@
-name: hanano-cms
+name: viseed-cms
 
 # Shared logging config — rotate at 10 MB, keep 5 files per service
 x-logging: &default-logging

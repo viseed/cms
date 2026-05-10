@@ -1,5 +1,5 @@
 {
-  "name": "hanano-theme-insurance",
+  "name": "@viseed/theme-insurance",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -21,9 +21,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanano/types": "workspace:*"
+    "@viseed/types": "workspace:*"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*"
+    "@viseed/config": "workspace:*"
   }
 }

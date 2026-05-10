@@ -23,21 +23,21 @@ onMounted(async () => {
     // API not available during static dev
     plugins.value = [
       {
-        name: '@hanano/plugin-auth',
+        name: '@viseed/plugin-auth',
         version: '0.1.0',
         description: 'Authentication & session management',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hanano/plugin-blog',
+        name: '@viseed/plugin-blog',
         version: '0.1.0',
         description: 'Blog posts & categories',
         installed: true,
         type: 'official',
       },
       {
-        name: '@hanano/plugin-media',
+        name: '@viseed/plugin-media',
         version: '0.1.0',
         description: 'File upload & media management',
         installed: false,

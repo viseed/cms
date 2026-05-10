@@ -9,7 +9,7 @@ Resolve current site per request and enforce RBAC on all admin and site-sensitiv
 - Permission guards for admin API and site-scoped operations.
 
 ## Target Files
-- `packages/core/src/hana-cms.ts`
+- `packages/core/src/viseed-cms.ts`
 - `packages/core/src/database.ts` (only if runtime query helper updates are needed)
 - New auth/policy helper modules under `packages/core/src/`
 

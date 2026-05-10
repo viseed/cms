@@ -6,7 +6,7 @@ export default defineConfig([
     entry: ['src/index.ts'],
     format: ['esm'],
     dts: true,
-    external: [/^@hanano\//, 'drizzle-orm', 'hono', 'eta', /^@tiptap\//],
+    external: [/^@viseed\//, 'drizzle-orm', 'hono', 'eta', /^@tiptap\//],
     onSuccess: async () => {
       await cp('../core/dist/admin', 'dist/admin', { recursive: true })
     },
@@ -15,6 +15,6 @@ export default defineConfig([
     entry: ['src/cli.ts'],
     format: ['esm'],
     dts: false,
-    external: [/^@hanano\//, 'drizzle-orm', /^@drizzle-kit/],
+    external: [/^@viseed\//, 'drizzle-orm', /^@drizzle-kit/],
   },
 ])

@@ -11,17 +11,17 @@ todos:
   - id: plugin-route-registry
     content: "Tạo packages/core/src/plugin-route-registry.ts: PluginRouteRegistry class với register/activate/deactivate/isActive/middleware()"
     status: pending
-  - id: hana-cms-launch
-    content: "hana-cms.ts launch(): thay direct plugin.routes() bằng PluginRouteRegistry, syncPluginActiveStateFromDb(), gom companion schemas"
+  - id: viseed-cms-launch
+    content: "viseed-cms.ts launch(): thay direct plugin.routes() bằng PluginRouteRegistry, syncPluginActiveStateFromDb(), gom companion schemas"
     status: pending
-  - id: hana-cms-theme-activate
-    content: "hana-cms.ts activateTheme(): toggle companion plugin khi theme swap (disable old, enable new)"
+  - id: viseed-cms-theme-activate
+    content: "viseed-cms.ts activateTheme(): toggle companion plugin khi theme swap (disable old, enable new)"
     status: pending
-  - id: hana-cms-admin-api
-    content: "hana-cms.ts setupAdminApi(): thêm 4 plugin endpoints (install/uninstall/enable/disable) + GET list"
+  - id: viseed-cms-admin-api
+    content: "viseed-cms.ts setupAdminApi(): thêm 4 plugin endpoints (install/uninstall/enable/disable) + GET list"
     status: pending
-  - id: hana-cms-mount-routes
-    content: "hana-cms.ts mountThemeRoutes(): hỗ trợ routePattern override từ ThemeLayoutEntry, register custom routes từ mọi registered themes"
+  - id: viseed-cms-mount-routes
+    content: "viseed-cms.ts mountThemeRoutes(): hỗ trợ routePattern override từ ThemeLayoutEntry, register custom routes từ mọi registered themes"
     status: pending
   - id: core-export
     content: "packages/core/src/index.ts: export PluginRouteRegistry"
@@ -74,8 +74,8 @@ Thêm `lifecycle` vào `CMSPlugin`:
 export interface PluginLifecycle {
   onInstall?:   (db: DatabaseInstance) => void | Promise<void>
   onUninstall?: (db: DatabaseInstance) => void | Promise<void>
-  onEnable?:    (cms: HanaCMS) => void | Promise<void>
-  onDisable?:   (cms: HanaCMS) => void | Promise<void>
+  onEnable?:    (cms: ViseedCMS) => void | Promise<void>
+  onDisable?:   (cms: ViseedCMS) => void | Promise<void>
 }
 
 export interface CMSPlugin {
@@ -102,7 +102,7 @@ Thêm `companionPlugin` và `routePattern`:
 export interface ThemeLayoutEntry<TData = Record<string, unknown>> {
   template: string
   routePattern?: string  // override DEFAULT_LAYOUT_ROUTES, e.g. '/product/:slug'
-  data?: (defaultData: TData, cms: HanaCMS) => TData | Promise<TData>
+  data?: (defaultData: TData, cms: ViseedCMS) => TData | Promise<TData>
 }
 
 export interface CMSTheme {
@@ -135,9 +135,9 @@ export class PluginRouteRegistry {
 - Chỉ dispatch tới plugin nằm trong `active` set
 - Nếu `subRouter.fetch()` trả 404, tiếp tục `next()`
 
-## Phan 3 — Thay đổi hana-cms.ts
+## Phan 3 — Thay đổi viseed-cms.ts
 
-**File:** [`packages/core/src/hana-cms.ts`](packages/core/src/hana-cms.ts)
+**File:** [`packages/core/src/viseed-cms.ts`](packages/core/src/viseed-cms.ts)
 
 ### 3a. `launch()` — thay plugin.routes() direct mount
 
@@ -262,7 +262,7 @@ export function ecommerceCompanionPlugin(): CMSPlugin {
 - [`packages/types/src/plugin.ts`](packages/types/src/plugin.ts) — thêm `PluginLifecycle`, 2 hooks mới
 - [`packages/types/src/theme.ts`](packages/types/src/theme.ts) — thêm `companionPlugin`, `routePattern`
 - `packages/core/src/plugin-route-registry.ts` — **file mới**
-- [`packages/core/src/hana-cms.ts`](packages/core/src/hana-cms.ts) — launch(), schema collection, activateTheme(), admin APIs, mountThemeRoutes()
+- [`packages/core/src/viseed-cms.ts`](packages/core/src/viseed-cms.ts) — launch(), schema collection, activateTheme(), admin APIs, mountThemeRoutes()
 - [`packages/core/src/index.ts`](packages/core/src/index.ts) — export PluginRouteRegistry
 - [`.cursor/rules/05-plugin-api-contract.mdc`](.cursor/rules/05-plugin-api-contract.mdc) — update lifecycle docs
 - [`.cursor/rules/08-theme-api-contract.mdc`](.cursor/rules/08-theme-api-contract.mdc) — update companion concept, routePattern

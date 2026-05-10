@@ -1,4 +1,4 @@
-﻿import type { Permission } from '@hanano/types'
+﻿import type { Permission } from '@viseed/types'
 import type { RouteRecordRaw } from 'vue-router'
 
 type AdminRouteMeta = {

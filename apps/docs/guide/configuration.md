@@ -3,7 +3,7 @@
 All configuration is passed to `createCMS()` as a single `CMSConfig` object.
 
 ```typescript
-import { createCMS } from '@hanano/core'
+import { createCMS } from '@viseed/core'
 
 const cms = createCMS({
   db: { driver: 'postgres', url: process.env.DATABASE_URL! },
@@ -33,7 +33,7 @@ db: {
 ```typescript
 db: {
   driver: 'postgres',
-  url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+  url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
 }
 ```
 
@@ -110,8 +110,8 @@ defaultTheme?: string        // Name of the theme to use when none is set in DB
 **Example:**
 
 ```typescript
-import { blogTheme } from 'hanano-theme-blog'
-import { insuranceTheme } from 'hanano-theme-insurance'
+import { blogTheme } from 'viseed-theme-blog'
+import { insuranceTheme } from 'viseed-theme-insurance'
 
 const cms = createCMS({
   ...,
@@ -182,7 +182,7 @@ See the [Media](/guide/media) guide for the full upload API.
 Create a `.env` file at the project root for local development:
 
 ```bash
-DATABASE_URL=postgresql://postgres:admin@localhost:5432/hana
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/viseed
 PORT=3000
 HANA_ADMIN_EMAIL=admin@local.dev
 HANA_ADMIN_PASSWORD=12345678

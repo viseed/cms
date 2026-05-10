@@ -4,7 +4,7 @@ export type {
   AuthContextPayload,
   CMSConfig,
   DatabaseConfig,
-  HananoCMS,
+  ViseedCMS,
   Permission,
   PermissionChecker,
   PermissionCheckInput,

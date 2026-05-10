@@ -1,6 +1,6 @@
 # Deployment Guide
 
-Hướng dẫn setup từ đầu để chạy Hana CMS trên VPS với Docker + Nginx + GitHub Actions.
+Hướng dẫn setup từ đầu để chạy Viseed CMS trên VPS với Docker + Nginx + GitHub Actions.
 
 ---
 

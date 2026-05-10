@@ -1,4 +1,4 @@
-﻿import type { CMSPlugin, CMSRouteContextHelpers } from '@hanano/types'
+﻿import type { CMSPlugin, CMSRouteContextHelpers } from '@viseed/types'
 import type { MiddlewareHandler } from 'hono'
 import { Hono } from 'hono'
 

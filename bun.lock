@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "hana-cms",
+      "name": "viseed-cms",
       "dependencies": {
         "@types/bun": "^1.3.11",
       },
@@ -20,12 +20,9 @@
       },
     },
     "apps/admin": {
-      "name": "@hanano/admin",
+      "name": "@viseed/admin",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
-        "@hanano/ui": "workspace:*",
-        "@hanano/validator": "workspace:*",
         "@tiptap/extension-character-count": "^3.22.3",
         "@tiptap/extension-color": "^3.22.3",
         "@tiptap/extension-image": "^3.22.3",
@@ -40,18 +37,21 @@
         "@tiptap/pm": "^3.22.3",
         "@tiptap/starter-kit": "^3.22.3",
         "@tiptap/vue-3": "^3.22.3",
+        "@viseed/types": "workspace:*",
+        "@viseed/ui": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "schema-org-adapter": "^7.1.1",
         "vue": "^3.5.0",
         "vue-router": "^4.5.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
       },
     },
     "apps/docs": {
-      "name": "@hanano/docs",
+      "name": "@viseed/docs",
       "version": "0.1.0",
       "devDependencies": {
         "vitepress": "^1.6.0",
@@ -59,46 +59,43 @@
       },
     },
     "apps/starter": {
-      "name": "@hanano/starter",
+      "name": "@viseed/starter",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/core": "workspace:*",
-        "hanano-plugin-auth": "workspace:*",
-        "hanano-plugin-blog": "workspace:*",
-        "hanano-plugin-menu": "workspace:*",
-        "hanano-plugin-pages": "workspace:*",
+        "@viseed/core": "workspace:*",
+        "@viseed/plugin-auth": "workspace:*",
+        "@viseed/plugin-blog": "workspace:*",
+        "@viseed/plugin-menu": "workspace:*",
+        "@viseed/plugin-pages": "workspace:*",
       },
       "devDependencies": {
-        "hanano-theme-blog": "workspace:*",
-        "hanano-theme-insurance": "workspace:*",
+        "@viseed/theme-blog": "workspace:*",
+        "@viseed/theme-insurance": "workspace:*",
       },
     },
     "packages/cli": {
-      "name": "@hanano/cli",
+      "name": "@viseed/cli",
       "version": "0.1.0",
       "bin": {
-        "hana": "./dist/index.js",
+        "viseed": "./dist/index.js",
       },
       "dependencies": {
-        "@hanano/types": "workspace:*",
+        "@viseed/types": "workspace:*",
         "drizzle-kit": "^0.31.10",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
         "@types/node": "^25.5.0",
+        "@viseed/config": "workspace:*",
       },
     },
     "packages/config": {
-      "name": "@hanano/config",
+      "name": "@viseed/config",
       "version": "0.1.0",
     },
     "packages/core": {
-      "name": "@hanano/core",
+      "name": "@viseed/core",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/schema": "workspace:*",
-        "@hanano/types": "workspace:*",
-        "@hanano/validator": "workspace:*",
         "@tiptap/extension-color": "^3.22.3",
         "@tiptap/extension-image": "^3.22.3",
         "@tiptap/extension-link": "^3.22.3",
@@ -112,124 +109,127 @@
         "@tiptap/html": "^3.22.3",
         "@tiptap/pm": "^3.22.3",
         "@tiptap/starter-kit": "^3.22.3",
+        "@viseed/schema": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "drizzle-orm": "0.44.7",
         "eta": "^4.5.1",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
         "@types/node": "^25.5.0",
-      },
-    },
-    "packages/hanano": {
-      "name": "hanano",
-      "version": "0.1.0",
-      "bin": {
-        "hanano": "./dist/cli.js",
-      },
-      "dependencies": {
-        "@hanano/cli": "workspace:*",
-        "@hanano/core": "workspace:*",
-        "@hanano/registry": "workspace:*",
-        "@hanano/schema": "workspace:*",
-        "@hanano/types": "workspace:*",
-        "@hanano/ui": "workspace:*",
-        "@hanano/validator": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "packages/registry": {
-      "name": "@hanano/registry",
+      "name": "@viseed/registry",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
-        "@hanano/validator": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/validator": "workspace:*",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "packages/schema": {
-      "name": "@hanano/schema",
+      "name": "@viseed/schema",
       "version": "0.1.0",
       "dependencies": {
         "drizzle-orm": "^0.44.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
-        "@hanano/types": "workspace:*",
+        "@viseed/config": "workspace:*",
+        "@viseed/types": "workspace:*",
       },
     },
     "packages/types": {
-      "name": "@hanano/types",
+      "name": "@viseed/types",
       "version": "0.1.0",
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "packages/ui": {
-      "name": "@hanano/ui",
+      "name": "@viseed/ui",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
+        "@viseed/types": "workspace:*",
         "vue": "^3.5.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "packages/validator": {
-      "name": "@hanano/validator",
+      "name": "@viseed/validator",
       "version": "0.1.0",
       "dependencies": {
         "zod": "^3.24.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
-        "@hanano/types": "workspace:*",
+        "@viseed/config": "workspace:*",
+        "@viseed/types": "workspace:*",
+      },
+    },
+    "packages/viseed": {
+      "name": "@viseed/cms",
+      "version": "0.1.0",
+      "bin": {
+        "viseed": "./dist/cli.js",
+      },
+      "dependencies": {
+        "@viseed/cli": "workspace:*",
+        "@viseed/core": "workspace:*",
+        "@viseed/registry": "workspace:*",
+        "@viseed/schema": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/ui": "workspace:*",
+        "@viseed/validator": "workspace:*",
       },
     },
     "plugins/plugin-auth": {
-      "name": "hanano-plugin-auth",
+      "name": "@viseed/plugin-auth",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/schema": "workspace:*",
-        "@hanano/types": "workspace:*",
-        "@hanano/validator": "workspace:*",
+        "@viseed/schema": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "plugins/plugin-blog": {
-      "name": "hanano-plugin-blog",
+      "name": "@viseed/plugin-blog",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
-        "@hanano/validator": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
-        "@hanano/core": "workspace:*",
+        "@viseed/config": "workspace:*",
+        "@viseed/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
       },
     },
     "plugins/plugin-menu": {
-      "name": "hanano-plugin-menu",
+      "name": "@viseed/plugin-menu",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
+        "@viseed/types": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
-        "@hanano/core": "workspace:*",
+        "@viseed/config": "workspace:*",
+        "@viseed/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vite-plugin-css-injected-by-js": "^3.5.2",
@@ -237,40 +237,40 @@
       },
     },
     "plugins/plugin-pages": {
-      "name": "hanano-plugin-pages",
+      "name": "@viseed/plugin-pages",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
-        "@hanano/validator": "workspace:*",
+        "@viseed/types": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "drizzle-orm": "^0.44.0",
         "hono": "^4.7.0",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
-        "@hanano/core": "workspace:*",
+        "@viseed/config": "workspace:*",
+        "@viseed/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
       },
     },
     "themes/theme-blog": {
-      "name": "hanano-theme-blog",
+      "name": "@viseed/theme-blog",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
+        "@viseed/types": "workspace:*",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
     "themes/theme-insurance": {
-      "name": "hanano-theme-insurance",
+      "name": "@viseed/theme-insurance",
       "version": "0.1.0",
       "dependencies": {
-        "@hanano/types": "workspace:*",
+        "@viseed/types": "workspace:*",
       },
       "devDependencies": {
-        "@hanano/config": "workspace:*",
+        "@viseed/config": "workspace:*",
       },
     },
   },
@@ -454,28 +454,6 @@
     "@floating-ui/dom": ["@floating-ui/dom@1.7.6", "", { "dependencies": { "@floating-ui/core": "^1.7.5", "@floating-ui/utils": "^0.2.11" } }, "sha512-9gZSAI5XM36880PPMm//9dfiEngYoC6Am2izES1FF406YFsjvyBMmeJ2g4SAju3xWwtuynNRFL2s9hgxpLI5SQ=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
-
-    "@hanano/admin": ["@hanano/admin@workspace:apps/admin"],
-
-    "@hanano/cli": ["@hanano/cli@workspace:packages/cli"],
-
-    "@hanano/config": ["@hanano/config@workspace:packages/config"],
-
-    "@hanano/core": ["@hanano/core@workspace:packages/core"],
-
-    "@hanano/docs": ["@hanano/docs@workspace:apps/docs"],
-
-    "@hanano/registry": ["@hanano/registry@workspace:packages/registry"],
-
-    "@hanano/schema": ["@hanano/schema@workspace:packages/schema"],
-
-    "@hanano/starter": ["@hanano/starter@workspace:apps/starter"],
-
-    "@hanano/types": ["@hanano/types@workspace:packages/types"],
-
-    "@hanano/ui": ["@hanano/ui@workspace:packages/ui"],
-
-    "@hanano/validator": ["@hanano/validator@workspace:packages/validator"],
 
     "@iconify-json/simple-icons": ["@iconify-json/simple-icons@1.2.74", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-yqaohfY6jnYjTVpuTkaBQHrWbdUrQyWXhau0r/0EZiNWYXPX/P8WWwl1DoLH5CbvDjjcWQw5J0zADhgCUklOqA=="],
 
@@ -811,6 +789,42 @@
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.3.0", "", {}, "sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g=="],
 
+    "@viseed/admin": ["@viseed/admin@workspace:apps/admin"],
+
+    "@viseed/cli": ["@viseed/cli@workspace:packages/cli"],
+
+    "@viseed/cms": ["@viseed/cms@workspace:packages/viseed"],
+
+    "@viseed/config": ["@viseed/config@workspace:packages/config"],
+
+    "@viseed/core": ["@viseed/core@workspace:packages/core"],
+
+    "@viseed/docs": ["@viseed/docs@workspace:apps/docs"],
+
+    "@viseed/plugin-auth": ["@viseed/plugin-auth@workspace:plugins/plugin-auth"],
+
+    "@viseed/plugin-blog": ["@viseed/plugin-blog@workspace:plugins/plugin-blog"],
+
+    "@viseed/plugin-menu": ["@viseed/plugin-menu@workspace:plugins/plugin-menu"],
+
+    "@viseed/plugin-pages": ["@viseed/plugin-pages@workspace:plugins/plugin-pages"],
+
+    "@viseed/registry": ["@viseed/registry@workspace:packages/registry"],
+
+    "@viseed/schema": ["@viseed/schema@workspace:packages/schema"],
+
+    "@viseed/starter": ["@viseed/starter@workspace:apps/starter"],
+
+    "@viseed/theme-blog": ["@viseed/theme-blog@workspace:themes/theme-blog"],
+
+    "@viseed/theme-insurance": ["@viseed/theme-insurance@workspace:themes/theme-insurance"],
+
+    "@viseed/types": ["@viseed/types@workspace:packages/types"],
+
+    "@viseed/ui": ["@viseed/ui@workspace:packages/ui"],
+
+    "@viseed/validator": ["@viseed/validator@workspace:packages/validator"],
+
     "@vitejs/plugin-vue": ["@vitejs/plugin-vue@5.2.4", "", { "peerDependencies": { "vite": "^5.0.0 || ^6.0.0", "vue": "^3.2.25" } }, "sha512-7Yx/SXSOcQq5HiiV3orevHUFn+pmMB4cgbEkDYgnkUWb0WfeQ/wa2yFv6D5ICiCQOVpjA7vYDXrC7AGO8yjDHA=="],
 
     "@vue/compiler-core": ["@vue/compiler-core@3.5.30", "", { "dependencies": { "@babel/parser": "^7.29.0", "@vue/shared": "3.5.30", "entities": "^7.0.1", "estree-walker": "^2.0.2", "source-map-js": "^1.2.1" } }, "sha512-s3DfdZkcu/qExZ+td75015ljzHc6vE+30cFMGRPROYjqkroYI5NV2X1yAMX9UeyBNWB9MxCfPcsjpLS11nzkkw=="],
@@ -1000,20 +1014,6 @@
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
 
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
-
-    "hanano": ["hanano@workspace:packages/hanano"],
-
-    "hanano-plugin-auth": ["hanano-plugin-auth@workspace:plugins/plugin-auth"],
-
-    "hanano-plugin-blog": ["hanano-plugin-blog@workspace:plugins/plugin-blog"],
-
-    "hanano-plugin-menu": ["hanano-plugin-menu@workspace:plugins/plugin-menu"],
-
-    "hanano-plugin-pages": ["hanano-plugin-pages@workspace:plugins/plugin-pages"],
-
-    "hanano-theme-blog": ["hanano-theme-blog@workspace:themes/theme-blog"],
-
-    "hanano-theme-insurance": ["hanano-theme-insurance@workspace:themes/theme-insurance"],
 
     "happy-dom": ["happy-dom@20.8.9", "", { "dependencies": { "@types/node": ">=20.0.0", "@types/whatwg-mimetype": "^3.0.2", "@types/ws": "^8.18.1", "entities": "^7.0.1", "whatwg-mimetype": "^3.0.0", "ws": "^8.18.3" } }, "sha512-Tz23LR9T9jOGVZm2x1EPdXqwA37G/owYMxRwU0E4miurAtFsPMQ1d2Jc2okUaSjZqAFz2oEn3FLXC5a0a+siyA=="],
 
@@ -1433,11 +1433,11 @@
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
 
+    "@viseed/plugin-menu/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
+
     "bun-types/@types/node": ["@types/node@12.20.55", "", {}, "sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ=="],
 
     "cross-fetch/node-fetch": ["node-fetch@2.7.0", "", { "dependencies": { "whatwg-url": "^5.0.0" }, "peerDependencies": { "encoding": "^0.1.0" }, "optionalPeers": ["encoding"] }, "sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A=="],
-
-    "hanano-plugin-menu/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
 
     "ky-universal/node-fetch": ["node-fetch@3.0.0-beta.9", "", { "dependencies": { "data-uri-to-buffer": "^3.0.1", "fetch-blob": "^2.1.1" } }, "sha512-RdbZCEynH2tH46+tj0ua9caUHVWrd/RHnRfvly2EVdqGmI3ndS1Vn/xjm5KuGejDt2RNDQsVRLPNd2QPwcewVg=="],
 

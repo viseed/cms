@@ -1,6 +1,6 @@
 ﻿import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { CMSTheme } from '@hanano/types'
+import type { CMSTheme } from '@viseed/types'
 import { blogCompanionPlugin } from './companion-plugin'
 
 export { blogCompanionPlugin }
@@ -32,12 +32,12 @@ export function blogTheme(): CMSTheme {
           key: 'general',
           title: 'General',
           fields: [
-            { key: 'siteTitle', label: 'Site Title', type: 'text', default: 'Hana Blog' },
+            { key: 'siteTitle', label: 'Site Title', type: 'text', default: 'Viseed Blog' },
             {
               key: 'siteDescription',
               label: 'Site Description',
               type: 'textarea',
-              default: 'A modern blog powered by Hana CMS',
+              default: 'A modern blog powered by Viseed CMS',
             },
             { key: 'brandColor', label: 'Brand Color', type: 'color', default: '#1a56db' },
           ],

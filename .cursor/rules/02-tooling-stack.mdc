@@ -2,7 +2,7 @@
 description: Tooling stack — Các tools chính xác đang dùng, tránh AI suggest sai tools
 alwaysApply: false
 ---
-# Tooling Stack — Hana CMS (03/2026)
+# Tooling Stack — Viseed CMS (03/2026)
 
 Đây là danh sách tool **đang thực sự dùng**. KHÔNG suggest thay thế trừ khi được yêu cầu.
 
@@ -60,9 +60,9 @@ bun test --watch      # watch mode
 | Package management | **Bun workspaces** | Linking, hoisting, lockfile |
 
 ```bash
-bun run dev:starter    # turbo run dev --filter=@hanano/starter
-bun run dev:admin      # turbo run dev --filter=@hanano/admin
-bun run dev:docs       # turbo run dev --filter=@hanano/docs
+bun run dev:starter    # turbo run dev --filter=@viseed/starter
+bun run dev:admin      # turbo run dev --filter=@viseed/admin
+bun run dev:docs       # turbo run dev --filter=@viseed/docs
 ```
 
 Config: `turbo.json` (root)

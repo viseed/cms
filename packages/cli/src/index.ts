@@ -12,7 +12,7 @@ async function main(): Promise<void> {
     case 'init': {
       const name = args[0]
       if (!name) {
-        console.error('Usage: hanabi init <project-name>')
+        console.error('Usage: viseedbi init <project-name>')
         process.exit(1)
       }
       await initProject(name)
@@ -22,7 +22,7 @@ async function main(): Promise<void> {
     case 'db': {
       const subcommand = args[0]
       if (!subcommand) {
-        console.error('Usage: hanabi db <push|generate|migrate>')
+        console.error('Usage: viseedbi db <push|generate|migrate>')
         process.exit(1)
       }
       await runDbCommand(subcommand)
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     }
 
     case 'migrate': {
-      console.log('Note: "hanabi migrate" is deprecated. Use "hanabi db migrate" instead.')
+      console.log('Note: "viseedbi migrate" is deprecated. Use "viseedbi db migrate" instead.')
       await runDbCommand('migrate')
       break
     }
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: hanabi plugin <install|uninstall> <package-name>')
+        console.error('Usage: viseedbi plugin <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -57,7 +57,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: hanabi theme <install|uninstall> <package-name>')
+        console.error('Usage: viseedbi theme <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -72,10 +72,10 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.log('Hanabi CMS CLI')
+      console.log('Viseedbi CMS CLI')
       console.log('')
       console.log('Commands:')
-      console.log('  init <name>                     Create a new Hana CMS project')
+      console.log('  init <name>                     Create a new Viseed CMS project')
       console.log('  db push                         Push schema to database (dev)')
       console.log('  db generate                     Generate SQL migration files (prod)')
       console.log('  db migrate                      Apply pending migrations (prod)')

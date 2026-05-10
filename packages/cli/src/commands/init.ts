@@ -12,26 +12,23 @@ const STARTER_PACKAGE_JSON = (name: string): string =>
         build: 'bun build src/index.ts --outdir dist --target bun',
       },
       dependencies: {
-        '@hanano/core': 'latest',
-        'hanano-plugin-auth': 'latest',
-        'hanano-plugin-blog': 'latest',
-      },
-      devDependencies: {
-        hanano: 'latest',
+        '@viseed/cms': 'latest',
+        '@viseed/plugin-auth': 'latest',
+        '@viseed/plugin-blog': 'latest',
       },
     },
     null,
     2,
   )
 
-const STARTER_INDEX = `import { createCMS } from '@hanano/core'
-import { authPlugin } from 'hanano-plugin-auth'
-import { blogPlugin } from 'hanano-plugin-blog'
+const STARTER_INDEX = `import { createCMS } from '@viseed/cms'
+import { authPlugin } from '@viseed/plugin-auth'
+import { blogPlugin } from '@viseed/plugin-blog'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hanano',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
   },
   admin: {
     bootstrapAdmin:
@@ -87,9 +84,9 @@ export async function initProject(projectName: string): Promise<void> {
   console.log(`  cd ${projectName}`)
   console.log(`  bun install`)
   console.log(`  # Set your PostgreSQL connection string:`)
-  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/hanano"`)
+  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"`)
   console.log(`  # Push schema to database:`)
-  console.log(`  bunx hanano db push`)
+  console.log(`  bunx viseed db push`)
   console.log(`  # Dev default admin is auto-seeded on first run:`)
   console.log(`  # email: admin@local.dev`)
   console.log(`  # password: 12345678`)

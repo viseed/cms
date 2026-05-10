@@ -6,7 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_ADMIN_PLUGIN_UI_BUILD_ID: string
 }
 
-import type { Permission } from '@hanano/types'
+import type { Permission } from '@viseed/types'
 
 declare module 'vue-router' {
   interface RouteMeta {

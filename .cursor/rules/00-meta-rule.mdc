@@ -22,7 +22,7 @@ Khi làm việc ở **Plan mode** hoặc **Agent mode**, nếu thực hiện b�
 | Thêm DB driver mới (turso, postgres, mysql) | `06-database-patterns.mdc` |
 | Thay đổi build tool / test runner / linter | `02-tooling-stack.mdc` |
 | Đổi biome config (indent, quotes...) | `07-coding-standards.mdc` |
-| Đổi tên package scope (ví dụ @hana → @hanabi) | `01-project-identity.mdc`, `03-package-map.mdc`, `04-dependency-rules.mdc` |
+| Đổi tên package scope (ví dụ @viseed → @viseedbi) | `01-project-identity.mdc`, `03-package-map.mdc`, `04-dependency-rules.mdc` |
 | Thay đổi dependency graph giữa packages | `04-dependency-rules.mdc` |
 | Thay đổi `CMSTheme` interface | `08-theme-api-contract.mdc` |
 | Thay đổi theme manifest, required layouts | `08-theme-api-contract.mdc` |

@@ -15,8 +15,8 @@
   <main class="container">
     <% if (it.settings['hero.showHero'] !== false) { %>
       <section class="hero">
-        <h1><%= it.settings['general.siteTitle'] || 'Hana Blog' %></h1>
-        <p><%= it.settings['general.siteDescription'] || 'A modern blog powered by Hana CMS' %></p>
+        <h1><%= it.settings['general.siteTitle'] || 'Viseed Blog' %></h1>
+        <p><%= it.settings['general.siteDescription'] || 'A modern blog powered by Viseed CMS' %></p>
       </section>
     <% } %>
 

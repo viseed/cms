@@ -9,7 +9,7 @@ import {
   themeState,
   userSiteRoles,
   users,
-} from '@hanano/schema'
+} from '@viseed/schema'
 import type {
   CMSConfig,
   CMSPlugin,
@@ -18,14 +18,14 @@ import type {
   Permission,
   RequestContext,
   RequiredLayoutKey,
-} from '@hanano/types'
+} from '@viseed/types'
 import {
   HOOK_KEY,
   resolveDefaultSettings,
   SINGLE_SITE_CONTEXT,
   toAuthContextPayload,
-} from '@hanano/types'
-import { loginSchema } from '@hanano/validator'
+} from '@viseed/types'
+import { loginSchema } from '@viseed/validator'
 import { count, eq, sql } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
@@ -99,7 +99,7 @@ interface ResolvedTheme {
   previewToken?: string
 }
 
-export class HananoCMS {
+export class ViseedCMS {
   private app: Hono
   private plugins: CMSPlugin[] = []
   private hooks = new HookRegistry()
@@ -122,7 +122,7 @@ export class HananoCMS {
     }
   }
 
-  use(plugin: CMSPlugin): HananoCMS {
+  use(plugin: CMSPlugin): ViseedCMS {
     this.plugins.push(plugin)
 
     if (plugin.hooks) {
@@ -205,22 +205,22 @@ export class HananoCMS {
   }
 
   async shutdown(): Promise<void> {
-    console.log('[HananoCMS] Graceful shutdown initiated...')
+    console.log('[ViseedCMS] Graceful shutdown initiated...')
 
     if (this.db) {
       try {
         const client = (this.db as unknown as { $client?: { close?: () => Promise<void> } }).$client
         if (typeof client?.close === 'function') {
           await client.close()
-          console.log('[HananoCMS] Database connection closed.')
+          console.log('[ViseedCMS] Database connection closed.')
         }
       } catch (error) {
-        console.error('[HananoCMS] Error closing database connection:', error)
+        console.error('[ViseedCMS] Error closing database connection:', error)
       }
       this.db = null
     }
 
-    console.log('[HananoCMS] Shutdown complete.')
+    console.log('[ViseedCMS] Shutdown complete.')
   }
 
   getPlugins(): CMSPlugin[] {
@@ -331,7 +331,7 @@ export class HananoCMS {
     const activeRuntime = this.themeRuntimes.get(this.activeThemeName)
     if (!activeTheme || !activeRuntime) return null
 
-    const token = c.req.query('hanano_preview') ?? getCookie(c, 'hanano_preview')
+    const token = c.req.query('viseed_preview') ?? getCookie(c, 'viseed_preview')
     if (token) {
       const db = this.getDatabase()
       const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
@@ -364,7 +364,7 @@ export class HananoCMS {
   }
 
   private clearThemePreviewCookie(c: Context): void {
-    setCookie(c, 'hanano_preview', '', { path: '/', maxAge: 0 })
+    setCookie(c, 'viseed_preview', '', { path: '/', maxAge: 0 })
   }
 
   private async clearThemePreviewState(c: Context) {
@@ -809,7 +809,7 @@ export class HananoCMS {
         expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS),
       })
 
-      setCookie(c, 'hana_admin_session', token, {
+      setCookie(c, 'viseed_admin_session', token, {
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
@@ -845,7 +845,7 @@ export class HananoCMS {
         }
       }
 
-      setCookie(c, 'hana_admin_session', '', {
+      setCookie(c, 'viseed_admin_session', '', {
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
@@ -1031,7 +1031,7 @@ export class HananoCMS {
       const activeTheme = this.getTheme()
 
       const seen = new Set<string>()
-      const catalog: ReturnType<HananoCMS['describeTheme']>[] = []
+      const catalog: ReturnType<ViseedCMS['describeTheme']>[] = []
 
       for (const [, theme] of this.themeRegistry) {
         seen.add(theme.name)
@@ -1148,7 +1148,7 @@ export class HananoCMS {
       }
 
       if (b.skipCookie !== true) {
-        setCookie(c, 'hanano_preview', token, {
+        setCookie(c, 'viseed_preview', token, {
           path: '/',
           httpOnly: true,
           sameSite: 'Lax',
@@ -1157,7 +1157,7 @@ export class HananoCMS {
       }
 
       const url = new URL(c.req.url)
-      const previewQueryExample = `${url.origin}/?hanano_preview=${encodeURIComponent(token)}`
+      const previewQueryExample = `${url.origin}/?viseed_preview=${encodeURIComponent(token)}`
 
       return c.json({
         message: 'Theme preview enabled for this browser.',
@@ -1264,7 +1264,7 @@ export class HananoCMS {
         return c.json({ error: `Theme "${name}" is already the active theme.` }, 409)
       }
 
-      const missingLayouts = HananoCMS.REQUIRED_LAYOUTS.filter((k) => !(k in registeredTheme.layouts))
+      const missingLayouts = ViseedCMS.REQUIRED_LAYOUTS.filter((k) => !(k in registeredTheme.layouts))
       if (missingLayouts.length > 0) {
         return c.json(
           { error: `Theme "${name}" is missing required layouts: ${missingLayouts.join(', ')}.` },
@@ -1521,7 +1521,7 @@ export class HananoCMS {
 
   private describeTheme(theme: CMSTheme, active: boolean) {
     const providedKeys = Object.keys(theme.layouts)
-    const missingRequiredLayouts = HananoCMS.REQUIRED_LAYOUTS.filter(
+    const missingRequiredLayouts = ViseedCMS.REQUIRED_LAYOUTS.filter(
       (key) => !providedKeys.includes(key),
     )
 
@@ -1589,8 +1589,8 @@ export class HananoCMS {
   }
 }
 
-export function createCMS(config: CMSConfig): HananoCMS {
-  return new HananoCMS(config)
+export function createCMS(config: CMSConfig): ViseedCMS {
+  return new ViseedCMS(config)
 }
 
 

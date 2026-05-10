@@ -16,8 +16,8 @@ alwaysApply: false
 interface PluginLifecycle {
   onInstall?:   (db: unknown) => void | Promise<void>
   onUninstall?: (db: unknown) => void | Promise<void>
-  onEnable?:    (cms: HanaCMS) => void | Promise<void>
-  onDisable?:   (cms: HanaCMS) => void | Promise<void>
+  onEnable?:    (cms: ViseedCMS) => void | Promise<void>
+  onDisable?:   (cms: ViseedCMS) => void | Promise<void>
 }
 
 interface PluginAdminMenuItem {
@@ -49,7 +49,7 @@ interface CMSPlugin {
 }
 
 interface CMSPluginHooks {
-  'cms:init':            (cms: HanaCMS) => void | Promise<void>
+  'cms:init':            (cms: ViseedCMS) => void | Promise<void>
   'cms:ready':           (app: Hono)    => void | Promise<void>
   'admin:register':      (registry: ComponentRegistry) => void
   'theme:mount':         (theme: CMSTheme) => void | Promise<void>
@@ -63,11 +63,11 @@ interface CMSPluginHooks {
 ## Lifecycle Hooks — Thứ tự thực thi
 
 ```
-1. createCMS(config)            → HanaCMS constructor, đăng ký tất cả plugins
+1. createCMS(config)            → ViseedCMS constructor, đăng ký tất cả plugins
 2. cms.launch()
    ├─ registerThemes()          → xây dựng themeRegistry + themeRuntimes
    ├─ createDatabase()          → merge schemas từ core + plugins + companionPlugin schemas
-   ├─ hooks.run('cms:init')     → mỗi plugin nhận HanaCMS instance (setup DB, services)
+   ├─ hooks.run('cms:init')     → mỗi plugin nhận ViseedCMS instance (setup DB, services)
    ├─ PluginRouteRegistry       → đăng ký sub-routers cho plugins + companionPlugins
    ├─ syncPluginActiveStateFromDb() → activate plugins có enabled=1 trong DB
    ├─ app.use('*', registry.middleware()) → single middleware dispatch tới active plugins
@@ -143,7 +143,7 @@ export const hooks: CMSPlugin['hooks'] = {
 
 ```typescript
 // ✅ Chuẩn — export factory function
-import type { CMSPlugin } from '@hanano/types'
+import type { CMSPlugin } from '@viseed/types'
 
 export function createBlogPlugin(options?: BlogPluginOptions): CMSPlugin {
   return {
@@ -169,7 +169,7 @@ createCMS({
 | Cài đặt | `bun add` + restart | dynamic import, không restart |
 | Schema | Drizzle type-safe objects | raw SQL string (`schema_sql`) |
 | Dependencies | full npm deps | self-bundled, không external deps |
-| Ví dụ | `@hanano/plugin-auth` | third-party từ registry |
+| Ví dụ | `@viseed/plugin-auth` | third-party từ registry |
 
 ### Admin UI Registration
 

@@ -1,6 +1,6 @@
 ﻿# Plugins Overview
 
-Hana CMS ships with four official plugins covering the most common CMS needs. All are optional — install only what your project requires.
+Viseed CMS ships with four official plugins covering the most common CMS needs. All are optional — install only what your project requires.
 
 ---
 
@@ -8,10 +8,10 @@ Hana CMS ships with four official plugins covering the most common CMS needs. Al
 
 | Package                 | Function          | What it provides                                              |
 |-------------------------|-------------------|---------------------------------------------------------------|
-| `hanano-plugin-auth`     | `authPlugin()`    | User authentication, sessions, and role-based access control  |
-| `hanano-plugin-blog`     | `blogPlugin()`    | Blog posts and categories with admin UI                       |
-| `hanano-plugin-menu`     | `menuPlugin()`    | Navigation menus with admin UI and theme menu injection       |
-| `hanano-plugin-pages`    | `pagesPlugin()`   | Standalone pages with TOC support and admin UI                |
+| `viseed-plugin-auth`     | `authPlugin()`    | User authentication, sessions, and role-based access control  |
+| `viseed-plugin-blog`     | `blogPlugin()`    | Blog posts and categories with admin UI                       |
+| `viseed-plugin-menu`     | `menuPlugin()`    | Navigation menus with admin UI and theme menu injection       |
+| `viseed-plugin-pages`    | `pagesPlugin()`   | Standalone pages with TOC support and admin UI                |
 
 ---
 
@@ -20,17 +20,17 @@ Hana CMS ships with four official plugins covering the most common CMS needs. Al
 Install the packages you need:
 
 ```bash
-bun add hanano-plugin-auth hanano-plugin-blog hanano-plugin-menu hanano-plugin-pages
+bun add viseed-plugin-auth viseed-plugin-blog viseed-plugin-menu viseed-plugin-pages
 ```
 
 Register them in your entry file before calling `cms.launch()`:
 
 ```typescript
-import { createCMS } from '@hanano/core'
-import { authPlugin } from 'hanano-plugin-auth'
-import { blogPlugin } from 'hanano-plugin-blog'
-import { menuPlugin } from 'hanano-plugin-menu'
-import { pagesPlugin } from 'hanano-plugin-pages'
+import { createCMS } from '@viseed/core'
+import { authPlugin } from 'viseed-plugin-auth'
+import { blogPlugin } from 'viseed-plugin-blog'
+import { menuPlugin } from 'viseed-plugin-menu'
+import { pagesPlugin } from 'viseed-plugin-pages'
 
 const cms = createCMS({
   db: { driver: 'postgres', url: process.env.DATABASE_URL! },
@@ -47,16 +47,16 @@ const app = await cms.launch()
 After adding a new plugin, update the database schema:
 
 ```bash
-bunx hanabi db push      # development
-bunx hanabi db generate  # production — generates migration files
-bunx hanabi db migrate   # production — applies migrations
+bunx viseedbi db push      # development
+bunx viseedbi db generate  # production — generates migration files
+bunx viseedbi db migrate   # production — applies migrations
 ```
 
 ---
 
 ## Plugin Details
 
-### `hanano-plugin-auth`
+### `viseed-plugin-auth`
 
 Provides user authentication and session management.
 
@@ -64,7 +64,7 @@ Provides user authentication and session management.
 - Handles login, logout, and session validation
 - Role-based access control per site
 
-### `hanano-plugin-blog`
+### `viseed-plugin-blog`
 
 Adds a full blog system with admin management.
 
@@ -72,7 +72,7 @@ Adds a full blog system with admin management.
 - Registers admin UI for creating and editing posts and categories
 - Injects post data into theme layouts (`home`, `post`, `category`)
 
-### `hanano-plugin-menu`
+### `viseed-plugin-menu`
 
 Provides navigation menu management.
 
@@ -80,7 +80,7 @@ Provides navigation menu management.
 - Registers admin UI for building menus
 - Injects `menuMain` and `menuFooter` data into theme layout context
 
-### `hanano-plugin-pages`
+### `viseed-plugin-pages`
 
 Adds standalone content pages.
 
@@ -93,11 +93,11 @@ Adds standalone content pages.
 
 ## Using the CLI
 
-You can also install and uninstall plugins using the `hanabi` CLI:
+You can also install and uninstall plugins using the `viseedbi` CLI:
 
 ```bash
-bunx hanabi plugin install hanano-plugin-pages
-bunx hanabi plugin uninstall hanano-plugin-pages
+bunx viseedbi plugin install viseed-plugin-pages
+bunx viseedbi plugin uninstall viseed-plugin-pages
 ```
 
 See the [CLI Reference](/guide/cli) for details.

@@ -1,6 +1,6 @@
 <header class="site-header">
   <div class="container">
-    <a href="/" class="site-logo"><%= it.settings.siteTitle || 'Hana Blog' %></a>
+    <a href="/" class="site-logo"><%= it.settings.siteTitle || 'Viseed Blog' %></a>
     <nav class="site-nav">
       <% if (it.menus && it.menus.primary) { %>
         <% for (const item of it.menus.primary) { %>

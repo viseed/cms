@@ -4,7 +4,7 @@ globs: ["**/*.ts", "**/*.vue", "**/*.tsx"]
 alwaysApply: false
 ---
 
-# Coding Standards — Hana CMS
+# Coding Standards — Viseed CMS
 
 > Source of truth cho style: `biome.json` (root).
 > **Khi đổi biome config → cập nhật file này.**
@@ -22,7 +22,7 @@ Ví dụ đúng:
 
 ```typescript
 // ✅ no semicolons, single quotes, 2-space indent
-import type { CMSPlugin } from '@hanano/types'
+import type { CMSPlugin } from '@viseed/types'
 
 export function createPlugin(name: string): CMSPlugin {
   return {
@@ -38,19 +38,19 @@ export function createPlugin(name: string): CMSPlugin {
 
 ```typescript
 // ✅ Named exports trong packages (KHÔNG default export)
-export class HanaCMS { ... }
-export function createCMS(config: CMSConfig): HanaCMS { ... }
+export class ViseedCMS { ... }
+export function createCMS(config: CMSConfig): ViseedCMS { ... }
 export type { CMSConfig, CMSPlugin }
 
 // ❌ Tránh default export trong packages/
-export default HanaCMS
+export default ViseedCMS
 ```
 
 ### Type imports
 
 ```typescript
 // ✅ Dùng import type khi chỉ cần type
-import type { CMSPlugin, CMSConfig } from '@hanano/types'
+import type { CMSPlugin, CMSConfig } from '@viseed/types'
 import type { Hono } from 'hono'
 
 // ✅ Import value khi cần runtime
@@ -93,7 +93,7 @@ cms.launch().then(app => ...).catch(err => ...)
 
 ```
 Variables/functions:  camelCase    (createDatabase, hookRegistry)
-Classes:              PascalCase   (HanaCMS, HookRegistry, PluginRegistryClient)
+Classes:              PascalCase   (ViseedCMS, HookRegistry, PluginRegistryClient)
 Interfaces/Types:     PascalCase   (CMSPlugin, DatabaseConfig)
 Constants:            UPPER_SNAKE  (MAX_RETRY_COUNT) — chỉ cho true constants
 Files:                kebab-case   (hook-registry.ts, schema-builder.ts)
@@ -119,7 +119,7 @@ const handler = handler as (...a: unknown[]) => unknown  // HookRegistry interna
 ```
 packages/core/src/
 ├── index.ts           ← re-export public API
-├── hana-cms.ts        ← main class
+├── viseed-cms.ts        ← main class
 ├── hook-registry.ts   ← HookRegistry
 └── database.ts        ← createDatabase()
 ```

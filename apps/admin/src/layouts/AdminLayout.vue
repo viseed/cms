@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import type { Permission } from '@hanano/types'
+import type { Permission } from '@viseed/types'
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdminSiteContext } from '../composables/useAdminSiteContext'
@@ -104,7 +104,7 @@ onMounted(() => {
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="logo">
-        <h2>Hana CMS</h2>
+        <h2>Viseed CMS</h2>
       </div>
       <nav>
         <button

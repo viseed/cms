@@ -2,5 +2,5 @@
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  external: ['@hanano/types'],
+  external: ['@viseed/types'],
 })

@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import type { MetaSeo } from '@hanano/validator'
+import type { MetaSeo } from '@viseed/validator'
 import { computed } from 'vue'
 
 const props = defineProps<{

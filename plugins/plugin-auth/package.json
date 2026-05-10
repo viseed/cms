@@ -1,5 +1,5 @@
 {
-  "name": "hanano-plugin-auth",
+  "name": "@viseed/plugin-auth",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -23,13 +23,13 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@hanano/types": "workspace:*",
-    "@hanano/schema": "workspace:*",
-    "@hanano/validator": "workspace:*",
+    "@viseed/types": "workspace:*",
+    "@viseed/schema": "workspace:*",
+    "@viseed/validator": "workspace:*",
     "hono": "^4.7.0",
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*"
+    "@viseed/config": "workspace:*"
   }
 }

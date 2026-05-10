@@ -19,12 +19,12 @@ function randomAdminPluginUiBuildId(): string {
 const VENDOR_VUE_URL = '/admin/assets/vendor-vue.js'
 const VENDOR_VUE_ROUTER_URL = '/admin/assets/vendor-vue-router.js'
 
-function hanaImportMapPlugin(): Plugin {
+function viseedImportMapPlugin(): Plugin {
   let isDev = false
   let cacheDir = ''
 
   return {
-    name: 'hana-import-map',
+    name: 'viseed-import-map',
     enforce: 'post',
 
     configResolved(config) {
@@ -76,7 +76,7 @@ export default defineConfig(() => {
     define: {
       'import.meta.env.VITE_ADMIN_PLUGIN_UI_BUILD_ID': JSON.stringify(adminPluginUiBuildId),
     },
-    plugins: [vue(), hanaImportMapPlugin()],
+    plugins: [vue(), viseedImportMapPlugin()],
     build: {
       outDir: '../../packages/core/dist/admin',
       emptyOutDir: true,

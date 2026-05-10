@@ -1,5 +1,5 @@
 {
-  "name": "hanano",
+  "name": "@viseed/cms",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -10,19 +10,19 @@
     "./admin": "./dist/admin/index.html",
     "./admin/*": "./dist/admin/*"
   },
-  "bin": { "hanano": "./dist/cli.js" },
+  "bin": { "viseed": "./dist/cli.js" },
   "files": ["dist"],
   "scripts": {
     "build": "bunup",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@hanano/core": "workspace:*",
-    "@hanano/schema": "workspace:*",
-    "@hanano/types": "workspace:*",
-    "@hanano/validator": "workspace:*",
-    "@hanano/ui": "workspace:*",
-    "@hanano/registry": "workspace:*",
-    "@hanano/cli": "workspace:*"
+    "@viseed/core": "workspace:*",
+    "@viseed/schema": "workspace:*",
+    "@viseed/types": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "@viseed/ui": "workspace:*",
+    "@viseed/registry": "workspace:*",
+    "@viseed/cli": "workspace:*"
   }
 }

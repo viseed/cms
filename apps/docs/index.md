@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: Hana CMS
+  name: Viseed CMS
   text: Lightweight & Extensible
   tagline: A plugin-based CMS framework built on Hono + Drizzle + Bun
   actions:
@@ -10,7 +10,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/hanano-cms/hanano
+      link: https://github.com/viseed-cms/viseed
 features:
   - title: Plugin Architecture
     details: Add capabilities with official plugins for auth, blog, menus, and pages. Register via cms.use() — no configuration files needed.
@@ -23,5 +23,5 @@ features:
   - title: Media Library
     details: Upload, serve, and manage files out of the box. The media API is built into core — no plugin installation required.
   - title: Developer-First CLI
-    details: Scaffold projects, push schemas, generate migrations, and manage plugins with the hanabi CLI.
+    details: Scaffold projects, push schemas, generate migrations, and manage plugins with the viseedbi CLI.
 ---

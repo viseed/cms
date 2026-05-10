@@ -1,5 +1,5 @@
-﻿import { mediaFiles } from '@hanano/schema'
-import type { CMSRouteContextHelpers } from '@hanano/types'
+﻿import { mediaFiles } from '@viseed/schema'
+import type { CMSRouteContextHelpers } from '@viseed/types'
 import { and, count, desc, eq, ilike, or } from 'drizzle-orm'
 import { Hono } from 'hono'
 import type { DatabaseInstance } from './database'

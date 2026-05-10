@@ -1,5 +1,5 @@
 {
-  "name": "@hanano/types",
+  "name": "@viseed/types",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -21,6 +21,6 @@
     "test": "bun test"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*"
+    "@viseed/config": "workspace:*"
   }
 }

@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import type { SchemaOrgItem, SchemaOrgValue } from '@hanano/validator'
+import type { SchemaOrgItem, SchemaOrgValue } from '@viseed/validator'
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { type SchemaPropertyInfo, useSchemaOrg } from '../composables/useSchemaOrg'
 import SchemaClassPicker from './SchemaClassPicker.vue'

@@ -2,5 +2,5 @@
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  external: ['@hanano/types', '@hanano/core', 'drizzle-orm'],
+  external: ['@viseed/types', '@viseed/core', 'drizzle-orm'],
 })

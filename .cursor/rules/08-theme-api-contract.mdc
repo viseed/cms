@@ -35,7 +35,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 | **widget descriptor** | Metadata plugin đăng ký (không chứa HTML runtime); core merge theo slot | `ThemeExtensionWidgetDescriptor` |
 | **theme settings** | Key-value config do theme khai báo schema, end-user tuỳ chỉnh qua admin | `{ primaryColor: '#3b82f6', showSidebar: true }` |
 | **active theme** | Theme duy nhất đang được mount để render mọi request phía front-end | Lưu trong DB, hot-swap qua admin API không cần restart |
-| **theme registry** | In-memory `Map` giữ tất cả `CMSTheme` objects đăng ký qua `CMSConfig.themes[]` | `themeRegistry`, `themeRuntimes` trong `HanaCMS` |
+| **theme registry** | In-memory `Map` giữ tất cả `CMSTheme` objects đăng ký qua `CMSConfig.themes[]` | `themeRegistry`, `themeRuntimes` trong `ViseedCMS` |
 | **name preview** | Preview theme từ registry bằng tên; swap toàn bộ theme object (templates + static + settings) | `theme_state.previewThemeName` + `previewToken` |
 | **path preview** | Thư mục dưới `themes/…` dùng tạm cho templates/static; fallback khi theme không trong registry | `theme_state.previewThemePath` + `previewToken` |
 | **templateRoot** | Absolute path tới thư mục chứa `.eta` template files, khai báo trong `CMSTheme` | `resolve(__dirname, '../templates')` |
@@ -77,7 +77,7 @@ Theme **KHÔNG** phải là Plugin. Hai concept này tách biệt hoàn toàn:
 
 ### Extension points (regions / slots / widgets) — official contract
 
-- **Types**: `@hanano/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
+- **Types**: `@viseed/types` — `theme-extension-points.ts` (`ThemeExtensionRegionId`, `ThemeExtensionSlotId`, `ThemeExtensionManifest`, `ThemeExtensionWidgetDescriptor`, `ThemeExtensionWidgetRegistration`, `ThemeExtensionWidgetKind`).
 - **Theme**: `CMSTheme.extensionPoints?` — optional manifest (`slots[]`) mô tả slot id theme thực sự render trong `.eta`.
 - **Nguyên tắc**: Plugin cung cấp **logic hoặc component identity** (`ThemeExtensionWidgetDescriptor` / registration với `source`); **theme quyết định vị trí** bằng cách khai báo slot và gọi render hook trong template.
 - **Admin UI registry** (Vue): `packages/ui/src/theme-widget-registry.ts` — `themeWidgetRegistry` giữ đăng ký widget theo `source` + `id`, query theo `slot` qua `getWidgetsForSlot` (không dùng `component-registry` cho mục đích này).
@@ -127,7 +127,7 @@ Theme khai báo menu zones nó render qua `CMSTheme.menuZones`.
 
 - `CMSConfig.themes[]` nhận array `CMSTheme` objects; `CMSConfig.defaultTheme` chỉ định fallback.
 - Legacy `CMSConfig.theme` (single) vẫn được hỗ trợ, merge vào `themes[]` nội bộ.
-- `HanaCMS` xây dựng `themeRegistry` (name → `CMSTheme`) và `themeRuntimes` (name → `ThemeRuntime`).
+- `ViseedCMS` xây dựng `themeRegistry` (name → `CMSTheme`) và `themeRuntimes` (name → `ThemeRuntime`).
 - Activate theme khác: `POST /admin/api/themes/:name/activate` → cập nhật DB + in-memory `activeThemeName`, **không cần restart**.
 - Preview by name: `POST /admin/api/themes/preview` với `{ themeName: "news" }` → swap toàn bộ theme object.
 - Preview by path (legacy): `{ path: "themes/dark/preview" }` → override template/static root.

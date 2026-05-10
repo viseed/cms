@@ -1,15 +1,15 @@
 ﻿import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import type { CMSTheme, LayoutContext, ThemeAssets } from '@hanano/types'
+import type { CMSTheme, LayoutContext, ThemeAssets } from '@viseed/types'
 import { Eta } from 'eta'
-import type { HananoCMS } from './hanano-cms'
+import type { ViseedCMS } from './viseed-cms'
 import { createLayoutHelpers } from './seo-head'
 
 export interface ThemeRenderOptions {
   /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
   templateRoot?: string
-  /** Preview token to append as `?hana_preview=TOKEN` on all static asset URLs. */
+  /** Preview token to append as `?viseed_preview=TOKEN` on all static asset URLs. */
   previewToken?: string
 }
 
@@ -24,7 +24,7 @@ export interface ThemeRuntime {
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }
 }
 
-export function createThemeRuntime(theme: CMSTheme, cms: HananoCMS): ThemeRuntime {
+export function createThemeRuntime(theme: CMSTheme, cms: ViseedCMS): ThemeRuntime {
   const defaultTemplateDir = resolveTemplateDir(theme)
   /** One value per theme process lifetime — not recomputed per HTTP request. */
   const assetFingerprint = resolveStaticAssetFingerprint(theme)
@@ -123,7 +123,7 @@ function resolveTemplateDir(theme: CMSTheme): string {
 
 /**
  * If `theme.staticAssetFingerprint` is unset, the server may read (once per process,
- * when the theme runtime is created) either `staticRoot/.hana-static-fingerprint`
+ * when the theme runtime is created) either `staticRoot/.viseed-static-fingerprint`
  * (first line = token from your theme build/CI) or a short hash of `assets` file bytes.
  */
 export function resolveStaticAssetFingerprint(theme: CMSTheme): string {
@@ -139,7 +139,7 @@ export function resolveStaticAssetFingerprint(theme: CMSTheme): string {
 function readStaticFingerprintFile(theme: CMSTheme): string {
   const root = theme.staticRoot
   if (!root) return ''
-  const p = join(root, '.hana-static-fingerprint')
+  const p = join(root, '.viseed-static-fingerprint')
   if (!existsSync(p)) return ''
   try {
     const line = readFileSync(p, 'utf8').split(/\r?\n/)[0]?.trim() ?? ''
@@ -151,7 +151,7 @@ function readStaticFingerprintFile(theme: CMSTheme): string {
 
 /**
  * Short fingerprint of declared theme static files (css/js/fonts). Used only when
- * neither `staticAssetFingerprint` nor `.hana-static-fingerprint` is provided.
+ * neither `staticAssetFingerprint` nor `.viseed-static-fingerprint` is provided.
  */
 export function computeThemeAssetFingerprint(theme: CMSTheme): string {
   const root = theme.staticRoot
@@ -176,7 +176,7 @@ export function computeThemeAssetFingerprint(theme: CMSTheme): string {
 
 function themeStaticQuery(previewToken?: string, assetFingerprint?: string): string {
   const parts: string[] = []
-  if (previewToken) parts.push(`hana_preview=${encodeURIComponent(previewToken)}`)
+  if (previewToken) parts.push(`viseed_preview=${encodeURIComponent(previewToken)}`)
   if (assetFingerprint) parts.push(`v=${encodeURIComponent(assetFingerprint)}`)
   return parts.length > 0 ? `?${parts.join('&')}` : ''
 }

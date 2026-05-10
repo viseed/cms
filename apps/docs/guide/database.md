@@ -1,6 +1,6 @@
 ﻿# Database
 
-Hana CMS uses **PostgreSQL** with **Drizzle ORM** for type-safe database access. The connection is managed via Bun's built-in SQL driver (`bun:sql`), so no separate PostgreSQL client package is needed.
+Viseed CMS uses **PostgreSQL** with **Drizzle ORM** for type-safe database access. The connection is managed via Bun's built-in SQL driver (`bun:sql`), so no separate PostgreSQL client package is needed.
 
 ::: warning PostgreSQL only
 Only PostgreSQL is supported. Other databases (MySQL, SQLite, etc.) are not compatible.
@@ -16,7 +16,7 @@ Provide your connection string via `DATABASE_URL` or directly in the config:
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
   },
 })
 ```
@@ -37,14 +37,14 @@ postgresql://user:pass@host:5432/db?sslmode=verify-full&sslrootcert=./ca-certifi
 
 ## Schema Management
 
-Use the `hanabi db` commands to manage your database schema. The CLI automatically discovers the core schema plus schemas from all installed `hanano-plugin-*` packages.
+Use the `viseedbi db` commands to manage your database schema. The CLI automatically discovers the core schema plus schemas from all installed `viseed-plugin-*` packages.
 
 ### Development
 
 Push your current schema directly to the database. This is the fastest way to iterate during development — no migration files are generated.
 
 ```bash
-bunx hanabi db push
+bunx viseedbi db push
 ```
 
 ::: warning
@@ -56,34 +56,34 @@ bunx hanabi db push
 Generate SQL migration files that can be reviewed and committed to source control:
 
 ```bash
-bunx hanabi db generate
+bunx viseedbi db generate
 ```
 
 Apply pending migrations to the database:
 
 ```bash
-bunx hanabi db migrate
+bunx viseedbi db migrate
 ```
 
 The recommended production workflow:
 
 ```bash
 # 1. Generate migration files (in CI or locally)
-bunx hanabi db generate
+bunx viseedbi db generate
 
 # 2. Review generated files in drizzle/
 git add drizzle/
 git commit -m "feat: add migration"
 
 # 3. Apply migrations on the server
-bunx hanabi db migrate
+bunx viseedbi db migrate
 ```
 
 ---
 
 ## Core Tables
 
-The following tables are created by Hana CMS core:
+The following tables are created by Viseed CMS core:
 
 | Table               | Description                                       |
 |---------------------|---------------------------------------------------|
@@ -110,22 +110,22 @@ Plugins contribute their own Drizzle table definitions. All plugin schemas are m
 const finalSchema = mergeSchemas(coreSchema, ...pluginSchemas)
 ```
 
-When running `hanabi db` commands, the CLI scans your `package.json` for `hanano-plugin-*` dependencies and auto-generates a schema barrel file to feed into `drizzle-kit`.
+When running `viseedbi db` commands, the CLI scans your `package.json` for `viseed-plugin-*` dependencies and auto-generates a schema barrel file to feed into `drizzle-kit`.
 
 ---
 
 ## Custom Schemas
 
-If your application defines additional Drizzle tables beyond what plugins provide, register them in `hana.config.ts` at the project root:
+If your application defines additional Drizzle tables beyond what plugins provide, register them in `viseed.config.ts` at the project root:
 
 ```typescript
-// hana.config.ts
+// viseed.config.ts
 export default {
   extraSchemas: ['./src/schema.ts'],
 }
 ```
 
-These will be included when running any `hanabi db` command.
+These will be included when running any `viseedbi db` command.
 
 Example custom schema:
 

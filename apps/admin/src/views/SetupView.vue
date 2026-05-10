@@ -67,7 +67,7 @@ const handleSetup = async () => {
   <div class="setup-page">
     <form v-if="!success" class="setup-card" @submit.prevent="handleSetup">
       <div class="setup-header">
-        <h1>Welcome to Hana CMS</h1>
+        <h1>Welcome to Viseed CMS</h1>
         <p class="subtitle">Complete the setup to get started.</p>
       </div>
 

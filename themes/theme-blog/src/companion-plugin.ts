@@ -1,4 +1,4 @@
-﻿import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hanano/types'
+﻿import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@viseed/types'
 
 export function blogCompanionPlugin(): CMSPlugin {
   return {

@@ -1,5 +1,5 @@
 {
-  "name": "@hanano/schema",
+  "name": "@viseed/schema",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -23,7 +23,7 @@
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*",
-    "@hanano/types": "workspace:*"
+    "@viseed/config": "workspace:*",
+    "@viseed/types": "workspace:*"
   }
 }

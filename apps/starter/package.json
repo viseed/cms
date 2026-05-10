@@ -1,5 +1,5 @@
 {
-  "name": "@hanano/starter",
+  "name": "@viseed/starter",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,14 +9,14 @@
     "build": "bun build src/index.ts --outdir dist --target bun"
   },
   "dependencies": {
-    "@hanano/core": "workspace:*",
-    "hanano-plugin-auth": "workspace:*",
-    "hanano-plugin-blog": "workspace:*",
-    "hanano-plugin-menu": "workspace:*",
-    "hanano-plugin-pages": "workspace:*"
+    "@viseed/core": "workspace:*",
+    "@viseed/plugin-auth": "workspace:*",
+    "@viseed/plugin-blog": "workspace:*",
+    "@viseed/plugin-menu": "workspace:*",
+    "@viseed/plugin-pages": "workspace:*"
   },
   "devDependencies": {
-    "hanano-theme-blog": "workspace:*",
-    "hanano-theme-insurance": "workspace:*"
+    "@viseed/theme-blog": "workspace:*",
+    "@viseed/theme-insurance": "workspace:*"
   }
 }

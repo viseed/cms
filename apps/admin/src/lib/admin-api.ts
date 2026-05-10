@@ -2,10 +2,10 @@
  * Admin API fetch: always sends cookies (`credentials: 'include'`) and, when an
  * active site id is set (see {@link setActiveAdminSiteId}), adds the site context header.
  */
-export const ADMIN_SITE_CONTEXT_HEADER = 'X-Hana-Site-Id'
+export const ADMIN_SITE_CONTEXT_HEADER = 'X-Viseed-Site-Id'
 
 /** Session key used with {@link getActiveAdminSiteId} / {@link setActiveAdminSiteId}. */
-export const ADMIN_ACTIVE_SITE_STORAGE_KEY = 'hana.admin.activeSiteId'
+export const ADMIN_ACTIVE_SITE_STORAGE_KEY = 'viseed.admin.activeSiteId'
 
 export function getActiveAdminSiteId(): string | null {
   if (typeof sessionStorage === 'undefined') {

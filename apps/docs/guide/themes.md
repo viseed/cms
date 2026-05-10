@@ -9,8 +9,8 @@ Themes control the visual presentation of your site — HTML templates, static a
 Install a theme package and register it in your CMS config:
 
 ```typescript
-import { createCMS } from '@hanano/core'
-import { blogTheme } from 'hanano-theme-blog'
+import { createCMS } from '@viseed/core'
+import { blogTheme } from 'viseed-theme-blog'
 
 const cms = createCMS({
   db: { driver: 'postgres', url: process.env.DATABASE_URL! },
@@ -23,11 +23,11 @@ const cms = createCMS({
 
 | Package                   | Function             | Description                          |
 |---------------------------|----------------------|--------------------------------------|
-| `hanano-theme-blog`        | `blogTheme()`        | Clean blog layout with post listings |
-| `hanano-theme-insurance`   | `insuranceTheme()`   | Insurance company landing pages      |
+| `viseed-theme-blog`        | `blogTheme()`        | Clean blog layout with post listings |
+| `viseed-theme-insurance`   | `insuranceTheme()`   | Insurance company landing pages      |
 
 ```bash
-bun add hanano-theme-blog
+bun add viseed-theme-blog
 ```
 
 ---
@@ -37,8 +37,8 @@ bun add hanano-theme-blog
 You can register several themes at once. The active theme is stored in the database and can be switched from the admin panel without redeploying.
 
 ```typescript
-import { blogTheme } from 'hanano-theme-blog'
-import { insuranceTheme } from 'hanano-theme-insurance'
+import { blogTheme } from 'viseed-theme-blog'
+import { insuranceTheme } from 'viseed-theme-insurance'
 
 const cms = createCMS({
   db: { driver: 'postgres', url: process.env.DATABASE_URL! },
@@ -80,7 +80,7 @@ Themes declare named menu zones where navigation menus can be rendered. Common z
 | `menuMain`    | Primary navigation    |
 | `menuFooter`  | Footer navigation     |
 
-Menus are managed in the admin panel under **Menus** (requires `hanano-plugin-menu`).
+Menus are managed in the admin panel under **Menus** (requires `viseed-plugin-menu`).
 
 ---
 

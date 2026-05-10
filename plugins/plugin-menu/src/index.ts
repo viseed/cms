@@ -1,7 +1,7 @@
 ﻿import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { DatabaseInstance } from '@hanano/core'
-import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@hanano/types'
+import type { DatabaseInstance } from '@viseed/core'
+import { type CMSPlugin, HOOK_KEY, type ThemeRenderRequestContext } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
 import { setupMenuRoutes } from './routes'
 import { menuItems, menuSchema, menus } from './schema'
@@ -16,7 +16,7 @@ interface MenuItemNode {
   children: MenuItemNode[]
 }
 
-function buildMenuTree(flatItems: typeof menuItems.$inferSelect[]): MenuItemNode[] {
+function buildMenuTree(flatItems: (typeof menuItems.$inferSelect)[]): MenuItemNode[] {
   const roots: MenuItemNode[] = []
   const byId = new Map<string, MenuItemNode>()
 
@@ -77,10 +77,7 @@ export function menuPlugin(): CMSPlugin {
 
         const siteId = 'default'
 
-        const allMenus = await db
-          .select()
-          .from(menus)
-          .where(eq(menus.siteId, siteId))
+        const allMenus = await db.select().from(menus).where(eq(menus.siteId, siteId))
 
         const menuData: Record<string, MenuItemNode[]> = {}
 
@@ -106,4 +103,4 @@ export function menuPlugin(): CMSPlugin {
   }
 }
 
-export { menuSchema, menus, menuItems } from './schema'
+export { menuItems, menuSchema, menus } from './schema'

@@ -1,5 +1,5 @@
-﻿import type { DatabaseInstance } from '@hanano/core'
-import type { CMSRouteContextHelpers } from '@hanano/types'
+﻿import type { DatabaseInstance } from '@viseed/core'
+import type { CMSRouteContextHelpers } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { menuItems, menus } from './schema'

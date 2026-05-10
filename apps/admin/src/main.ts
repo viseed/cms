@@ -1,4 +1,4 @@
-﻿import type { AuthContextPayload } from '@hanano/types'
+﻿import type { AuthContextPayload } from '@viseed/types'
 import { createApp } from 'vue'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createRouter, createWebHistory, type Router } from 'vue-router'

@@ -1,15 +1,15 @@
-﻿import { createCMS } from '@hanano/core'
-import { authPlugin } from 'hanano-plugin-auth'
-import { blogPlugin } from 'hanano-plugin-blog'
-import { menuPlugin } from 'hanano-plugin-menu'
-import { pagesPlugin } from 'hanano-plugin-pages'
-import { blogTheme } from 'hanano-theme-blog'
-import { insuranceTheme } from 'hanano-theme-insurance'
+﻿import { createCMS } from '@viseed/core'
+import { authPlugin } from '@viseed/plugin-auth'
+import { blogPlugin } from '@viseed/plugin-blog'
+import { menuPlugin } from '@viseed/plugin-menu'
+import { pagesPlugin } from '@viseed/plugin-pages'
+import { blogTheme } from '@viseed/theme-blog'
+import { insuranceTheme } from '@viseed/theme-insurance'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/viseed',
   },
   themes: [blogTheme(), insuranceTheme()],
   defaultTheme: 'blog',
@@ -29,7 +29,7 @@ const server = Bun.serve({
   fetch: app.fetch,
 })
 
-console.log(`Hana CMS running at http://localhost:${port}`)
+console.log(`Viseed CMS running at http://localhost:${port}`)
 
 let isShuttingDown = false
 

@@ -5,8 +5,8 @@
   function rewriteLinks() {
     document.querySelectorAll('a[href]').forEach(function (a) {
       var href = a.getAttribute('href');
-      if (href && href.startsWith('/') && href.indexOf('hana_preview') === -1) {
-        a.setAttribute('href', href + (href.indexOf('?') !== -1 ? '&' : '?') + 'hana_preview=' + token);
+      if (href && href.startsWith('/') && href.indexOf('viseed_preview') === -1) {
+        a.setAttribute('href', href + (href.indexOf('?') !== -1 ? '&' : '?') + 'viseed_preview=' + token);
       }
     });
   }

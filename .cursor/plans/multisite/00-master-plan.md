@@ -1,4 +1,4 @@
-# Multi-site Hana CMS Master Plan
+# Multi-site Viseed CMS Master Plan
 
 ## Decisions Locked
 - Tenancy model: single shared database with strict `site_id` isolation.

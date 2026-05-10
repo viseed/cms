@@ -1,12 +1,12 @@
-﻿import type { DatabaseInstance } from '@hanano/core'
-import type { CMSRouteContextHelpers } from '@hanano/types'
+﻿import type { DatabaseInstance } from '@viseed/core'
+import type { CMSRouteContextHelpers } from '@viseed/types'
 import {
   contentQuerySchema,
   createCategorySchema,
   createContentSchema,
   updateCategorySchema,
   updateContentSchema,
-} from '@hanano/validator'
+} from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { categories, posts } from './schema'

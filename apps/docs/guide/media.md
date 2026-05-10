@@ -1,6 +1,6 @@
 ﻿# Media
 
-Hana CMS includes a built-in media library for uploading and serving files. No additional plugin is required — media support is part of `@hanano/core`.
+Viseed CMS includes a built-in media library for uploading and serving files. No additional plugin is required — media support is part of `@viseed/core`.
 
 ---
 

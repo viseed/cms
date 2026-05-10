@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Hana CMS',
+  title: 'Viseed CMS',
   description: 'A lightweight, extensible CMS framework for Bun',
   themeConfig: {
     nav: [
@@ -43,6 +43,6 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/hanano-cms/hanano' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/viseed-cms/viseed' }],
   },
 })

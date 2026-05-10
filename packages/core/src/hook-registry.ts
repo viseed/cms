@@ -1,4 +1,4 @@
-﻿import type { CMSHookName, CMSPluginHooks } from '@hanano/types'
+﻿import type { CMSHookName, CMSPluginHooks } from '@viseed/types'
 
 type HookHandler = CMSPluginHooks[CMSHookName]
 

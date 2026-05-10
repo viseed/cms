@@ -1,6 +1,6 @@
 ---
 name: Docker + Nginx + CI/CD
-overview: Containerize the Hana CMS monorepo, run 2 starter instances on separate ports, route by domain via Nginx, and add a GitHub Actions workflow with selective deploy support.
+overview: Containerize the Viseed CMS monorepo, run 2 starter instances on separate ports, route by domain via Nginx, and add a GitHub Actions workflow with selective deploy support.
 todos:
   - id: modify-port
     content: Modify apps/starter/src/index.ts to read PORT from env variable

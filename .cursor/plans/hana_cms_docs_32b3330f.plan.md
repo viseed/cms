@@ -1,12 +1,12 @@
 ---
-name: Hana CMS Docs
+name: Viseed CMS Docs
 overview: Mở rộng VitePress site tại `apps/docs` thành tài liệu core guide cho external developer — getting started, cấu hình, database, plugins (tổng quan), themes, CLI, media và deployment.
 todos:
   - id: audit-existing
     content: Đọc và audit nội dung các file docs hiện có để giữ lại phần đúng
     status: completed
   - id: update-getting-started
-    content: Viết/update guide/getting-started.md — hanabi init flow + manual install
+    content: Viết/update guide/getting-started.md — viseedbi init flow + manual install
     status: completed
   - id: update-configuration
     content: Viết/update guide/configuration.md — CMSConfig đầy đủ + env vars
@@ -21,7 +21,7 @@ todos:
     content: Viết mới guide/themes.md — CMSTheme interface, multi-theme, hot-swap
     status: completed
   - id: new-cli
-    content: Viết mới guide/cli.md — tất cả hanabi commands
+    content: Viết mới guide/cli.md — tất cả viseedbi commands
     status: completed
   - id: new-media
     content: Viết mới guide/media.md — media upload config và API
@@ -38,13 +38,13 @@ todos:
 isProject: false
 ---
 
-# Hana CMS Developer Docs Plan
+# Viseed CMS Developer Docs Plan
 
 ## Phạm vi
 
 Mở rộng [`apps/docs/`](apps/docs/) — VitePress site hiện có. Không tạo site mới.
 
-Target: external developer muốn dùng Hana CMS cho project của họ.
+Target: external developer muốn dùng Viseed CMS cho project của họ.
 
 ---
 
@@ -67,13 +67,13 @@ Target: external developer muốn dùng Hana CMS cho project của họ.
 apps/docs/
 ├── index.md                      UPDATE — homepage hero + feature list
 ├── guide/
-│   ├── getting-started.md        UPDATE — quick start via hanabi init
+│   ├── getting-started.md        UPDATE — quick start via viseedbi init
 │   ├── configuration.md          UPDATE — CMSConfig đầy đủ
 │   ├── database.md               UPDATE — db push vs generate/migrate
 │   ├── plugins.md                UPDATE — cms.use() API, lifecycle, danh sách built-in
 │   ├── themes.md                 NEW — CMSTheme + multi-theme hot-swap
 │   ├── media.md                  NEW — upload dir, maxFileSizeMb, API
-│   ├── cli.md                    NEW — hanabi init/db/plugin/theme
+│   ├── cli.md                    NEW — viseedbi init/db/plugin/theme
 │   └── deployment.md             NEW — Docker + env vars production
 └── plugins/
     └── overview.md               UPDATE — tổng quan (giữ lại, cập nhật nếu lệch)
@@ -86,15 +86,15 @@ apps/docs/
 ## Chi tiết từng file quan trọng
 
 ### `guide/getting-started.md` (UPDATE)
-Dựa trên `hanabi init` flow từ [`packages/cli/src/commands/init.ts`](packages/cli/src/commands/init.ts):
+Dựa trên `viseedbi init` flow từ [`packages/cli/src/commands/init.ts`](packages/cli/src/commands/init.ts):
 
 ```bash
 # Prerequisites: Bun >= 1.3, PostgreSQL
-bunx hanabi init my-site
+bunx viseedbi init my-site
 cd my-site
 bun install
-export DATABASE_URL="postgresql://user:pass@localhost:5432/hana"
-bunx hanabi db push
+export DATABASE_URL="postgresql://user:pass@localhost:5432/viseed"
+bunx viseedbi db push
 bun run dev
 # Admin: http://localhost:3000/admin
 # Default credentials: admin@local.dev / 12345678
@@ -102,7 +102,7 @@ bun run dev
 
 Hoặc manual (không CLI):
 ```bash
-bun add @hana/core @hana/plugin-auth @hana/plugin-blog
+bun add @viseed/core @viseed/plugin-auth @viseed/plugin-blog
 ```
 
 ### `guide/configuration.md` (UPDATE)
@@ -127,16 +127,16 @@ Từ [`packages/cli/src/index.ts`](packages/cli/src/index.ts):
 
 | Command | Mô tả |
 |---------|--------|
-| `hanabi init <name>` | Scaffold project mới |
-| `hanabi db push` | Dev: push schema trực tiếp |
-| `hanabi db generate` | Prod: gen SQL migrations |
-| `hanabi db migrate` | Prod: apply migrations |
-| `hanabi plugin install/uninstall <pkg>` | Quản lý plugins |
-| `hanabi theme install/uninstall <pkg>` | Quản lý themes |
+| `viseedbi init <name>` | Scaffold project mới |
+| `viseedbi db push` | Dev: push schema trực tiếp |
+| `viseedbi db generate` | Prod: gen SQL migrations |
+| `viseedbi db migrate` | Prod: apply migrations |
+| `viseedbi plugin install/uninstall <pkg>` | Quản lý plugins |
+| `viseedbi theme install/uninstall <pkg>` | Quản lý themes |
 
 ### `guide/deployment.md` (NEW)
 Từ [`Dockerfile`](Dockerfile) và [`docker-compose.yml`](docker-compose.yml):
-- Build image: `docker build -t hana-cms .`
+- Build image: `docker build -t viseed-cms .`
 - Env vars bắt buộc: `DATABASE_URL`, `PORT`
 - SSL cert: `NODE_EXTRA_CA_CERTS`, mount `ca-certificate.crt`
 - Upload persistence: mount `/app/uploads`

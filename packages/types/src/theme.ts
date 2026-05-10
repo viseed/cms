@@ -1,4 +1,4 @@
-﻿import type { HananoCMS, HOOK_KEY } from './cms'
+﻿import type { ViseedCMS, HOOK_KEY } from './cms'
 import type { CMSPlugin } from './plugin'
 import type { ThemeExtensionManifest } from './theme-extension-points'
 import type {
@@ -9,7 +9,7 @@ import type {
 } from './theme-layout'
 import type { ThemeSettingsSchema, ThemeSettingsValue } from './theme-settings'
 
-// Re-export so consumers can import ThemeSettingsValue from '@hanano/types' directly.
+// Re-export so consumers can import ThemeSettingsValue from '@viseed/types' directly.
 export type { ThemeMenuItem, ThemeSettingsSchema, ThemeSettingsValue }
 
 export interface LayoutHelpers {
@@ -42,7 +42,7 @@ export interface LayoutContext<TData = Record<string, unknown>> {
 export interface ThemeLayoutEntry<TData = Record<string, unknown>> {
   template: string
   routePattern?: string
-  data?: (defaultData: TData, cms: HananoCMS) => TData | Promise<TData>
+  data?: (defaultData: TData, cms: ViseedCMS) => TData | Promise<TData>
 }
 
 export interface ThemeAssets {
@@ -80,7 +80,7 @@ export interface CMSTheme {
   /**
    * Optional `v=` query token for `/theme/static/*` URLs (cache busting).
    * Set at theme build time (e.g. random hex, commit sha). When set, the server does not
-   * read static files to derive a fingerprint. When omitted, see `.hana-static-fingerprint`
+   * read static files to derive a fingerprint. When omitted, see `.viseed-static-fingerprint`
    * under `staticRoot` or a one-time content hash at theme runtime creation.
    */
   staticAssetFingerprint?: string

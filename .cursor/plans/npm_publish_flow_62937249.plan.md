@@ -1,33 +1,33 @@
 ---
 name: NPM Publish Flow
-overview: Đổi scope toàn project từ `@hana/` → `@hanano/`, sau đó tạo umbrella package `hanano` (re-export từ @hanano/* + admin dist), publish riêng từng `@hanano/*` core package, plugin `hanano-plugin-*`, và theme `hanano-theme-*`.
+overview: Đổi scope toàn project từ `@viseed/` → `@viseed/`, sau đó tạo umbrella package `viseed` (re-export từ @viseed/* + admin dist), publish riêng từng `@viseed/*` core package, plugin `viseed-plugin-*`, và theme `viseed-theme-*`.
 todos:
   - id: rename-scope
-    content: Chạy PowerShell global find-replace @hana/ → @hanano/ toàn project, sau đó bun install + verify build
+    content: Chạy PowerShell global find-replace @viseed/ → @viseed/ toàn project, sau đó bun install + verify build
     status: completed
-  - id: create-hana-cms-pkg
-    content: Tạo packages/hanano/ với package.json, src/index.ts, src/cli.ts, bunup.config.ts, turbo.json
+  - id: create-viseed-cms-pkg
+    content: Tạo packages/viseed/ với package.json, src/index.ts, src/cli.ts, bunup.config.ts, turbo.json
     status: completed
   - id: mark-private
-    content: Thêm private:true vào @hanano/cli và @hanano/config
+    content: Thêm private:true vào @viseed/cli và @viseed/config
     status: completed
   - id: rename-plugins
-    content: Đổi "name" field của 4 plugins từ @hanano/plugin-* → hanano-plugin-*
+    content: Đổi "name" field của 4 plugins từ @viseed/plugin-* → viseed-plugin-*
     status: completed
   - id: rename-themes
-    content: Đổi "name" field của 2 themes từ @hanano/theme-* → hanano-theme-*
+    content: Đổi "name" field của 2 themes từ @viseed/theme-* → viseed-theme-*
     status: completed
   - id: update-changeset-config
-    content: Cập nhật .changeset/config.json — linked @hanano/* core, ignore cli/config/admin/docs/starter
+    content: Cập nhật .changeset/config.json — linked @viseed/* core, ignore cli/config/admin/docs/starter
     status: completed
   - id: update-turbo-root
-    content: Thêm publish task vào turbo.json root, thêm packages/hana-cms vào workspace
+    content: Thêm publish task vào turbo.json root, thêm packages/viseed-cms vào workspace
     status: completed
   - id: add-npmrc
     content: Tạo .npmrc với access=public
     status: completed
   - id: update-rules
-    content: Cập nhật .cursor/rules/*.mdc — đổi @hana/ → @hanano/ và thêm hana-cms, hana-plugin-*, hana-theme-* vào package map
+    content: Cập nhật .cursor/rules/*.mdc — đổi @viseed/ → @viseed/ và thêm viseed-cms, viseed-plugin-*, viseed-theme-* vào package map
     status: completed
   - id: github-actions
     content: Tạo .github/workflows/publish.yml theo Changesets pattern
@@ -35,12 +35,12 @@ todos:
 isProject: false
 ---
 
-# NPM Publish Flow — Hana CMS
+# NPM Publish Flow — Viseed CMS
 
-## Prerequisite — Tạo npm org `@hanano`
+## Prerequisite — Tạo npm org `@viseed`
 
-Các core packages dùng scope `@hanano/`, cần tạo npm org trước:
-1. Đăng nhập npmjs.com → "Create Organization" → tên `hanano`
+Các core packages dùng scope `@viseed/`, cần tạo npm org trước:
+1. Đăng nhập npmjs.com → "Create Organization" → tên `viseed`
 2. Thêm `NPM_TOKEN` vào GitHub Secrets
 
 ---
@@ -49,14 +49,14 @@ Các core packages dùng scope `@hanano/`, cần tạo npm org trước:
 
 | Publish lên npm | Không publish |
 |---|---|
-| `hanano` (umbrella + admin dist) | `@hanano/cli`, `@hanano/config` (private) |
-| `@hanano/core`, `@hanano/schema`, `@hanano/types`, `@hanano/validator`, `@hanano/ui`, `@hanano/registry` | `@hanano/admin`, `@hanano/docs`, `@hanano/starter` |
-| `hanano-plugin-auth`, `hanano-plugin-blog`, `hanano-plugin-menu`, `hanano-plugin-pages` | |
-| `hanano-theme-blog`, `hanano-theme-insurance` | |
+| `viseed` (umbrella + admin dist) | `@viseed/cli`, `@viseed/config` (private) |
+| `@viseed/core`, `@viseed/schema`, `@viseed/types`, `@viseed/validator`, `@viseed/ui`, `@viseed/registry` | `@viseed/admin`, `@viseed/docs`, `@viseed/starter` |
+| `viseed-plugin-auth`, `viseed-plugin-blog`, `viseed-plugin-menu`, `viseed-plugin-pages` | |
+| `viseed-theme-blog`, `viseed-theme-insurance` | |
 
 ---
 
-## 1. Đổi scope toàn project `@hana/` → `@hanano/`
+## 1. Đổi scope toàn project `@viseed/` → `@viseed/`
 
 Đây là bước đầu tiên, trước khi làm bất kỳ thứ gì khác.
 
@@ -72,8 +72,8 @@ Get-ChildItem -Path "d:\projects\cms" -Recurse `
   } |
   ForEach-Object {
     $content = Get-Content $_.FullName -Raw -Encoding UTF8
-    if ($content -match "@hana/") {
-      $newContent = $content -replace "@hana/", "@hanano/"
+    if ($content -match "@viseed/") {
+      $newContent = $content -replace "@viseed/", "@viseed/"
       Set-Content $_.FullName $newContent -NoNewline -Encoding UTF8
     }
   }
@@ -87,14 +87,14 @@ Sau khi chạy:
 
 ---
 
-## 2. Tạo `packages/hanano/` — umbrella package
+## 2. Tạo `packages/viseed/` — umbrella package
 
-`hanano` là entry point cho người dùng cuối: re-export từ `@hanano/*`, bao gồm admin dist, và expose CLI bin.
+`viseed` là entry point cho người dùng cuối: re-export từ `@viseed/*`, bao gồm admin dist, và expose CLI bin.
 
-**`packages/hanano/package.json`**
+**`packages/viseed/package.json`**
 ```json
 {
-  "name": "hanano",
+  "name": "viseed",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -105,36 +105,36 @@ Sau khi chạy:
     "./admin": "./dist/admin/index.html",
     "./admin/*": "./dist/admin/*"
   },
-  "bin": { "hanano": "./dist/cli.js" },
+  "bin": { "viseed": "./dist/cli.js" },
   "files": ["dist"],
   "dependencies": {
-    "@hanano/core": "workspace:*",
-    "@hanano/schema": "workspace:*",
-    "@hanano/types": "workspace:*",
-    "@hanano/validator": "workspace:*",
-    "@hanano/ui": "workspace:*",
-    "@hanano/registry": "workspace:*",
-    "@hanano/cli": "workspace:*"
+    "@viseed/core": "workspace:*",
+    "@viseed/schema": "workspace:*",
+    "@viseed/types": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "@viseed/ui": "workspace:*",
+    "@viseed/registry": "workspace:*",
+    "@viseed/cli": "workspace:*"
   }
 }
 ```
 
-**`packages/hanano/src/index.ts`**
+**`packages/viseed/src/index.ts`**
 ```ts
-export * from '@hanano/core'
-export * from '@hanano/schema'
-export * from '@hanano/types'
-export * from '@hanano/validator'
-export * from '@hanano/ui'
-export * from '@hanano/registry'
+export * from '@viseed/core'
+export * from '@viseed/schema'
+export * from '@viseed/types'
+export * from '@viseed/validator'
+export * from '@viseed/ui'
+export * from '@viseed/registry'
 ```
 
-**`packages/hanano/src/cli.ts`**
+**`packages/viseed/src/cli.ts`**
 ```ts
-export * from '@hanano/cli'
+export * from '@viseed/cli'
 ```
 
-**`packages/hanano/bunup.config.ts`**
+**`packages/viseed/bunup.config.ts`**
 ```ts
 import { cp } from 'node:fs/promises'
 import { defineConfig } from 'bunup'
@@ -144,7 +144,7 @@ export default defineConfig([
     entry: ['src/index.ts'],
     format: ['esm'],
     dts: true,
-    external: [/^@hanano\//, 'drizzle-orm', 'hono', 'eta', /^@tiptap\//],
+    external: [/^@viseed\//, 'drizzle-orm', 'hono', 'eta', /^@tiptap\//],
     onSuccess: async () => {
       await cp('../core/dist/admin', 'dist/admin', { recursive: true })
     },
@@ -153,18 +153,18 @@ export default defineConfig([
     entry: ['src/cli.ts'],
     format: ['esm'],
     dts: false,
-    external: [/^@hanano\//, 'drizzle-orm', /^@drizzle-kit/],
+    external: [/^@viseed\//, 'drizzle-orm', /^@drizzle-kit/],
   },
 ])
 ```
 
-**`packages/hanano/turbo.json`**
+**`packages/viseed/turbo.json`**
 ```json
 {
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": ["@hanano/admin#build", "^build"]
+      "dependsOn": ["@viseed/admin#build", "^build"]
     }
   }
 }
@@ -175,27 +175,27 @@ export default defineConfig([
 ## 3. Đánh dấu packages không publish là private
 
 Chỉ đánh `"private": true` cho 2 packages:
-- [`packages/cli/package.json`](packages/cli/package.json) — CLI expose qua `hanano` bin, không publish riêng
+- [`packages/cli/package.json`](packages/cli/package.json) — CLI expose qua `viseed` bin, không publish riêng
 - [`packages/config/package.json`](packages/config/package.json) — chỉ chứa tsconfig
 
-(`@hanano/admin`, `@hanano/docs`, `@hanano/starter` đã `private: true` rồi.)
+(`@viseed/admin`, `@viseed/docs`, `@viseed/starter` đã `private: true` rồi.)
 
-Các packages còn lại (`@hanano/core`, `@hanano/schema`, `@hanano/types`, `@hanano/validator`, `@hanano/ui`, `@hanano/registry`) **vẫn publish** để plugins có thể depend vào.
+Các packages còn lại (`@viseed/core`, `@viseed/schema`, `@viseed/types`, `@viseed/validator`, `@viseed/ui`, `@viseed/registry`) **vẫn publish** để plugins có thể depend vào.
 
 ---
 
 ## 4. Đổi tên plugins
 
-Sau khi bước 1 (rename scope) chạy xong, workspace name của plugins là `@hanano/plugin-*`. Chỉ cần đổi thêm field `"name"` sang tên npm:
+Sau khi bước 1 (rename scope) chạy xong, workspace name của plugins là `@viseed/plugin-*`. Chỉ cần đổi thêm field `"name"` sang tên npm:
 
 | Tên workspace (sau rename) | Tên publish lên npm |
 |---|---|
-| `@hanano/plugin-auth` | `hanano-plugin-auth` |
-| `@hanano/plugin-blog` | `hanano-plugin-blog` |
-| `@hanano/plugin-menu` | `hanano-plugin-menu` |
-| `@hanano/plugin-pages` | `hanano-plugin-pages` |
+| `@viseed/plugin-auth` | `viseed-plugin-auth` |
+| `@viseed/plugin-blog` | `viseed-plugin-blog` |
+| `@viseed/plugin-menu` | `viseed-plugin-menu` |
+| `@viseed/plugin-pages` | `viseed-plugin-pages` |
 
-Khi changesets publish, `workspace:*` deps (`@hanano/types`, `@hanano/validator`...) tự động resolve thành version thực trong published `package.json`.
+Khi changesets publish, `workspace:*` deps (`@viseed/types`, `@viseed/validator`...) tự động resolve thành version thực trong published `package.json`.
 
 ---
 
@@ -203,8 +203,8 @@ Khi changesets publish, `workspace:*` deps (`@hanano/types`, `@hanano/validator`
 
 | Tên workspace (sau rename) | Tên publish lên npm |
 |---|---|
-| `@hanano/theme-blog` | `hanano-theme-blog` |
-| `@hanano/theme-insurance` | `hanano-theme-insurance` |
+| `@viseed/theme-blog` | `viseed-theme-blog` |
+| `@viseed/theme-insurance` | `viseed-theme-insurance` |
 
 ---
 
@@ -217,20 +217,20 @@ Khi changesets publish, `workspace:*` deps (`@hanano/types`, `@hanano/validator`
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@hanano/core", "@hanano/schema", "@hanano/types", "@hanano/validator", "@hanano/ui", "@hanano/registry"]
+    ["@viseed/core", "@viseed/schema", "@viseed/types", "@viseed/validator", "@viseed/ui", "@viseed/registry"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@hanano/cli", "@hanano/config",
-    "@hanano/admin", "@hanano/docs", "@hanano/starter"
+    "@viseed/cli", "@viseed/config",
+    "@viseed/admin", "@viseed/docs", "@viseed/starter"
   ]
 }
 ```
 
 - `linked`: các core packages versioned cùng nhau
-- Packages có thể publish: `hanano`, `@hanano/core`, `@hanano/schema`, `@hanano/types`, `@hanano/validator`, `@hanano/ui`, `@hanano/registry`, `hanano-plugin-*`, `hanano-theme-*`
+- Packages có thể publish: `viseed`, `@viseed/core`, `@viseed/schema`, `@viseed/types`, `@viseed/validator`, `@viseed/ui`, `@viseed/registry`, `viseed-plugin-*`, `viseed-theme-*`
 
 ---
 
@@ -276,16 +276,16 @@ flowchart TD
     B --> C[PR merge vào main]
     C --> D[GitHub Actions trigger]
     D --> E[bun run build]
-    E --> F["Build @hanano/* packages"]
-    F --> G["Build @hanano/admin → core/dist/admin/"]
-    G --> H[Build hana-cms bundle + copy admin]
+    E --> F["Build @viseed/* packages"]
+    F --> G["Build @viseed/admin → core/dist/admin/"]
+    G --> H[Build viseed-cms bundle + copy admin]
     H --> I[Build plugins + themes]
     I --> J[changeset version]
     J --> K[changeset publish]
-    K --> L[npm: hanano]
-    K --> O["npm: @hanano/core, @hanano/types..."]
-    K --> M["npm: hanano-plugin-*"]
-    K --> N["npm: hanano-theme-*"]
+    K --> L[npm: viseed]
+    K --> O["npm: @viseed/core, @viseed/types..."]
+    K --> M["npm: viseed-plugin-*"]
+    K --> N["npm: viseed-theme-*"]
 ```
 
 ---
@@ -296,8 +296,8 @@ flowchart TD
 1. Chạy PowerShell rename (bước 1) trước tất cả
 2. `bun install` để regenerate lock file
 3. Verify build: `bun run build`
-4. Mới bắt đầu tạo `packages/hana-cms/` và các bước còn lại
+4. Mới bắt đầu tạo `packages/viseed-cms/` và các bước còn lại
 
-**Về npm org `@hanano`**: Cần tạo org `@hanano` trên npmjs.com (free) trước khi publish lần đầu.
+**Về npm org `@viseed`**: Cần tạo org `@viseed` trên npmjs.com (free) trước khi publish lần đầu.
 
-**Changeset files cũ**: Nếu có file nào trong `.changeset/` tham chiếu `@hana/*`, xóa và tạo lại sau khi rename.
+**Changeset files cũ**: Nếu có file nào trong `.changeset/` tham chiếu `@viseed/*`, xóa và tạo lại sau khi rename.

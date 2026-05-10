@@ -1,4 +1,4 @@
-﻿import type { MetaSeo, SchemaOrgItem } from '@hanano/validator'
+﻿import type { MetaSeo, SchemaOrgItem } from '@viseed/validator'
 import { boolean, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 
 export const pages = pgTable(

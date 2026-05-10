@@ -1,4 +1,4 @@
-﻿import type { LayoutContext, LayoutHelpers } from '@hanano/types'
+﻿import type { LayoutContext, LayoutHelpers } from '@viseed/types'
 
 /**
  * Subset of the SEO meta-tag shape persisted by plugin-pages / plugin-blog.
@@ -130,7 +130,7 @@ function resolveSubject(context: LayoutContext): SeoSubject {
 
   const siteName =
     pickString(settings['general.siteName'], settings['general.siteTitle'], settings.siteTitle) ??
-    'Hana CMS'
+    'Viseed CMS'
   const siteDescription = pickString(
     settings['general.siteDescription'],
     settings.siteDescription,

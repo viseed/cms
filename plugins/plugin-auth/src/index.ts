@@ -1,4 +1,4 @@
-﻿import type { CMSPlugin } from '@hanano/types'
+﻿import type { CMSPlugin } from '@viseed/types'
 import { setupAuthRoutes } from './routes'
 import { authSchema } from './schema'
 

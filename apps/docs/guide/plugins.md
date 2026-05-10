@@ -1,6 +1,6 @@
 ﻿# Plugin System
 
-Plugins are the primary extension mechanism in Hana CMS. Each plugin can contribute database tables, API routes, hooks, and admin UI components.
+Plugins are the primary extension mechanism in Viseed CMS. Each plugin can contribute database tables, API routes, hooks, and admin UI components.
 
 ---
 
@@ -9,11 +9,11 @@ Plugins are the primary extension mechanism in Hana CMS. Each plugin can contrib
 Register plugins via `cms.use()` before calling `cms.launch()`:
 
 ```typescript
-import { createCMS } from '@hanano/core'
-import { authPlugin } from 'hanano-plugin-auth'
-import { blogPlugin } from 'hanano-plugin-blog'
-import { menuPlugin } from 'hanano-plugin-menu'
-import { pagesPlugin } from 'hanano-plugin-pages'
+import { createCMS } from '@viseed/core'
+import { authPlugin } from 'viseed-plugin-auth'
+import { blogPlugin } from 'viseed-plugin-blog'
+import { menuPlugin } from 'viseed-plugin-menu'
+import { pagesPlugin } from 'viseed-plugin-pages'
 
 const cms = createCMS({ db: { driver: 'postgres', url: process.env.DATABASE_URL! } })
 
@@ -33,15 +33,15 @@ The order of `cms.use()` calls determines plugin initialization order.
 
 | Package                | Function          | What it provides                                    |
 |------------------------|-------------------|-----------------------------------------------------|
-| `hanano-plugin-auth`    | `authPlugin()`    | User authentication, sessions, role management      |
-| `hanano-plugin-blog`    | `blogPlugin()`    | Blog posts, categories, admin UI                    |
-| `hanano-plugin-menu`    | `menuPlugin()`    | Navigation menus, admin UI, theme menu injection    |
-| `hanano-plugin-pages`   | `pagesPlugin()`   | Standalone pages, TOC support, admin UI             |
+| `viseed-plugin-auth`    | `authPlugin()`    | User authentication, sessions, role management      |
+| `viseed-plugin-blog`    | `blogPlugin()`    | Blog posts, categories, admin UI                    |
+| `viseed-plugin-menu`    | `menuPlugin()`    | Navigation menus, admin UI, theme menu injection    |
+| `viseed-plugin-pages`   | `pagesPlugin()`   | Standalone pages, TOC support, admin UI             |
 
 Install what you need:
 
 ```bash
-bun add hanano-plugin-auth hanano-plugin-blog hanano-plugin-menu hanano-plugin-pages
+bun add viseed-plugin-auth viseed-plugin-blog viseed-plugin-menu viseed-plugin-pages
 ```
 
 ---
@@ -57,7 +57,7 @@ createCMS()
 cms.launch()
   ├── createDatabase()       ← DB connection established
   ├── plugin.schema          ← all plugin tables merged
-  ├── cms:init hook          ← HananoCMS instance available
+  ├── cms:init hook          ← ViseedCMS instance available
   ├── plugin.routes()        ← Hono routes registered
   ├── plugin.admin           ← admin UI bundles registered
   └── cms:ready hook         ← Hono app fully ready
@@ -69,7 +69,7 @@ cms.launch()
 
 | Hook                    | Trigger                                      | Arguments                              |
 |-------------------------|----------------------------------------------|----------------------------------------|
-| `cms:init`              | After database connection is established     | `HananoCMS` instance                   |
+| `cms:init`              | After database connection is established     | `ViseedCMS` instance                   |
 | `cms:ready`             | After all routes are registered              | `Hono` app instance                    |
 | `admin:register`        | When admin UI loads                          | `ComponentRegistry`                    |
 | `theme:mount`           | When a theme is activated                    | `CMSTheme`                             |
@@ -83,7 +83,7 @@ cms.launch()
 ## Writing a Custom Plugin
 
 ```typescript
-import type { CMSPlugin } from '@hanano/core'
+import type { CMSPlugin } from '@viseed/core'
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 export function myPlugin(): CMSPlugin {
@@ -120,7 +120,7 @@ export function myPlugin(): CMSPlugin {
 
 ### Plugin Schema
 
-Plugin tables are passed directly as Drizzle table definitions. The CLI will auto-discover them when the plugin is installed as an `hanano-plugin-*` package.
+Plugin tables are passed directly as Drizzle table definitions. The CLI will auto-discover them when the plugin is installed as an `viseed-plugin-*` package.
 
 ### Plugin Routes
 

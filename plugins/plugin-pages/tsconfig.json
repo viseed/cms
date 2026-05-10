@@ -1,5 +1,5 @@
 ﻿{
-  "extends": "@hanano/config/tsconfig.lib.json",
+  "extends": "@viseed/config/tsconfig.lib.json",
   "compilerOptions": {
     "outDir": "dist",
     "isolatedDeclarations": false,

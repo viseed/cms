@@ -16,7 +16,7 @@
 
 - Implement nhánh **`turso`** trong `createDatabase()` (libSQL client + `drizzle-orm/libsql`), giữ **`sqlite`** mặc định dev.
 - Giữ **`postgres`** / **`mysql`** trong `DatabaseConfig` và factory: hoặc **throw có hướng dẫn**, hoặc stub rõ “chưa nối” — để env/deploy chỉ cần đổi `driver` + `url` khi team sẵn sàng làm dialect B.
-- Refactor bootstrap (`ensureMultisiteFoundation`, migrations nhỏ inline, …) thành **một lộ trình thực thi SQL** dùng được cho cả `bun:sqlite` và `@libsql/client` (**`createDatabase` async** + `await` trong `HanaCMS.launch()`).
+- Refactor bootstrap (`ensureMultisiteFoundation`, migrations nhỏ inline, …) thành **một lộ trình thực thi SQL** dùng được cho cả `bun:sqlite` và `@libsql/client` (**`createDatabase` async** + `await` trong `ViseedCMS.launch()`).
 - Connection / lỗi mạng (Turso): retry tạm thời trên bootstrap libSQL (3 lần, backoff ngắn).
 - Tài liệu: ma trận dev/prod, env ví dụ; migration Drizzle cho Turso vẫn dùng `drizzle-kit` dialect sqlite.
 
@@ -29,7 +29,7 @@
 
 - `packages/core/src/database.ts` — factory + driver branches.
 - `packages/core/src/database-bootstrap.ts` — bootstrap SQLite dialect dùng chung (Bun SQLite + libSQL).
-- `packages/core/src/hana-cms.ts` — `await createDatabase(...)`.
+- `packages/core/src/viseed-cms.ts` — `await createDatabase(...)`.
 - `packages/types/src/cms.ts` — `DatabaseConfig.driver` đủ bốn giá trị + field phụ (token, v.v.).
 - `packages/core/package.json` — `@libsql/client`.
 - `.cursor/rules/06-database-patterns.mdc` — matrix + quy ước hai nhóm driver.
@@ -60,7 +60,7 @@
 
 ## Implementation checklist
 
-- [x] Thêm dependency `@libsql/client` cho `@hana/core`.
+- [x] Thêm dependency `@libsql/client` cho `@viseed/core`.
 - [x] Refactor bootstrap → `BootstrapCtx` + `runSqliteDialectBootstrap`; `createDatabase` async.
 - [x] Wire `turso` + `authToken` (bắt buộc cho URL remote).
 - [x] Message lỗi rõ ràng cho `postgres` / `mysql`.

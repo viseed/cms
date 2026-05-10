@@ -4,16 +4,18 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@hanano/core", "@hanano/schema", "@hanano/types", "@hanano/validator", "@hanano/ui", "@hanano/registry"]
+    ["@viseed/core", "@viseed/schema", "@viseed/types", "@viseed/validator", "@viseed/ui", "@viseed/registry", "@viseed/cms"],
+    ["@viseed/plugin-auth", "@viseed/plugin-blog", "@viseed/plugin-menu", "@viseed/plugin-pages"],
+    ["@viseed/theme-blog", "@viseed/theme-insurance"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@hanano/cli",
-    "@hanano/config",
-    "@hanano/admin",
-    "@hanano/docs",
-    "@hanano/starter"
+    "@viseed/cli",
+    "@viseed/config",
+    "@viseed/admin",
+    "@viseed/docs",
+    "@viseed/starter"
   ]
 }

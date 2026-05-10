@@ -1,9 +1,9 @@
-﻿import type { ThemeSettingsValue } from '@hanano/types'
+﻿import type { ThemeSettingsValue } from '@viseed/types'
 import { jsonb, pgTable, serial, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sites } from './sites'
 
 export const themeState = pgTable(
-  'hanano_theme_state',
+  'viseed_theme_state',
   {
     id: serial('id').primaryKey(),
     siteId: text('site_id')
@@ -20,13 +20,13 @@ export const themeState = pgTable(
      * Fallback when theme is not in registry. Applied only when request presents matching `previewToken`.
      */
     previewThemePath: text('preview_theme_path'),
-    /** Opaque token; preview applies iff cookie `hanano_preview` or `?hanano_preview=` matches. */
+    /** Opaque token; preview applies iff cookie `viseed_preview` or `?viseed_preview=` matches. */
     previewToken: text('preview_token'),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteUnique: uniqueIndex('hanano_theme_state_site_unique').on(table.siteId),
-    siteThemeUnique: uniqueIndex('hanano_theme_state_site_theme_unique').on(
+    siteUnique: uniqueIndex('viseed_theme_state_site_unique').on(table.siteId),
+    siteThemeUnique: uniqueIndex('viseed_theme_state_site_theme_unique').on(
       table.siteId,
       table.activeThemeName,
     ),

@@ -1,4 +1,4 @@
-CREATE TABLE "hana_installed_plugins" (
+CREATE TABLE "viseed_installed_plugins" (
 	"id" text PRIMARY KEY NOT NULL,
 	"site_id" text DEFAULT 'default' NOT NULL,
 	"name" text NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "hana_installed_plugins" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_installed_themes" (
+CREATE TABLE "viseed_installed_themes" (
 	"id" text PRIMARY KEY NOT NULL,
 	"site_id" text DEFAULT 'default' NOT NULL,
 	"name" text NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE "media_files" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_sessions" (
+CREATE TABLE "viseed_sessions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"site_id" text DEFAULT 'default' NOT NULL,
 	"user_id" text NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE "hana_sessions" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_site_domains" (
+CREATE TABLE "viseed_site_domains" (
 	"id" text PRIMARY KEY NOT NULL,
 	"site_id" text NOT NULL,
 	"domain" text NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE "hana_site_domains" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_sites" (
+CREATE TABLE "viseed_sites" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"slug" text NOT NULL,
@@ -76,7 +76,7 @@ CREATE TABLE "hana_sites" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_theme_state" (
+CREATE TABLE "viseed_theme_state" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"site_id" text DEFAULT 'default' NOT NULL,
 	"active_theme_name" text NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE "hana_theme_state" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_user_site_roles" (
+CREATE TABLE "viseed_user_site_roles" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"site_id" text NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE "hana_user_site_roles" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "hana_users" (
+CREATE TABLE "viseed_users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"email" text NOT NULL,
 	"name" text NOT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE "hana_users" (
 	"role" text DEFAULT 'site_content_writer' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "hana_users_email_unique" UNIQUE("email")
+	CONSTRAINT "viseed_users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE "blog_categories" (
@@ -163,23 +163,23 @@ CREATE TABLE "cms_pages" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "hana_installed_plugins" ADD CONSTRAINT "hana_installed_plugins_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_installed_themes" ADD CONSTRAINT "hana_installed_themes_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_sessions" ADD CONSTRAINT "hana_sessions_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_sessions" ADD CONSTRAINT "hana_sessions_user_id_hana_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."hana_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_site_domains" ADD CONSTRAINT "hana_site_domains_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_theme_state" ADD CONSTRAINT "hana_theme_state_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_user_site_roles" ADD CONSTRAINT "hana_user_site_roles_user_id_hana_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."hana_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "hana_user_site_roles" ADD CONSTRAINT "hana_user_site_roles_site_id_hana_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."hana_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_installed_plugins_site_name_unique" ON "hana_installed_plugins" USING btree ("site_id","name");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_installed_themes_site_name_unique" ON "hana_installed_themes" USING btree ("site_id","name");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_sessions_site_token_unique" ON "hana_sessions" USING btree ("site_id","token");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_site_domains_domain_unique" ON "hana_site_domains" USING btree ("domain");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_site_domains_site_domain_unique" ON "hana_site_domains" USING btree ("site_id","domain");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_sites_slug_unique" ON "hana_sites" USING btree ("slug");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_theme_state_site_unique" ON "hana_theme_state" USING btree ("site_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_theme_state_site_theme_unique" ON "hana_theme_state" USING btree ("site_id","active_theme_name");--> statement-breakpoint
-CREATE UNIQUE INDEX "hana_user_site_roles_user_site_unique" ON "hana_user_site_roles" USING btree ("user_id","site_id");--> statement-breakpoint
+ALTER TABLE "viseed_installed_plugins" ADD CONSTRAINT "viseed_installed_plugins_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_installed_themes" ADD CONSTRAINT "viseed_installed_themes_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_sessions" ADD CONSTRAINT "viseed_sessions_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_sessions" ADD CONSTRAINT "viseed_sessions_user_id_viseed_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."viseed_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_site_domains" ADD CONSTRAINT "viseed_site_domains_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_theme_state" ADD CONSTRAINT "viseed_theme_state_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_user_site_roles" ADD CONSTRAINT "viseed_user_site_roles_user_id_viseed_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."viseed_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "viseed_user_site_roles" ADD CONSTRAINT "viseed_user_site_roles_site_id_viseed_sites_id_fk" FOREIGN KEY ("site_id") REFERENCES "public"."viseed_sites"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_installed_plugins_site_name_unique" ON "viseed_installed_plugins" USING btree ("site_id","name");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_installed_themes_site_name_unique" ON "viseed_installed_themes" USING btree ("site_id","name");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_sessions_site_token_unique" ON "viseed_sessions" USING btree ("site_id","token");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_site_domains_domain_unique" ON "viseed_site_domains" USING btree ("domain");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_site_domains_site_domain_unique" ON "viseed_site_domains" USING btree ("site_id","domain");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_sites_slug_unique" ON "viseed_sites" USING btree ("slug");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_theme_state_site_unique" ON "viseed_theme_state" USING btree ("site_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_theme_state_site_theme_unique" ON "viseed_theme_state" USING btree ("site_id","active_theme_name");--> statement-breakpoint
+CREATE UNIQUE INDEX "viseed_user_site_roles_user_site_unique" ON "viseed_user_site_roles" USING btree ("user_id","site_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "blog_categories_site_slug_unique" ON "blog_categories" USING btree ("site_id","slug");--> statement-breakpoint
 CREATE UNIQUE INDEX "blog_posts_site_slug_unique" ON "blog_posts" USING btree ("site_id","slug");--> statement-breakpoint
 CREATE UNIQUE INDEX "menus_site_zone_unique" ON "menus" USING btree ("site_id","zone");--> statement-breakpoint

@@ -1,24 +1,24 @@
-﻿# Hanano CMS
+﻿# Viseed CMS
 
 A lightweight, extensible CMS framework built on **Hono** + **Drizzle** + **Vue 3** for the **Bun** runtime.
 
 ## Architecture
 
 ```
-hanano-cms/
+viseed-cms/
 ├── packages/
-│   ├── core/           # @hanano/core — Hono engine, Plugin system, DB bridge
-│   ├── types/          # @hanano/types — Shared TypeScript interfaces
-│   ├── validator/      # @hanano/validator — Zod validation schemas
-│   ├── schema/         # @hanano/schema — Drizzle base tables & merge helper
-│   ├── registry/       # @hanano/registry — Plugin marketplace client
-│   ├── ui/             # @hanano/ui — Vue component registry
-│   ├── config/         # @hanano/config — Shared tsconfig
-│   └── cli/            # @hanano/cli — CLI commands
+│   ├── core/           # @viseed/core — Hono engine, Plugin system, DB bridge
+│   ├── types/          # @viseed/types — Shared TypeScript interfaces
+│   ├── validator/      # @viseed/validator — Zod validation schemas
+│   ├── schema/         # @viseed/schema — Drizzle base tables & merge helper
+│   ├── registry/       # @viseed/registry — Plugin marketplace client
+│   ├── ui/             # @viseed/ui — Vue component registry
+│   ├── config/         # @viseed/config — Shared tsconfig
+│   └── cli/            # @viseed/cli — CLI commands
 ├── plugins/
-│   ├── plugin-auth/    # @hanano/plugin-auth
-│   ├── plugin-blog/    # @hanano/plugin-blog
-│   └── plugin-media/   # @hanano/plugin-media
+│   ├── plugin-auth/    # @viseed/plugin-auth
+│   ├── plugin-blog/    # @viseed/plugin-blog
+│   └── plugin-media/   # @viseed/plugin-media
 ├── apps/
 │   ├── admin/          # Vue 3 admin dashboard
 │   ├── docs/           # VitePress documentation

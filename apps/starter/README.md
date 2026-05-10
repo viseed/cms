@@ -1,6 +1,6 @@
-﻿# Hana CMS Starter
+﻿# Viseed CMS Starter
 
-A starter template for building with Hana CMS.
+A starter template for building with Viseed CMS.
 
 ## Quick Start
 
@@ -18,13 +18,13 @@ bun run build
 ## Add Plugins
 
 ```bash
-bun add @hanano/plugin-media
+bun add @viseed/plugin-media
 ```
 
 Then register in `src/index.ts`:
 
 ```typescript
-import { mediaPlugin } from '@hanano/plugin-media'
+import { mediaPlugin } from '@viseed/plugin-media'
 
 cms.use(mediaPlugin())
 ```

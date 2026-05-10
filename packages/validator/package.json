@@ -1,5 +1,5 @@
 {
-  "name": "@hanano/validator",
+  "name": "@viseed/validator",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -23,7 +23,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@hanano/config": "workspace:*",
-    "@hanano/types": "workspace:*"
+    "@viseed/config": "workspace:*",
+    "@viseed/types": "workspace:*"
   }
 }
