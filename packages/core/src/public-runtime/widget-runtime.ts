@@ -17,6 +17,7 @@ interface WidgetConfig {
   id: string
   type: string
   config: Record<string, unknown>
+  componentExport?: string | null
 }
 
 const configCache = new Map<string, WidgetConfig>()
@@ -81,7 +82,7 @@ async function mountWidget(el: HTMLElement): Promise<void> {
     return
   }
 
-  const exportName = componentNameFromType(widgetType)
+  const exportName = config.componentExport ?? componentNameFromType(widgetType)
   const Component = mod[exportName] ?? mod.default
 
   if (!Component) {

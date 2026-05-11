@@ -56,7 +56,7 @@ function parseContent(value: string | null) {
 const editor = useEditor({
   content: parseContent(props.modelValue),
   extensions: [
-    StarterKit,
+    StarterKit.configure({ link: false, underline: false }),
     Link.configure({ openOnClick: false }),
     Image,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),

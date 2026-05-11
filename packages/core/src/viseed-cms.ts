@@ -1698,6 +1698,26 @@ export class ViseedCMS {
   }
 
   private widgetRuntimeBundle: string | null = null
+  private vendorVueBundle: string | null = null
+
+  private async buildVendorVue(): Promise<string> {
+    if (this.vendorVueBundle) return this.vendorVueBundle
+
+    // Resolve vue's package root then pick the pre-built browser ESM file.
+    // This avoids re-bundling Vue through Bun.build (which drops named exports).
+    const vuePkgDir = resolve(Bun.resolveSync('vue/package.json', import.meta.dirname), '..')
+    const distFile = process.env.NODE_ENV === 'production'
+      ? 'dist/vue.esm-browser.prod.js'
+      : 'dist/vue.esm-browser.js'
+
+    const file = Bun.file(resolve(vuePkgDir, distFile))
+    if (!(await file.exists())) {
+      throw new Error(`[ViseedCMS] vue browser ESM not found at ${distFile}`)
+    }
+
+    this.vendorVueBundle = await file.text()
+    return this.vendorVueBundle
+  }
 
   private async buildWidgetRuntime(): Promise<string> {
     if (this.widgetRuntimeBundle) return this.widgetRuntimeBundle
@@ -1737,20 +1757,23 @@ export class ViseedCMS {
       }
     })
 
-    // Vendor Vue — served from the admin's pre-built vendor file
+    // Vendor Vue — prefer the pre-built dist file; fall back to on-the-fly
+    // Bun.build() for dev mode (where the Vite build hasn't run yet).
     this.app.get('/api/public/vendor-vue.js', async (c) => {
-      const vendorPath = resolve(import.meta.dirname, '../dist/admin/assets/vendor-vue.js')
-      const file = Bun.file(vendorPath)
-      if (!(await file.exists())) {
-        return c.json({ error: 'vendor-vue.js not found. Run bun run build:admin first.' }, 404)
+      try {
+        const vendorPath = resolve(import.meta.dirname, '../dist/admin/assets/vendor-vue.js')
+        const file = Bun.file(vendorPath)
+        const content = (await file.exists()) ? await file.text() : await this.buildVendorVue()
+        return new Response(content, {
+          headers: {
+            'Content-Type': 'application/javascript; charset=utf-8',
+            'Cache-Control': 'public, max-age=86400',
+          },
+        })
+      } catch (err) {
+        console.error('[ViseedCMS] vendor-vue build error:', err)
+        return c.json({ error: 'vendor-vue.js unavailable.' }, 500)
       }
-      const content = await file.text()
-      return new Response(content, {
-        headers: {
-          'Content-Type': 'application/javascript; charset=utf-8',
-          'Cache-Control': 'public, max-age=86400',
-        },
-      })
     })
 
     // Public widget instance fetch (for CSR hydration)
@@ -1768,8 +1791,15 @@ export class ViseedCMS {
 
       if (!row) return c.json({ error: 'Widget not found.' }, 404)
 
+      const widgetType = this.widgetTypeRegistry.get(row.type)
+
       return c.json(
-        { id: row.id, type: row.type, config: row.config },
+        {
+          id: row.id,
+          type: row.type,
+          config: row.config,
+          componentExport: widgetType?.publicComponent ?? null,
+        },
         200,
         { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
       )

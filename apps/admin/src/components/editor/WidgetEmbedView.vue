@@ -57,7 +57,7 @@ function removeWidget() {
 </script>
 
 <template>
-  <node-view-wrapper class="widget-embed-node" :class="{ selected: props.selected }">
+  <NodeViewWrapper class="widget-embed-node" :class="{ selected: props.selected }">
     <div class="widget-embed-header" contenteditable="false">
       <span class="widget-icon">❖</span>
       <span v-if="widgetInfo" class="widget-name">{{ widgetInfo.name }}</span>
@@ -72,7 +72,7 @@ function removeWidget() {
     <div v-if="previewComponent" class="widget-preview" contenteditable="false">
       <component :is="previewComponent" :config="{}" />
     </div>
-  </node-view-wrapper>
+  </NodeViewWrapper>
 </template>
 
 <style scoped>

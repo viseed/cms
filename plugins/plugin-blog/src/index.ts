@@ -48,6 +48,7 @@ export function blogPlugin(): CMSPlugin {
         description: 'Display a list of the most recent published posts',
         pluginName: 'blog',
         configComponent: 'LatestPostsConfigForm',
+        previewComponent: 'LatestPosts',
         publicComponent: 'LatestPosts',
         defaultConfig: { count: 5, title: 'Latest Posts' },
       },
