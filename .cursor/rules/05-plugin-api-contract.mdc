@@ -36,6 +36,22 @@ interface PluginAdminConfig {
   bundlePath?: string                // absolute path to compiled admin ESM bundle
 }
 
+interface WidgetTypeDef {
+  id: string              // unique, pattern: '{pluginName}/{typeName}', e.g. 'blog/latest-posts'
+  label: string
+  icon?: string
+  description?: string
+  pluginName: string      // must match CMSPlugin.name
+  configComponent: string // export name in plugin admin bundle (Vue form)
+  previewComponent?: string // optional preview in TipTap NodeView
+  publicComponent: string // export name in plugin public bundle (Vue renderer)
+  defaultConfig?: Record<string, unknown>
+}
+
+interface PluginPublicConfig {
+  bundlePath?: string  // absolute path to compiled public ESM bundle (widget renderers)
+}
+
 interface CMSPlugin {
   name: string      // required — unique identifier, dùng kebab-case
   version: string   // required — semver (vd: "1.0.0")
@@ -44,6 +60,8 @@ interface CMSPlugin {
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
   lifecycle?: PluginLifecycle         // install/uninstall/enable/disable callbacks
   admin?: PluginAdminConfig           // admin UI menu items + ESM bundle path
+  widgets?: WidgetTypeDef[]           // widget types this plugin contributes
+  public?: PluginPublicConfig         // public-facing ESM bundle (Vue widget renderers)
   // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
   // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
 }
@@ -217,8 +235,33 @@ A theme can declare `companionPlugin?: CMSPlugin` — a full plugin (schema + ro
 
 Companion plugin schemas are always migrated at startup. Only routes are toggled.
 
+## Widget System API
+
+Plugin registers widget types via `widgets?: WidgetTypeDef[]` on `CMSPlugin`. Core auto-builds `WidgetTypeRegistry` from active plugins and provides:
+
+```
+GET  /api/admin/widget-types          → list all active widget types
+GET  /api/admin/widgets               → list site-scoped widget instances
+GET  /api/admin/widgets/:id           → get single instance
+POST /api/admin/widgets               → create instance (requires site.widgets.manage)
+PUT  /api/admin/widgets/:id           → update config/name
+DELETE /api/admin/widgets/:id         → delete instance
+GET  /api/widgets/:id                 → public fetch (no auth, cached), for CSR hydration
+GET  /api/public/plugins/:name/widget.js → serve plugin public bundle
+GET  /api/public/widget-runtime.js   → serve widget hydration runtime (built via Bun.build)
+GET  /api/public/vendor-vue.js       → serve shared Vue vendor bundle
+```
+
+Permissions: `site.widgets.read` (read/list), `site.widgets.manage` (create/update/delete).
+
+Plugin public bundle pattern:
+- Source: `src/public/index.ts` with named Vue component exports
+- Build: `build-public.ts` (Vite lib, `external: ['vue']`, outDir: `dist/public`)
+- Plugin factory: `public: { bundlePath: resolve(__dirname, '../dist/public/index.js') }`
+
 ## Last updated
 
+2026-05-11 — Widget system v1: `WidgetTypeDef`, `PluginPublicConfig`, `widgets`, `public` fields on CMSPlugin; widget CRUD/public routes; WidgetTypeRegistry rebuilds on plugin enable/disable.
 2026-04-10 — Added `PluginAdminConfig`, `PluginAdminMenuItem`, admin UI registration via ESM dynamic import
 2026-04-10 — Added `PluginLifecycle`, `plugin:enabled`/`plugin:disabled` hooks, `PluginRouteRegistry`, companion plugins, admin API for enable/disable
 2026-03-30 — Added `CMSRouteContextHelpers` for site-aware request context + permission checks

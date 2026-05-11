@@ -14,6 +14,8 @@ import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useMediaPicker } from '../composables/useMediaPicker'
+import { WidgetEmbedExtension } from './editor/widget-embed-extension'
+import WidgetInsertModal from './editor/WidgetInsertModal.vue'
 
 const COLOR_PALETTE = [
   '#000000',
@@ -66,6 +68,7 @@ const editor = useEditor({
     TableCell,
     TextStyle,
     Color,
+    WidgetEmbedExtension,
   ],
   onUpdate({ editor: e }) {
     emit('update:modelValue', JSON.stringify(e.getJSON()))
@@ -132,6 +135,17 @@ function unsetTextColor() {
 function onPickerInput(event: Event) {
   const target = event.target as HTMLInputElement
   if (target?.value) setTextColor(target.value)
+}
+
+const showWidgetModal = ref(false)
+
+function insertWidget(widgetId: string, widgetType: string) {
+  if (!editor.value) return
+  editor.value.chain().focus().insertContent({
+    type: 'widgetEmbed',
+    attrs: { widgetId, widgetType },
+  }).run()
+  showWidgetModal.value = false
 }
 </script>
 
@@ -433,7 +447,26 @@ function onPickerInput(event: Event) {
           Redo
         </button>
       </div>
+
+      <span class="toolbar-divider" />
+
+      <div class="toolbar-group">
+        <button
+          type="button"
+          title="Insert Widget"
+          class="toolbar-widget-btn"
+          @click="showWidgetModal = true"
+        >
+          ❖ Widget
+        </button>
+      </div>
     </div>
+
+    <WidgetInsertModal
+      v-if="showWidgetModal"
+      @select="insertWidget"
+      @close="showWidgetModal = false"
+    />
 
     <EditorContent :editor="editor" class="editor-body" />
 
@@ -709,5 +742,14 @@ function onPickerInput(event: Event) {
   font-size: 0.75rem;
   color: #94a3b8;
   text-align: right;
+}
+
+.toolbar-widget-btn {
+  color: #6366f1;
+  font-weight: 500;
+}
+.toolbar-widget-btn:hover {
+  background: #eff6ff;
+  color: #4f46e5;
 }
 </style>

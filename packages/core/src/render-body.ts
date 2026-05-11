@@ -1,3 +1,4 @@
+import { Node, type Node as TiptapNode } from '@tiptap/core'
 import { Color } from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
 import { Table } from '@tiptap/extension-table'
@@ -9,6 +10,39 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { generateHTML } from '@tiptap/html'
 import StarterKit from '@tiptap/starter-kit'
 import { annotateHeadings, buildTocHtml } from './toc'
+
+/**
+ * TipTap node that represents a reusable widget instance embedded in content.
+ * Server-side rendering emits a placeholder `<div>` that the public widget
+ * runtime (`/api/public/widget-runtime.js`) replaces with a live Vue component.
+ */
+export const WidgetEmbedExtension: TiptapNode = Node.create({
+  name: 'widgetEmbed',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      widgetId: { default: null },
+      widgetType: { default: null },
+    }
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-widget-id]' }]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'div',
+      {
+        'data-widget-id': HTMLAttributes.widgetId ?? '',
+        'data-widget-type': HTMLAttributes.widgetType ?? '',
+        class: 'cms-widget-embed',
+      },
+    ]
+  },
+})
 
 const baseExtensions = [
   StarterKit,
@@ -22,6 +56,7 @@ const baseExtensions = [
   TableCell,
   TextStyle,
   Color,
+  WidgetEmbedExtension,
 ]
 
 /**

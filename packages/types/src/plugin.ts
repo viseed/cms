@@ -42,6 +42,33 @@ export interface PluginAdminConfig {
   bundlePath?: string
 }
 
+export interface PluginPublicConfig {
+  /** Absolute filesystem path to compiled public ESM bundle (widget renderers) */
+  bundlePath?: string
+}
+
+/**
+ * Declares a widget kind that plugins can register.
+ * Users create named instances of this type via the Widgets admin view.
+ * Instances can then be embedded into post/page content via the TipTap editor.
+ */
+export interface WidgetTypeDef {
+  /** Unique id, recommended pattern: '{pluginName}/{widgetName}', e.g. 'plugin-blog/latest-posts' */
+  id: string
+  label: string
+  icon?: string
+  description?: string
+  /** Must match the CMSPlugin.name of the plugin that declares this type */
+  pluginName: string
+  /** Export name of the Vue config form component in the plugin admin bundle */
+  configComponent: string
+  /** Optional export name of a lightweight preview component shown in the TipTap NodeView */
+  previewComponent?: string
+  /** Export name of the public Vue renderer component in the plugin public bundle */
+  publicComponent: string
+  defaultConfig?: Record<string, unknown>
+}
+
 export interface CMSPlugin {
   name: string
   version: string
@@ -50,6 +77,10 @@ export interface CMSPlugin {
   routes?: (app: Hono, helpers: CMSRouteContextHelpers) => void
   lifecycle?: PluginLifecycle
   admin?: PluginAdminConfig
+  /** Widget types this plugin contributes */
+  widgets?: WidgetTypeDef[]
+  /** Public-facing ESM bundle (Vue widget renderers for CSR hydration) */
+  public?: PluginPublicConfig
 }
 
 export interface CMSPluginHooks {

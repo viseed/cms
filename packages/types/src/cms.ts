@@ -24,6 +24,8 @@ export const PERMISSION_CATALOG = [
   'site.path.write',
   'site.media.read',
   'site.media.write',
+  'site.widgets.read',
+  'site.widgets.manage',
 ] as const
 
 export type Permission = (typeof PERMISSION_CATALOG)[number]
@@ -90,6 +92,8 @@ export const SITE_CONTENT_WRITER_PERMISSIONS: Array<Permission> = [
   'site.path.write',
   'site.media.read',
   'site.media.write',
+  'site.widgets.read',
+  'site.widgets.manage',
 ]
 
 export const ROLE_PERMISSION_MATRIX: Record<RBACRole, ReadonlyArray<Permission>> = {

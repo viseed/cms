@@ -13,8 +13,8 @@ alwaysApply: false
 | `packages/viseed` | `@viseed/cms` | **Umbrella package** — re-export từ tất cả `@viseed/*` core, include admin dist, expose CLI bin `viseed` | end-users |
 | `packages/types` | `@viseed/types` | TypeScript interfaces/types ONLY — không có runtime logic | Tất cả packages, plugins, apps |
 | `packages/validator` | `@viseed/validator` | Zod schemas cho content, user, media, plugin | `@viseed/core`, plugins, admin |
-| `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`), `mergeSchemas()` helper | `@viseed/core`, plugins |
-| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve | plugins, apps, CLI |
+| `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`, **`widgets`**), `mergeSchemas()` helper | `@viseed/core`, plugins |
+| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, widget CRUD API, public widget hydration routes | plugins, apps, CLI |
 | `packages/registry` | `@viseed/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@viseed/core`, `@viseed/ui` |
 | `packages/ui` | `@viseed/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
 | `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Private** — exposed via `@viseed/cms` bin, không publish riêng | standalone binary |
@@ -46,7 +46,7 @@ alwaysApply: false
 
 | App | Filter name | Mô tả | Port mặc định |
 |---|---|---|---|
-| `apps/admin` | `@viseed/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin` | 5173 (dev) |
+| `apps/admin` | `@viseed/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin`. Built-in views: Dashboard, Content, Media, **Widgets** (order 25), Plugins, Themes… | 5173 (dev) |
 | `apps/docs` | `@viseed/docs` | VitePress documentation site | 5174 |
 | `apps/starter` | `@viseed/starter` | Template project cho end-users clone | — |
 
@@ -87,6 +87,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-05-11 — Widget system v1: `widgets` table in `@viseed/schema` coreSchema; `WidgetTypeRegistry` + CRUD/public routes in `@viseed/core`; Widgets built-in admin view (order 25) in `apps/admin`; `plugin-blog` adds `blog/latest-posts` demo widget type.
 2026-05-10 — Đổi tất cả plugins/themes/umbrella sang @viseed org scope: `@viseed/cms`, `@viseed/plugin-*`, `@viseed/theme-*`.
 2026-05-09 — Renamed scope, added umbrella package `viseed`, plugins `viseed-plugin-*`, themes `viseed-theme-*`. Private: `@viseed/cli`, `@viseed/config`.
 2026-04-17 — Added `createCategorySchema`, `updateCategorySchema` to `@viseed/validator`; added `PUT /categories/:id` + `DELETE /categories/:id` to `plugin-blog` routes; rewrote `CategoriesView.vue` with full CRUD (create/edit modal + delete).

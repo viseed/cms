@@ -9,6 +9,7 @@ import {
   themeState,
   userSiteRoles,
   users,
+  widgets,
 } from '@viseed/schema'
 import type {
   CMSConfig,
@@ -26,7 +27,7 @@ import {
   toAuthContextPayload,
 } from '@viseed/types'
 import { loginSchema } from '@viseed/validator'
-import { count, eq, sql } from 'drizzle-orm'
+import { and, count, eq, ilike, sql } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
@@ -44,6 +45,7 @@ import { setupMediaRoutes } from './media-routes'
 import { LocalStorageAdapter } from './media-storage'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
+import { WidgetTypeRegistry } from './widget-type-registry'
 import {
   buildPreviewPathFromParts,
   normalizeThemePreviewRelativePath,
@@ -110,6 +112,7 @@ export class ViseedCMS {
   private themeRuntimes = new Map<string, ThemeRuntime>()
   private activeThemeName: string | null = null
   private pluginRegistry = new PluginRouteRegistry()
+  private widgetTypeRegistry = new WidgetTypeRegistry()
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -172,6 +175,7 @@ export class ViseedCMS {
       }
     }
     await this.syncPluginActiveStateFromDb()
+    this.rebuildWidgetTypeRegistry()
     this.app.use('*', this.pluginRegistry.middleware())
 
     await this.resolveActiveTheme()
@@ -314,6 +318,10 @@ export class ViseedCMS {
         this.pluginRegistry.activate(plugin.name)
       }
     }
+  }
+
+  private rebuildWidgetTypeRegistry(): void {
+    this.widgetTypeRegistry.rebuild(this.plugins, (name) => this.pluginRegistry.isActive(name))
   }
 
   private async registerPluginHooks(plugin: CMSPlugin): Promise<void> {
@@ -502,11 +510,24 @@ export class ViseedCMS {
               },
             )
 
-            return c.html(html)
+            return c.html(this.injectWidgetRuntime(html))
           })
         }
       }
     }
+  }
+
+  private injectWidgetRuntime(html: string): string {
+    if (!html.includes('data-widget-id')) return html
+
+    const importMap = `<script type="importmap">{"imports":{"vue":"/api/public/vendor-vue.js"}}</script>`
+    const runtimeScript = `<script type="module" src="/api/public/widget-runtime.js"></script>`
+    const injection = `\n${importMap}\n${runtimeScript}\n`
+
+    if (html.includes('</body>')) {
+      return html.replace('</body>', `${injection}</body>`)
+    }
+    return html + injection
   }
 
   private resolveLayoutKeyForRoute(
@@ -1460,6 +1481,7 @@ export class ViseedCMS {
       }
 
       this.pluginRegistry.activate(name)
+      this.rebuildWidgetTypeRegistry()
 
       const db = this.getDatabase()
       await db
@@ -1493,6 +1515,7 @@ export class ViseedCMS {
       }
 
       this.pluginRegistry.deactivate(name)
+      this.rebuildWidgetTypeRegistry()
 
       const db = this.getDatabase()
       await db
@@ -1508,7 +1531,283 @@ export class ViseedCMS {
       })
     })
 
+    // --- Widget type catalog ---
+
+    registerAdminRoute('GET', '/widget-types', 'site.widgets.read', (c) => {
+      const types = this.widgetTypeRegistry.list().map((t) => ({
+        ...t,
+        pluginEnabled: this.pluginRegistry.isActive(t.pluginName),
+        hasPublicBundle: !!this.plugins.find((p) => p.name === t.pluginName)?.public?.bundlePath,
+      }))
+      return c.json({ types })
+    })
+
+    // --- Widget CRUD ---
+
+    registerAdminRoute('GET', '/widgets', 'site.widgets.read', async (c) => {
+      const db = this.getDatabase()
+      const requestContext = this.resolveRequestContext(c)
+      const siteId = requestContext.site.id
+
+      const typeFilter = c.req.query('type')
+      const search = c.req.query('q')
+
+      const conditions = [eq(widgets.siteId, siteId)]
+      if (typeFilter) conditions.push(eq(widgets.type, typeFilter))
+      if (search) conditions.push(ilike(widgets.name, `%${search}%`))
+
+      const rows = await db
+        .select()
+        .from(widgets)
+        .where(and(...conditions))
+        .orderBy(widgets.updatedAt)
+
+      return c.json(
+        rows.map((r) => ({
+          ...r,
+          typeLabel: this.widgetTypeRegistry.get(r.type)?.label ?? r.type,
+          typeAvailable: this.widgetTypeRegistry.has(r.type),
+        })),
+      )
+    })
+
+    registerAdminRoute('GET', '/widgets/:id', 'site.widgets.read', async (c) => {
+      const db = this.getDatabase()
+      const requestContext = this.resolveRequestContext(c)
+      const id = c.req.param('id') ?? ''
+      if (!id) return c.json({ error: 'Widget id is required.' }, 400)
+
+      const [row] = await db
+        .select()
+        .from(widgets)
+        .where(and(eq(widgets.id, id), eq(widgets.siteId, requestContext.site.id)))
+
+      if (!row) return c.json({ error: 'Widget not found.' }, 404)
+
+      return c.json({
+        ...row,
+        typeLabel: this.widgetTypeRegistry.get(row.type)?.label ?? row.type,
+        typeAvailable: this.widgetTypeRegistry.has(row.type),
+      })
+    })
+
+    registerAdminRoute('POST', '/widgets', 'site.widgets.manage', async (c) => {
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      if (typeof body !== 'object' || body === null) {
+        return c.json({ error: 'Body must be an object.' }, 400)
+      }
+
+      const { name, type, config } = body as Record<string, unknown>
+
+      if (typeof name !== 'string' || !name.trim()) {
+        return c.json({ error: 'Field "name" is required.' }, 400)
+      }
+      if (typeof type !== 'string' || !type.trim()) {
+        return c.json({ error: 'Field "type" is required.' }, 400)
+      }
+      if (!this.widgetTypeRegistry.has(type)) {
+        return c.json({ error: `Widget type "${type}" is not registered or plugin is inactive.` }, 400)
+      }
+
+      const requestContext = this.resolveRequestContext(c)
+      const db = this.getDatabase()
+      const id = randomUUID()
+      const now = new Date()
+
+      const widgetTypeDef = this.widgetTypeRegistry.get(type)
+      const resolvedConfig = (config && typeof config === 'object') ? config : (widgetTypeDef?.defaultConfig ?? {})
+
+      await db.insert(widgets).values({
+        id,
+        siteId: requestContext.site.id,
+        name: name.trim(),
+        type,
+        config: resolvedConfig,
+        createdBy: requestContext.actor?.id ?? null,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      const [row] = await db.select().from(widgets).where(eq(widgets.id, id))
+      return c.json(row, 201)
+    })
+
+    registerAdminRoute('PUT', '/widgets/:id', 'site.widgets.manage', async (c) => {
+      let body: unknown
+      try {
+        body = await c.req.json()
+      } catch {
+        return c.json({ error: 'Invalid JSON body.' }, 400)
+      }
+
+      if (typeof body !== 'object' || body === null) {
+        return c.json({ error: 'Body must be an object.' }, 400)
+      }
+
+      const requestContext = this.resolveRequestContext(c)
+      const db = this.getDatabase()
+      const id = c.req.param('id') ?? ''
+      if (!id) return c.json({ error: 'Widget id is required.' }, 400)
+
+      const [existing] = await db
+        .select()
+        .from(widgets)
+        .where(and(eq(widgets.id, id), eq(widgets.siteId, requestContext.site.id)))
+
+      if (!existing) return c.json({ error: 'Widget not found.' }, 404)
+
+      const { name, config } = body as Record<string, unknown>
+
+      const updates: Partial<typeof existing> = { updatedAt: new Date() }
+      if (typeof name === 'string' && name.trim()) updates.name = name.trim()
+      if (config && typeof config === 'object') updates.config = config
+
+      await db.update(widgets).set(updates).where(eq(widgets.id, existing.id))
+
+      const [updated] = await db.select().from(widgets).where(eq(widgets.id, existing.id))
+      return c.json(updated)
+    })
+
+    registerAdminRoute('DELETE', '/widgets/:id', 'site.widgets.manage', async (c) => {
+      const requestContext = this.resolveRequestContext(c)
+      const db = this.getDatabase()
+      const id = c.req.param('id') ?? ''
+      if (!id) return c.json({ error: 'Widget id is required.' }, 400)
+
+      const [existing] = await db
+        .select()
+        .from(widgets)
+        .where(and(eq(widgets.id, id), eq(widgets.siteId, requestContext.site.id)))
+
+      if (!existing) return c.json({ error: 'Widget not found.' }, 404)
+
+      await db.delete(widgets).where(eq(widgets.id, existing.id))
+      return c.json({ message: 'Widget deleted.' })
+    })
+
     this.app.route('/api/admin', adminApi)
+
+    // --- Public widget API (no auth required) ---
+    this.setupPublicWidgetRoutes()
+  }
+
+  private widgetRuntimeBundle: string | null = null
+
+  private async buildWidgetRuntime(): Promise<string> {
+    if (this.widgetRuntimeBundle) return this.widgetRuntimeBundle
+
+    const entryPath = resolve(import.meta.dirname, 'public-runtime/widget-runtime.ts')
+    const result = await Bun.build({
+      entrypoints: [entryPath],
+      format: 'esm',
+      target: 'browser',
+      minify: process.env.NODE_ENV === 'production',
+      external: ['vue'],
+    })
+
+    const firstOutput = result.outputs[0]
+    if (!firstOutput) {
+      throw new Error('[ViseedCMS] Failed to build widget runtime.')
+    }
+
+    this.widgetRuntimeBundle = await firstOutput.text()
+    return this.widgetRuntimeBundle
+  }
+
+  private setupPublicWidgetRoutes(): void {
+    // Widget runtime script (bundled on first request, cached in-process)
+    this.app.get('/api/public/widget-runtime.js', async (c) => {
+      try {
+        const bundle = await this.buildWidgetRuntime()
+        return new Response(bundle, {
+          headers: {
+            'Content-Type': 'application/javascript; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        })
+      } catch (err) {
+        console.error('[ViseedCMS] Widget runtime build error:', err)
+        return c.json({ error: 'Widget runtime unavailable.' }, 500)
+      }
+    })
+
+    // Vendor Vue — served from the admin's pre-built vendor file
+    this.app.get('/api/public/vendor-vue.js', async (c) => {
+      const vendorPath = resolve(import.meta.dirname, '../dist/admin/assets/vendor-vue.js')
+      const file = Bun.file(vendorPath)
+      if (!(await file.exists())) {
+        return c.json({ error: 'vendor-vue.js not found. Run bun run build:admin first.' }, 404)
+      }
+      const content = await file.text()
+      return new Response(content, {
+        headers: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      })
+    })
+
+    // Public widget instance fetch (for CSR hydration)
+    this.app.get('/api/widgets/:id', async (c) => {
+      const db = this.getDatabase()
+      const id = c.req.param('id')
+
+      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
+      const siteId = siteResolution.site?.id ?? 'default'
+
+      const [row] = await db
+        .select()
+        .from(widgets)
+        .where(and(eq(widgets.id, id), eq(widgets.siteId, siteId)))
+
+      if (!row) return c.json({ error: 'Widget not found.' }, 404)
+
+      return c.json(
+        { id: row.id, type: row.type, config: row.config },
+        200,
+        { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
+      )
+    })
+
+    // Public plugin widget bundle serving
+    this.app.get('/api/public/plugins/:name/widget.js', async (c) => {
+      const name = c.req.param('name')
+      const plugin = this.plugins.find((p) => p.name === name)
+
+      if (!plugin?.public?.bundlePath) {
+        return c.json({ error: 'No public bundle for this plugin.' }, 404)
+      }
+      if (!this.pluginRegistry.isActive(name)) {
+        return c.json({ error: 'Plugin is not active.' }, 404)
+      }
+
+      const file = Bun.file(plugin.public.bundlePath)
+      if (!(await file.exists())) {
+        return c.json({ error: 'Public bundle file not found.' }, 404)
+      }
+
+      const content = await file.arrayBuffer()
+      const hashBuffer = await crypto.subtle.digest('SHA-1', content)
+      const etag = `"${Buffer.from(hashBuffer).toString('hex').slice(0, 16)}"`
+
+      if (c.req.header('if-none-match') === etag) {
+        return new Response(null, { status: 304, headers: { ETag: etag } })
+      }
+
+      return new Response(content, {
+        headers: {
+          'Content-Type': 'application/javascript; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+          ETag: etag,
+        },
+      })
+    })
   }
 
   private static readonly REQUIRED_LAYOUTS: RequiredLayoutKey[] = [

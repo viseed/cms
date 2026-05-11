@@ -42,7 +42,9 @@ export type {
   PluginAdminMenuItem,
   PluginFactory,
   PluginLifecycle,
+  PluginPublicConfig,
   ThemeRenderRequestContext,
+  WidgetTypeDef,
 } from './plugin'
 
 export type {

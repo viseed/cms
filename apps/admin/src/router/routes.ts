@@ -50,6 +50,17 @@ export const adminRoutes: Array<RouteRecordRaw> = [
     }),
   },
   {
+    path: '/widgets',
+    component: () => import('../views/WidgetsView.vue'),
+    meta: meta({
+      requiresAuth: true,
+      requiredPermissions: ['site.widgets.read'],
+      navigation: { label: 'Widgets', icon: '❖' },
+      siteScoped: true,
+      order: 25,
+    }),
+  },
+  {
     path: '/plugins',
     component: () => import('../views/PluginsView.vue'),
     meta: meta({

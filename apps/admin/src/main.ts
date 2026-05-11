@@ -1,6 +1,6 @@
 ﻿import type { AuthContextPayload } from '@viseed/types'
 import { createApp } from 'vue'
-import type { RouteLocationNormalized } from 'vue-router'
+import type { RouteLocationNormalized, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory, type Router } from 'vue-router'
 import App from './App.vue'
 import ContentEditor from './components/ContentEditor.vue'
@@ -17,6 +17,16 @@ const router = createRouter({
 })
 
 let pluginRoutesRegistered = false
+
+/**
+ * Singleton map of plugin name → loaded ESM module.
+ * Populated by registerPluginAdminRoutes(); consumed by usePluginComponent.
+ */
+const pluginModuleMap = new Map<string, Record<string, unknown>>()
+
+export function getPluginModule(pluginName: string): Record<string, unknown> | null {
+  return pluginModuleMap.get(pluginName) ?? null
+}
 
 let setupStatusCache: boolean | null = null
 
@@ -74,13 +84,16 @@ async function registerPluginAdminRoutes(r: Router) {
   if (manifest.plugins.length === 0) return
 
   for (const plugin of manifest.plugins) {
-    let pluginModule: Record<string, unknown> | null = null
-    if (plugin.admin.hasBundle) {
+    let pluginModule: Record<string, unknown> | null = pluginModuleMap.get(plugin.name) ?? null
+    if (plugin.admin.hasBundle && !pluginModule) {
       try {
         const v = encodeURIComponent(import.meta.env.VITE_ADMIN_PLUGIN_UI_BUILD_ID)
         pluginModule = await import(
           /* @vite-ignore */ `/api/admin/plugins/${plugin.name}/ui.js?v=${v}`
         )
+        if (pluginModule) {
+          pluginModuleMap.set(plugin.name, pluginModule)
+        }
       } catch (err) {
         console.warn(`Failed to load admin bundle for plugin "${plugin.name}"`, err)
       }
@@ -92,7 +105,7 @@ async function registerPluginAdminRoutes(r: Router) {
 
       r.addRoute({
         path: item.path,
-        component: component as Parameters<Router['addRoute']>[0]['component'],
+        component,
         meta: {
           requiresAuth: true,
           requiredPermissions: item.requiredPermissions,
@@ -101,7 +114,7 @@ async function registerPluginAdminRoutes(r: Router) {
           order: item.order,
           pluginName: plugin.name,
         },
-      })
+      } as RouteRecordRaw)
     }
   }
 

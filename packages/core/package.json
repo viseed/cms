@@ -21,9 +21,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/schema": "workspace:*",
-    "@viseed/types": "workspace:*",
-    "@viseed/validator": "workspace:*",
+    "@tiptap/core": "3.22.3",
     "@tiptap/extension-color": "^3.22.3",
     "@tiptap/extension-image": "^3.22.3",
     "@tiptap/extension-link": "^3.22.3",
@@ -37,6 +35,9 @@
     "@tiptap/html": "^3.22.3",
     "@tiptap/pm": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
+    "@viseed/schema": "workspace:*",
+    "@viseed/types": "workspace:*",
+    "@viseed/validator": "workspace:*",
     "drizzle-orm": "0.44.7",
     "eta": "^4.5.1",
     "hono": "^4.7.0"

@@ -40,6 +40,21 @@ export function blogPlugin(): CMSPlugin {
       ],
       bundlePath: resolve(__dirname, '../dist/admin/index.js'),
     },
+    widgets: [
+      {
+        id: 'blog/latest-posts',
+        label: 'Latest Posts',
+        icon: '✎',
+        description: 'Display a list of the most recent published posts',
+        pluginName: 'blog',
+        configComponent: 'LatestPostsConfigForm',
+        publicComponent: 'LatestPosts',
+        defaultConfig: { count: 5, title: 'Latest Posts' },
+      },
+    ],
+    public: {
+      bundlePath: resolve(__dirname, '../dist/public/index.js'),
+    },
     hooks: {
       [HOOK_KEY.CMS_INIT]: (cms) => {
         db = cms.getDatabase() as DatabaseInstance

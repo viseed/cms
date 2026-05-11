@@ -8,6 +8,7 @@ export { sites } from './tables/sites'
 export { themeState } from './tables/theme-state'
 export { userSiteRoles } from './tables/user-site-roles'
 export { users } from './tables/users'
+export { widgets } from './tables/widgets'
 
 import { installedPlugins } from './tables/installed-plugins'
 import { installedThemes } from './tables/installed-themes'
@@ -18,6 +19,7 @@ import { sites } from './tables/sites'
 import { themeState } from './tables/theme-state'
 import { userSiteRoles } from './tables/user-site-roles'
 import { users } from './tables/users'
+import { widgets } from './tables/widgets'
 
 export const coreSchema = {
   sites,
@@ -29,4 +31,5 @@ export const coreSchema = {
   installedThemes,
   themeState,
   mediaFiles,
+  widgets,
 }
