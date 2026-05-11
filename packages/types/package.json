@@ -16,8 +16,8 @@
   "scripts": {
     "build": "bunup",
     "dev": "bunup --no-dts --watch",
-    "dev:post": "rimraf tsconfig.build.tsbuildinfo && tsc --watch -p tsconfig.build.json",
-    "clean": "rimraf dist && rimraf tsconfig.build.tsbuildinfo",
+    "dev:post": "tsc --watch -p tsconfig.build.json",
+    "clean": "rimraf dist",
     "test": "bun test"
   },
   "devDependencies": {

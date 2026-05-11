@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "tsBuildInfoFile": "./tsconfig.build.tsbuildinfo",
+    "tsBuildInfoFile": "./dist/tsconfig.build.tsbuildinfo",
     "outDir": "dist",
     "rootDir": "src"
   },
