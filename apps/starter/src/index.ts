@@ -9,7 +9,7 @@ import { insuranceTheme } from '@viseed/theme-insurance'
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/viseed',
+    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
   },
   themes: [blogTheme(), insuranceTheme()],
   defaultTheme: 'blog',

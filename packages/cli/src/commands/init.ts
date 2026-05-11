@@ -28,7 +28,7 @@ import { blogPlugin } from '@viseed/plugin-blog'
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
   admin: {
     bootstrapAdmin:
@@ -84,7 +84,7 @@ export async function initProject(projectName: string): Promise<void> {
   console.log(`  cd ${projectName}`)
   console.log(`  bun install`)
   console.log(`  # Set your PostgreSQL connection string:`)
-  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"`)
+  console.log(`  export DATABASE_URL="postgresql://user:password@localhost:5432/hana"`)
   console.log(`  # Push schema to database:`)
   console.log(`  bunx viseed db push`)
   console.log(`  # Dev default admin is auto-seeded on first run:`)

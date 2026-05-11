@@ -4,7 +4,7 @@ import { sessions, siteDomains, userSiteRoles, users } from '@viseed/schema'
 import { eq } from 'drizzle-orm'
 import { createCMS } from './viseed-cms'
 
-const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed_test'
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana_test'
 const DEFAULT_SITE_ID = 'default'
 
 describe('admin runtime tenancy and guards', () => {
@@ -223,7 +223,7 @@ describe('admin runtime tenancy and guards', () => {
 
     expect(loginResponse.status).toBe(200)
     const sessionCookie = loginResponse.headers.get('set-cookie')
-    expect(sessionCookie?.includes('viseed_admin_session=')).toBe(true)
+    expect(sessionCookie?.includes('hana_admin_session=')).toBe(true)
 
     const contextResponse = await app.request('http://localhost/api/admin/auth/context', {
       headers: {

@@ -3,7 +3,7 @@ import { sites } from './sites'
 import { users } from './users'
 
 export const sessions = pgTable(
-  'viseed_sessions',
+  'hana_sessions',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -18,7 +18,7 @@ export const sessions = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
-    siteTokenUnique: uniqueIndex('viseed_sessions_site_token_unique').on(table.siteId, table.token),
+    siteTokenUnique: uniqueIndex('hana_sessions_site_token_unique').on(table.siteId, table.token),
   }),
 )
 

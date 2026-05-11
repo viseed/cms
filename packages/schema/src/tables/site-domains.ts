@@ -2,7 +2,7 @@
 import { sites } from './sites'
 
 export const siteDomains = pgTable(
-  'viseed_site_domains',
+  'hana_site_domains',
   {
     id: text('id').primaryKey(),
     siteId: text('site_id')
@@ -14,8 +14,8 @@ export const siteDomains = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({
-    domainUnique: uniqueIndex('viseed_site_domains_domain_unique').on(table.domain),
-    siteDomainUnique: uniqueIndex('viseed_site_domains_site_domain_unique').on(
+    domainUnique: uniqueIndex('hana_site_domains_domain_unique').on(table.domain),
+    siteDomainUnique: uniqueIndex('hana_site_domains_site_domain_unique').on(
       table.siteId,
       table.domain,
     ),

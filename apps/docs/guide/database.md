@@ -16,7 +16,7 @@ Provide your connection string via `DATABASE_URL` or directly in the config:
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
 })
 ```

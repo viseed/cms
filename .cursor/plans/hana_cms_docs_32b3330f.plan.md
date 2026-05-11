@@ -93,7 +93,7 @@ Dựa trên `viseedbi init` flow từ [`packages/cli/src/commands/init.ts`](pack
 bunx viseedbi init my-site
 cd my-site
 bun install
-export DATABASE_URL="postgresql://user:pass@localhost:5432/viseed"
+export DATABASE_URL="postgresql://user:pass@localhost:5432/hana"
 bunx viseedbi db push
 bun run dev
 # Admin: http://localhost:3000/admin

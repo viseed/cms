@@ -5,9 +5,9 @@ Add `site_id` to plugin content tables and namespace media storage so each site 
 
 ## Context — What Is Already Done
 Theme and plugin **metadata** tables already have `site_id`:
-- `viseed_installed_plugins` — per-site plugin install + config (done)
-- `viseed_installed_themes` — per-site theme install (done)
-- `viseed_theme_state` — active theme, settings, preview token per site (done)
+- `hana_installed_plugins` — per-site plugin install + config (done)
+- `hana_installed_themes` — per-site theme install (done)
+- `hana_theme_state` — active theme, settings, preview token per site (done)
 
 What is **not yet isolated** is the **content data** that plugins create at runtime:
 - `blog_posts`, `blog_categories` — no `site_id`, slug unique globally
@@ -24,15 +24,15 @@ What is **not yet isolated** is the **content data** that plugins create at runt
 ## Schema Changes
 
 ### `blog_posts`
-- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES viseed_sites(id) ON DELETE CASCADE`
+- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE`
 - Change unique constraint on `slug` to `UNIQUE(site_id, slug)`
 
 ### `blog_categories`
-- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES viseed_sites(id) ON DELETE CASCADE`
+- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE`
 - Change unique constraint on `slug` to `UNIQUE(site_id, slug)`
 
 ### `media_files`
-- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES viseed_sites(id) ON DELETE CASCADE`
+- Add `site_id TEXT NOT NULL DEFAULT 'default' REFERENCES hana_sites(id) ON DELETE CASCADE`
 
 ## Route Changes
 - All plugin routes already receive `helpers.resolveRequestContext(c)` which provides the current `siteId`.
@@ -56,9 +56,9 @@ What is **not yet isolated** is the **content data** that plugins create at runt
 - Add integration tests that create content on two sites and verify isolation.
 
 ## Out of Scope
-- Theme runtime changes (already site-scoped via `viseed_theme_state`).
+- Theme runtime changes (already site-scoped via `hana_theme_state`).
 - Admin UI changes (covered in Phase 4).
-- Auth plugin — uses core tables (`viseed_users`, `viseed_sessions`) which are already handled.
+- Auth plugin — uses core tables (`hana_users`, `hana_sessions`) which are already handled.
 
 ## Rules to Update
 - Update `.cursor/rules/06-database-patterns.mdc` to document `site_id` convention for plugin content tables.

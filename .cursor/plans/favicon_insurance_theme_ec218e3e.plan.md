@@ -67,7 +67,7 @@ Sau `<link rel="stylesheet">` trong `<head>`, thêm dòng này vào **tất cả
 
 ```mermaid
 flowchart LR
-    Admin["Admin UI\n(SettingsField type=image)"] -->|"media picker → URL"| DB["viseed_theme_state\n.settings JSON"]
+    Admin["Admin UI\n(SettingsField type=image)"] -->|"media picker → URL"| DB["hana_theme_state\n.settings JSON"]
     DB -->|"resolveDefaultSettings + merge"| Runtime["theme-runtime.ts\nit.settings"]
     Runtime -->|"it.settings['general.faviconUrl']"| Template["*.eta templates\n<link rel=icon>"]
     Template --> Browser["Browser tab icon"]

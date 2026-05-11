@@ -331,7 +331,7 @@ export class ViseedCMS {
     const activeRuntime = this.themeRuntimes.get(this.activeThemeName)
     if (!activeTheme || !activeRuntime) return null
 
-    const token = c.req.query('viseed_preview') ?? getCookie(c, 'viseed_preview')
+    const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
     if (token) {
       const db = this.getDatabase()
       const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
@@ -364,7 +364,7 @@ export class ViseedCMS {
   }
 
   private clearThemePreviewCookie(c: Context): void {
-    setCookie(c, 'viseed_preview', '', { path: '/', maxAge: 0 })
+    setCookie(c, 'hana_preview', '', { path: '/', maxAge: 0 })
   }
 
   private async clearThemePreviewState(c: Context) {
@@ -809,7 +809,7 @@ export class ViseedCMS {
         expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS),
       })
 
-      setCookie(c, 'viseed_admin_session', token, {
+      setCookie(c, 'hana_admin_session', token, {
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
@@ -845,7 +845,7 @@ export class ViseedCMS {
         }
       }
 
-      setCookie(c, 'viseed_admin_session', '', {
+      setCookie(c, 'hana_admin_session', '', {
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
@@ -1148,7 +1148,7 @@ export class ViseedCMS {
       }
 
       if (b.skipCookie !== true) {
-        setCookie(c, 'viseed_preview', token, {
+        setCookie(c, 'hana_preview', token, {
           path: '/',
           httpOnly: true,
           sameSite: 'Lax',
@@ -1157,7 +1157,7 @@ export class ViseedCMS {
       }
 
       const url = new URL(c.req.url)
-      const previewQueryExample = `${url.origin}/?viseed_preview=${encodeURIComponent(token)}`
+      const previewQueryExample = `${url.origin}/?hana_preview=${encodeURIComponent(token)}`
 
       return c.json({
         message: 'Theme preview enabled for this browser.',

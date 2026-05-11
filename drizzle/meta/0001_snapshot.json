@@ -4,8 +4,8 @@
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.viseed_installed_plugins": {
-      "name": "viseed_installed_plugins",
+    "public.hana_installed_plugins": {
+      "name": "hana_installed_plugins",
       "schema": "",
       "columns": {
         "id": {
@@ -80,8 +80,8 @@
         }
       },
       "indexes": {
-        "viseed_installed_plugins_site_name_unique": {
-          "name": "viseed_installed_plugins_site_name_unique",
+        "hana_installed_plugins_site_name_unique": {
+          "name": "hana_installed_plugins_site_name_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -103,10 +103,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_installed_plugins_site_id_viseed_sites_id_fk": {
-          "name": "viseed_installed_plugins_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_installed_plugins",
-          "tableTo": "viseed_sites",
+        "hana_installed_plugins_site_id_hana_sites_id_fk": {
+          "name": "hana_installed_plugins_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_installed_plugins",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -123,8 +123,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_installed_themes": {
-      "name": "viseed_installed_themes",
+    "public.hana_installed_themes": {
+      "name": "hana_installed_themes",
       "schema": "",
       "columns": {
         "id": {
@@ -247,8 +247,8 @@
         }
       },
       "indexes": {
-        "viseed_installed_themes_site_name_unique": {
-          "name": "viseed_installed_themes_site_name_unique",
+        "hana_installed_themes_site_name_unique": {
+          "name": "hana_installed_themes_site_name_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -270,10 +270,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_installed_themes_site_id_viseed_sites_id_fk": {
-          "name": "viseed_installed_themes_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_installed_themes",
-          "tableTo": "viseed_sites",
+        "hana_installed_themes_site_id_hana_sites_id_fk": {
+          "name": "hana_installed_themes_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_installed_themes",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -371,8 +371,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_sessions": {
-      "name": "viseed_sessions",
+    "public.hana_sessions": {
+      "name": "hana_sessions",
       "schema": "",
       "columns": {
         "id": {
@@ -415,8 +415,8 @@
         }
       },
       "indexes": {
-        "viseed_sessions_site_token_unique": {
-          "name": "viseed_sessions_site_token_unique",
+        "hana_sessions_site_token_unique": {
+          "name": "hana_sessions_site_token_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -438,10 +438,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_sessions_site_id_viseed_sites_id_fk": {
-          "name": "viseed_sessions_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_sessions",
-          "tableTo": "viseed_sites",
+        "hana_sessions_site_id_hana_sites_id_fk": {
+          "name": "hana_sessions_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_sessions",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -451,10 +451,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "viseed_sessions_user_id_viseed_users_id_fk": {
-          "name": "viseed_sessions_user_id_viseed_users_id_fk",
-          "tableFrom": "viseed_sessions",
-          "tableTo": "viseed_users",
+        "hana_sessions_user_id_hana_users_id_fk": {
+          "name": "hana_sessions_user_id_hana_users_id_fk",
+          "tableFrom": "hana_sessions",
+          "tableTo": "hana_users",
           "columnsFrom": [
             "user_id"
           ],
@@ -471,8 +471,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_site_domains": {
-      "name": "viseed_site_domains",
+    "public.hana_site_domains": {
+      "name": "hana_site_domains",
       "schema": "",
       "columns": {
         "id": {
@@ -515,8 +515,8 @@
         }
       },
       "indexes": {
-        "viseed_site_domains_domain_unique": {
-          "name": "viseed_site_domains_domain_unique",
+        "hana_site_domains_domain_unique": {
+          "name": "hana_site_domains_domain_unique",
           "columns": [
             {
               "expression": "domain",
@@ -530,8 +530,8 @@
           "method": "btree",
           "with": {}
         },
-        "viseed_site_domains_site_domain_unique": {
-          "name": "viseed_site_domains_site_domain_unique",
+        "hana_site_domains_site_domain_unique": {
+          "name": "hana_site_domains_site_domain_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -553,10 +553,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_site_domains_site_id_viseed_sites_id_fk": {
-          "name": "viseed_site_domains_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_site_domains",
-          "tableTo": "viseed_sites",
+        "hana_site_domains_site_id_hana_sites_id_fk": {
+          "name": "hana_site_domains_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_site_domains",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -573,8 +573,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_sites": {
-      "name": "viseed_sites",
+    "public.hana_sites": {
+      "name": "hana_sites",
       "schema": "",
       "columns": {
         "id": {
@@ -624,8 +624,8 @@
         }
       },
       "indexes": {
-        "viseed_sites_slug_unique": {
-          "name": "viseed_sites_slug_unique",
+        "hana_sites_slug_unique": {
+          "name": "hana_sites_slug_unique",
           "columns": [
             {
               "expression": "slug",
@@ -647,8 +647,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_theme_state": {
-      "name": "viseed_theme_state",
+    "public.hana_theme_state": {
+      "name": "hana_theme_state",
       "schema": "",
       "columns": {
         "id": {
@@ -703,8 +703,8 @@
         }
       },
       "indexes": {
-        "viseed_theme_state_site_unique": {
-          "name": "viseed_theme_state_site_unique",
+        "hana_theme_state_site_unique": {
+          "name": "hana_theme_state_site_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -718,8 +718,8 @@
           "method": "btree",
           "with": {}
         },
-        "viseed_theme_state_site_theme_unique": {
-          "name": "viseed_theme_state_site_theme_unique",
+        "hana_theme_state_site_theme_unique": {
+          "name": "hana_theme_state_site_theme_unique",
           "columns": [
             {
               "expression": "site_id",
@@ -741,10 +741,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_theme_state_site_id_viseed_sites_id_fk": {
-          "name": "viseed_theme_state_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_theme_state",
-          "tableTo": "viseed_sites",
+        "hana_theme_state_site_id_hana_sites_id_fk": {
+          "name": "hana_theme_state_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_theme_state",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -761,8 +761,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_user_site_roles": {
-      "name": "viseed_user_site_roles",
+    "public.hana_user_site_roles": {
+      "name": "hana_user_site_roles",
       "schema": "",
       "columns": {
         "id": {
@@ -798,8 +798,8 @@
         }
       },
       "indexes": {
-        "viseed_user_site_roles_user_site_unique": {
-          "name": "viseed_user_site_roles_user_site_unique",
+        "hana_user_site_roles_user_site_unique": {
+          "name": "hana_user_site_roles_user_site_unique",
           "columns": [
             {
               "expression": "user_id",
@@ -821,10 +821,10 @@
         }
       },
       "foreignKeys": {
-        "viseed_user_site_roles_user_id_viseed_users_id_fk": {
-          "name": "viseed_user_site_roles_user_id_viseed_users_id_fk",
-          "tableFrom": "viseed_user_site_roles",
-          "tableTo": "viseed_users",
+        "hana_user_site_roles_user_id_hana_users_id_fk": {
+          "name": "hana_user_site_roles_user_id_hana_users_id_fk",
+          "tableFrom": "hana_user_site_roles",
+          "tableTo": "hana_users",
           "columnsFrom": [
             "user_id"
           ],
@@ -834,10 +834,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "viseed_user_site_roles_site_id_viseed_sites_id_fk": {
-          "name": "viseed_user_site_roles_site_id_viseed_sites_id_fk",
-          "tableFrom": "viseed_user_site_roles",
-          "tableTo": "viseed_sites",
+        "hana_user_site_roles_site_id_hana_sites_id_fk": {
+          "name": "hana_user_site_roles_site_id_hana_sites_id_fk",
+          "tableFrom": "hana_user_site_roles",
+          "tableTo": "hana_sites",
           "columnsFrom": [
             "site_id"
           ],
@@ -854,8 +854,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.viseed_users": {
-      "name": "viseed_users",
+    "public.hana_users": {
+      "name": "hana_users",
       "schema": "",
       "columns": {
         "id": {
@@ -908,8 +908,8 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "viseed_users_email_unique": {
-          "name": "viseed_users_email_unique",
+        "hana_users_email_unique": {
+          "name": "hana_users_email_unique",
           "nullsNotDistinct": false,
           "columns": [
             "email"

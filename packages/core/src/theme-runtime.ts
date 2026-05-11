@@ -9,7 +9,7 @@ import { createLayoutHelpers } from './seo-head'
 export interface ThemeRenderOptions {
   /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */
   templateRoot?: string
-  /** Preview token to append as `?viseed_preview=TOKEN` on all static asset URLs. */
+  /** Preview token to append as `?hana_preview=TOKEN` on all static asset URLs. */
   previewToken?: string
 }
 
@@ -176,7 +176,7 @@ export function computeThemeAssetFingerprint(theme: CMSTheme): string {
 
 function themeStaticQuery(previewToken?: string, assetFingerprint?: string): string {
   const parts: string[] = []
-  if (previewToken) parts.push(`viseed_preview=${encodeURIComponent(previewToken)}`)
+  if (previewToken) parts.push(`hana_preview=${encodeURIComponent(previewToken)}`)
   if (assetFingerprint) parts.push(`v=${encodeURIComponent(assetFingerprint)}`)
   return parts.length > 0 ? `?${parts.join('&')}` : ''
 }

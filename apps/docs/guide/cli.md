@@ -55,7 +55,7 @@ Manage your database schema using Drizzle.
 All `db` subcommands require `DATABASE_URL` to be set:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
 ```
 
 ### `viseedbi db push`

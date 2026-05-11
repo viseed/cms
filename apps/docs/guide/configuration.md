@@ -33,7 +33,7 @@ db: {
 ```typescript
 db: {
   driver: 'postgres',
-  url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
+  url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
 }
 ```
 
@@ -182,7 +182,7 @@ See the [Media](/guide/media) guide for the full upload API.
 Create a `.env` file at the project root for local development:
 
 ```bash
-DATABASE_URL=postgresql://postgres:admin@localhost:5432/viseed
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/hana
 PORT=3000
 HANA_ADMIN_EMAIL=admin@local.dev
 HANA_ADMIN_PASSWORD=12345678

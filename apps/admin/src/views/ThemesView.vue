@@ -35,7 +35,7 @@ const previewHomeUrl = computed(() => {
   if (typeof window === 'undefined') return ''
   const u = new URL(window.location.origin)
   u.pathname = '/'
-  u.searchParams.set('viseed_preview', t)
+  u.searchParams.set('hana_preview', t)
   return u.toString()
 })
 
@@ -237,7 +237,7 @@ async function activateTheme(theme: ThemeItem) {
       <p class="preview-hint">
         Preview templates and static files from a folder under
         <code>themes/</code> without changing the active theme. Only requests that include the
-        preview token (cookie set here, or <code>?viseed_preview=</code>) use the preview path.
+        preview token (cookie set here, or <code>?hana_preview=</code>) use the preview path.
       </p>
 
       <div

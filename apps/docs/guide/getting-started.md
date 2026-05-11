@@ -18,7 +18,7 @@ bun install
 Set your database connection string:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
 ```
 
 Push the schema to your database and start the server:
@@ -70,7 +70,7 @@ import { blogPlugin } from 'viseed-plugin-blog'
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed',
+    url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
   },
   admin: {
     bootstrapAdmin:
@@ -98,7 +98,7 @@ export default {
 Push schema and run:
 
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/viseed"
+export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
 bunx viseedbi db push
 bun run src/index.ts
 ```
