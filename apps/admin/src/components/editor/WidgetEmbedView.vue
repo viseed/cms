@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NodeViewProps } from '@tiptap/vue-3'
+import { NodeViewWrapper } from '@tiptap/vue-3'
 import { computed, onMounted, ref, shallowRef } from 'vue'
 import { usePluginComponent } from '../../composables/usePluginComponent'
 import { adminFetch } from '../../lib/admin-api'
@@ -12,6 +13,7 @@ interface WidgetSummary {
   type: string
   typeLabel: string
   typeAvailable: boolean
+  config: Record<string, unknown>
 }
 
 const widgetInfo = ref<WidgetSummary | null>(null)
@@ -70,7 +72,7 @@ function removeWidget() {
       <button class="widget-remove-btn" @click="removeWidget" title="Remove widget">✕</button>
     </div>
     <div v-if="previewComponent" class="widget-preview" contenteditable="false">
-      <component :is="previewComponent" :config="{}" />
+      <component :is="previewComponent" :config="widgetInfo?.config ?? {}" />
     </div>
   </NodeViewWrapper>
 </template>

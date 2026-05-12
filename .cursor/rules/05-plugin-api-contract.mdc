@@ -259,8 +259,21 @@ Plugin public bundle pattern:
 - Build: `build-public.ts` (Vite lib, `external: ['vue']`, outDir: `dist/public`)
 - Plugin factory: `public: { bundlePath: resolve(__dirname, '../dist/public/index.js') }`
 
+### Preview component — config thật
+
+`WidgetEmbedView.vue` (TipTap NodeView trong admin) fetches `/api/admin/widgets/:id` và truyền `config` thật vào `previewComponent`:
+
+```html
+<component :is="previewComponent" :config="widgetInfo?.config ?? {}" />
+```
+
+Preview giờ hiển thị đúng nội dung widget đã lưu (không còn truyền `{}` rỗng).
+
+Convention: admin barrel nên re-export public renderer với tên `previewComponent` để dùng làm preview trong NodeView (xem `plugin-common-widgets/src/admin/index.ts`).
+
 ## Last updated
 
+2026-05-12 — Fix TipTap NodeView preview: `WidgetEmbedView.vue` giờ truyền `config` thật (không còn `{}`) vào `previewComponent`. Convention: admin barrel re-export public renderer làm preview.
 2026-05-11 — Widget system v1: `WidgetTypeDef`, `PluginPublicConfig`, `widgets`, `public` fields on CMSPlugin; widget CRUD/public routes; WidgetTypeRegistry rebuilds on plugin enable/disable.
 2026-04-10 — Added `PluginAdminConfig`, `PluginAdminMenuItem`, admin UI registration via ESM dynamic import
 2026-04-10 — Added `PluginLifecycle`, `plugin:enabled`/`plugin:disabled` hooks, `PluginRouteRegistry`, companion plugins, admin API for enable/disable

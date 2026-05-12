@@ -12,6 +12,7 @@
     "@viseed/core": "workspace:*",
     "@viseed/plugin-auth": "workspace:*",
     "@viseed/plugin-blog": "workspace:*",
+    "@viseed/plugin-common-widgets": "workspace:*",
     "@viseed/plugin-menu": "workspace:*",
     "@viseed/plugin-pages": "workspace:*"
   },

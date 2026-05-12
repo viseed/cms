@@ -18,7 +18,7 @@ export interface ThemeRuntime {
   eta: Eta
   renderLayout(
     layoutKey: string,
-    context: Omit<LayoutContext, 'data'> & { data: Record<string, unknown> },
+    context: Omit<LayoutContext, 'data' | 'helpers'> & { data: Record<string, unknown> },
     options?: ThemeRenderOptions,
   ): Promise<string>
   buildAssetTags(): { css: string[]; js: string[]; fonts: string[] }

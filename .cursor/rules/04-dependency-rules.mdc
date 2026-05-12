@@ -28,6 +28,8 @@ alwaysApply: false
 @viseed/cli       ←── @viseed/core
 
 @viseed/plugin-* ←── @viseed/types, @viseed/core, @viseed/ui  (KHÔNG import từ nhau)
+  └── plugin admin bundles có thể import @viseed/ui/vue (Vue source subpath, consumer tự compile)
+      để dùng shared components như RichTextEditor. KHÔNG external @viseed/ui/vue khi build.
 
 @viseed/theme-*  ←── @viseed/types  (CHỈ import types, KHÔNG import core/schema/plugin)
 
@@ -103,6 +105,7 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
 
 ## Last updated
 
+2026-05-12 — `@viseed/ui` thêm `./vue` subpath export trỏ source `.vue` files (RichTextEditor). Consumer plugin Vite tự compile, không publish dist cho subpath này. `@viseed/ui` thêm `@tiptap/*` dependencies.
 2026-05-11 — Widget system v1: no new packages; `@viseed/schema` now exports `widgets` (part of `coreSchema`); `@viseed/core` adds `WidgetTypeRegistry`, imports `@tiptap/core`. No graph changes.
 2026-05-10 — Đổi plugin/theme/umbrella sang @viseed org scope: `@viseed/plugin-*`, `@viseed/theme-*`, `@viseed/cms`.
 2026-05-09 — Updated plugin/theme names to `viseed-plugin-*` / `viseed-theme-*`. Added `viseed` umbrella to graph.

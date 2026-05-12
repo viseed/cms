@@ -14,6 +14,7 @@ interface WidgetType {
   publicComponent: string
   pluginEnabled: boolean
   hasPublicBundle: boolean
+  defaultConfig?: Record<string, unknown>
 }
 
 interface WidgetItem {
@@ -118,7 +119,7 @@ function filteredTypes() {
 
 function selectType(type: WidgetType) {
   form.value.type = type.id
-  form.value.config = {}
+  form.value.config = { ...(type.defaultConfig ?? {}) }
   configComponent.value = resolveComponent(type.pluginName, type.configComponent)
   modalStep.value = 'configure'
 }

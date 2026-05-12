@@ -10,6 +10,10 @@
     "./components": {
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
+    },
+    "./vue": {
+      "import": "./src/vue/index.ts",
+      "types": "./src/vue/index.d.ts"
     }
   },
   "files": [
@@ -23,7 +27,14 @@
   },
   "dependencies": {
     "@viseed/types": "workspace:*",
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "@tiptap/core": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/extension-link": "^3.22.3",
+    "@tiptap/extension-image": "^3.22.3",
+    "@tiptap/extension-text-align": "^3.22.3",
+    "@tiptap/extension-underline": "^3.22.3"
   },
   "devDependencies": {
     "@viseed/config": "workspace:*"

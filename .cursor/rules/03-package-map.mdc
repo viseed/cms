@@ -29,6 +29,7 @@ alwaysApply: false
 |---|---|---|
 | `plugins/plugin-auth` | `@viseed/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
 | `plugins/plugin-blog` | `@viseed/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
+| `plugins/plugin-common-widgets` | `@viseed/plugin-common-widgets` | Common widget types: `common-widgets/tabs` (vertical/horizontal tabs với rich content), `common-widgets/qa` (single-open accordion Q&A). No schema, no routes — chỉ widget types với admin config forms + public renderers |
 | `plugins/plugin-menu` | `@viseed/plugin-menu` | Menu management — schema + CRUD REST routes + admin view (MenusView). Injects `menuMain`/`menuFooter` into theme context via `theme:beforeRender` hook |
 | `plugins/plugin-pages` | `@viseed/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
 
@@ -87,6 +88,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-05-12 — Added `plugin-common-widgets` (`@viseed/plugin-common-widgets`): Tabs + Q&A widget types with TipTap rich content forms. `RichTextEditor` shared component added to `@viseed/ui` at `./vue` subpath export.
 2026-05-11 — Widget system v1: `widgets` table in `@viseed/schema` coreSchema; `WidgetTypeRegistry` + CRUD/public routes in `@viseed/core`; Widgets built-in admin view (order 25) in `apps/admin`; `plugin-blog` adds `blog/latest-posts` demo widget type.
 2026-05-10 — Đổi tất cả plugins/themes/umbrella sang @viseed org scope: `@viseed/cms`, `@viseed/plugin-*`, `@viseed/theme-*`.
 2026-05-09 — Renamed scope, added umbrella package `viseed`, plugins `viseed-plugin-*`, themes `viseed-theme-*`. Private: `@viseed/cli`, `@viseed/config`.

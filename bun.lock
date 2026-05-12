@@ -66,6 +66,7 @@
         "@viseed/core": "workspace:*",
         "@viseed/plugin-auth": "workspace:*",
         "@viseed/plugin-blog": "workspace:*",
+        "@viseed/plugin-common-widgets": "workspace:*",
         "@viseed/plugin-menu": "workspace:*",
         "@viseed/plugin-pages": "workspace:*",
       },
@@ -157,6 +158,13 @@
       "name": "@viseed/ui",
       "version": "0.1.0",
       "dependencies": {
+        "@tiptap/core": "^3.22.3",
+        "@tiptap/extension-image": "^3.22.3",
+        "@tiptap/extension-link": "^3.22.3",
+        "@tiptap/extension-text-align": "^3.22.3",
+        "@tiptap/extension-underline": "^3.22.3",
+        "@tiptap/starter-kit": "^3.22.3",
+        "@tiptap/vue-3": "^3.22.3",
         "@viseed/types": "workspace:*",
         "vue": "^3.5.0",
       },
@@ -222,6 +230,22 @@
         "vue": "^3.5.0",
       },
     },
+    "plugins/plugin-common-widgets": {
+      "name": "@viseed/plugin-common-widgets",
+      "version": "0.1.0",
+      "dependencies": {
+        "@viseed/types": "workspace:*",
+        "@viseed/ui": "workspace:*",
+      },
+      "devDependencies": {
+        "@viseed/config": "workspace:*",
+        "@viseed/core": "workspace:*",
+        "@vitejs/plugin-vue": "^5.2.0",
+        "vite": "^6.2.0",
+        "vite-plugin-css-injected-by-js": "^3.5.2",
+        "vue": "^3.5.0",
+      },
+    },
     "plugins/plugin-menu": {
       "name": "@viseed/plugin-menu",
       "version": "0.1.0",
@@ -279,6 +303,9 @@
   },
   "overrides": {
     "@tiptap/core": "3.22.3",
+    "@tiptap/pm": "3.22.3",
+    "@tiptap/starter-kit": "3.22.3",
+    "@tiptap/vue-3": "3.22.3",
   },
   "packages": {
     "@algolia/abtesting": ["@algolia/abtesting@1.15.2", "", { "dependencies": { "@algolia/client-common": "5.49.2", "@algolia/requester-browser-xhr": "5.49.2", "@algolia/requester-fetch": "5.49.2", "@algolia/requester-node-http": "5.49.2" } }, "sha512-rF7vRVE61E0QORw8e2NNdnttcl3jmFMWS9B4hhdga12COe+lMa26bQLfcBn/Nbp9/AF/8gXdaRCPsVns3CnjsA=="],
@@ -810,6 +837,8 @@
     "@viseed/plugin-auth": ["@viseed/plugin-auth@workspace:plugins/plugin-auth"],
 
     "@viseed/plugin-blog": ["@viseed/plugin-blog@workspace:plugins/plugin-blog"],
+
+    "@viseed/plugin-common-widgets": ["@viseed/plugin-common-widgets@workspace:plugins/plugin-common-widgets"],
 
     "@viseed/plugin-menu": ["@viseed/plugin-menu@workspace:plugins/plugin-menu"],
 
@@ -1438,6 +1467,8 @@
     "@manypkg/get-packages/@changesets/types": ["@changesets/types@4.1.0", "", {}, "sha512-LDQvVDv5Kb50ny2s25Fhm3d9QSZimsoUGBsUioj6MC3qbMUCuC8GPIvk/M6IvXx3lYhAs0lwWUQLb+VIEUCECw=="],
 
     "@manypkg/get-packages/fs-extra": ["fs-extra@8.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^4.0.0", "universalify": "^0.1.0" } }, "sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g=="],
+
+    "@viseed/plugin-common-widgets/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
 
     "@viseed/plugin-menu/vite-plugin-css-injected-by-js": ["vite-plugin-css-injected-by-js@3.5.2", "", { "peerDependencies": { "vite": ">2.0.0-0" } }, "sha512-2MpU/Y+SCZyWUB6ua3HbJCrgnF0KACAsmzOQt1UvRVJCGF6S8xdA3ZUhWcWdM9ivG4I5az8PnQmwwrkC2CAQrQ=="],
 

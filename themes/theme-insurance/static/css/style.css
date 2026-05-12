@@ -1328,6 +1328,95 @@ button {
   text-decoration: underline;
 }
 
+/* =========================================================
+   TABS WIDGET — Insurance Theme Skin
+   ========================================================= */
+
+/* Outer box */
+.tabs-widget--vertical {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Remove gap between strip and content */
+.tabs-widget--vertical .tabs-body {
+  gap: 0 !important;
+}
+
+/* Vertical sidebar */
+.tabs-widget--vertical .tabs-strip--vertical {
+  background: var(--color-bg);
+  border-right: 1px solid var(--color-border) !important;
+  min-width: 220px !important;
+}
+
+/* Every tab item */
+.tabs-widget--vertical .tab-btn {
+  padding: 0.875rem 1rem !important;
+  border: none !important;
+  border-left: 3px solid transparent !important;
+  border-bottom: 1px solid var(--color-border) !important;
+  margin-right: 0 !important;
+  color: var(--color-text) !important;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: var(--color-bg) !important;
+}
+
+/* Remove bottom border on last tab */
+.tabs-widget--vertical .tab-btn:last-child {
+  border-bottom: none !important;
+}
+
+/* Active tab */
+.tabs-widget--vertical .tab-btn.active {
+  border-left-color: var(--color-primary) !important;
+  background: var(--color-white) !important;
+  color: var(--color-text-light) !important;
+  font-weight: 600 !important;
+}
+
+/* Arrow indicator */
+.tabs-widget--vertical .tab-btn.active .tab-arrow {
+  color: var(--color-text-light) !important;
+}
+
+/* Hover state */
+.tabs-widget--vertical .tab-btn:hover:not(.active) {
+  background: var(--color-white) !important;
+  color: var(--color-text) !important;
+}
+
+/* Content pane */
+.tabs-widget--vertical .tab-content {
+  padding: 1.25rem 1.5rem !important;
+}
+
+/* Red-square bullet list in tab content */
+.tabs-widget .tab-content ul {
+  list-style: none;
+  padding-left: 0 !important;
+}
+
+.tabs-widget .tab-content ul li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.tabs-widget .tab-content ul li::before {
+  content: '■';
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  font-size: 0.6em;
+  color: var(--color-red);
+  line-height: 1.8;
+}
+
 /* Article tables */
 .article-body table,
 .tiptap-table {

@@ -1,6 +1,7 @@
 ﻿import { createCMS } from '@viseed/core'
 import { authPlugin } from '@viseed/plugin-auth'
 import { blogPlugin } from '@viseed/plugin-blog'
+import { commonWidgetsPlugin } from '@viseed/plugin-common-widgets'
 import { menuPlugin } from '@viseed/plugin-menu'
 import { pagesPlugin } from '@viseed/plugin-pages'
 import { blogTheme } from '@viseed/theme-blog'
@@ -17,6 +18,7 @@ const cms = createCMS({
 
 cms.use(authPlugin())
 cms.use(blogPlugin())
+cms.use(commonWidgetsPlugin())
 cms.use(menuPlugin())
 cms.use(pagesPlugin())
 
