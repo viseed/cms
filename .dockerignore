@@ -1,7 +1,7 @@
 .git
-node_modules
-.turbo
-dist
+**/node_modules
+**/.turbo
+**/dist
 **/.vitepress/dist
 **/.vitepress/cache
 .env

@@ -16,7 +16,9 @@ COPY packages/registry/package.json     ./packages/registry/package.json
 COPY packages/schema/package.json       ./packages/schema/package.json
 COPY packages/types/package.json        ./packages/types/package.json
 COPY packages/ui/package.json           ./packages/ui/package.json
+COPY packages/viseed/package.json       ./packages/viseed/package.json
 COPY packages/validator/package.json    ./packages/validator/package.json
+COPY plugins/plugin-common-widgets/package.json   ./plugins/plugin-common-widgets/package.json
 COPY plugins/plugin-auth/package.json   ./plugins/plugin-auth/package.json
 COPY plugins/plugin-blog/package.json   ./plugins/plugin-blog/package.json
 COPY plugins/plugin-menu/package.json   ./plugins/plugin-menu/package.json
@@ -24,7 +26,7 @@ COPY plugins/plugin-pages/package.json  ./plugins/plugin-pages/package.json
 COPY themes/theme-blog/package.json     ./themes/theme-blog/package.json
 COPY themes/theme-insurance/package.json ./themes/theme-insurance/package.json
 
-RUN bun install
+RUN bun install 
 
 # ─── Stage 2: Runner ──────────────────────────────────────────────────────────
 FROM oven/bun:1-alpine AS runner
@@ -39,7 +41,7 @@ WORKDIR /app
 RUN chown appuser:appgroup /app
 
 # Copy installed node_modules (includes workspace symlinks) from deps stage
-COPY --chown=appuser:appgroup --from=deps /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup --from=deps /app .
 
 # Copy full source (node_modules excluded via .dockerignore)
 COPY --chown=appuser:appgroup . .
