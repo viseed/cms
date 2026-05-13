@@ -19,7 +19,6 @@ services:
     volumes:
       - ./ca-certificate.crt:/app/ca-certificate.crt:ro
       - ./uploads:/app/uploads:rw
-      - ./.turbo:/app/.turbo:rw
     restart: unless-stopped
     logging: *default-logging
     networks:
