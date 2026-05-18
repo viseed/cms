@@ -846,13 +846,13 @@ export class ViseedCMS {
       }
     })
 
-    // Vendor Vue — prefer the pre-built dist file; fall back to on-the-fly
-    // Bun.build() for dev mode (where the Vite build hasn't run yet).
+    // Vendor Vue — always serve vue.esm-browser.js (a self-contained ESM bundle
+    // from the Vue package itself). The Vite-built dist/admin/assets/vendor-vue.js
+    // contains relative imports to sibling chunks and cannot be served from a
+    // different URL path such as /api/public/.
     this.app.get('/api/public/vendor-vue.js', async (c) => {
       try {
-        const vendorPath = resolve(import.meta.dirname, '../dist/admin/assets/vendor-vue.js')
-        const file = Bun.file(vendorPath)
-        const content = (await file.exists()) ? await file.text() : await this.buildVendorVue()
+        const content = await this.buildVendorVue()
         return new Response(content, {
           headers: {
             'Content-Type': 'application/javascript; charset=utf-8',
