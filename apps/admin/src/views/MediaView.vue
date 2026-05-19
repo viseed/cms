@@ -86,7 +86,7 @@
     </div>
 
     <!-- Edit Modal -->
-    <div v-if="editTarget" class="modal-backdrop" @click.self="closeEdit">
+    <div v-if="editTarget" class="modal-backdrop" @mousedown.self="closeEdit">
       <div class="modal">
         <div class="modal-header">
           <h2>Edit Media</h2>

@@ -15,8 +15,8 @@
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/">Trang chủ</a>
         <span>›</span>
-        <% if (it.data.post && it.data.post.categoryId) { %>
-          <a href="/category">Danh mục</a>
+        <% if (it.data.category) { %>
+          <a href="/category/<%= it.data.category.slug %>"><%= it.data.category.name %></a>
           <span>›</span>
         <% } %>
         <span><%= it.data.post ? it.data.post.title : 'Bài viết' %></span>

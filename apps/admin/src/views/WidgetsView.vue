@@ -235,7 +235,7 @@ function formatDate(iso: string) {
     </table>
 
     <!-- Create / Edit modal -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <div v-if="showModal" class="modal-overlay" @mousedown.self="closeModal">
       <div class="modal">
         <!-- Step 1: pick type (create only) -->
         <template v-if="modalStep === 'pick-type'">

@@ -181,7 +181,7 @@ onMounted(fetchCategories)
     </table>
 
     <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+    <div v-if="showModal" class="modal-overlay" @mousedown.self="closeModal">
       <div class="modal">
         <div class="modal-header">
           <h2>{{ modalTitle }}</h2>

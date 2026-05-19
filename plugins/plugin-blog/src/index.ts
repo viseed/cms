@@ -97,9 +97,19 @@ export function blogPlugin(): CMSPlugin {
               const { bodyHtml, tocHtml } = renderBodyWithToc(post.body, {
                 withToc: post.tocEnabled,
               })
-              return { ...data, post: { ...post, bodyHtml, tocHtml } }
+
+              let category = null
+              if (post.categoryId) {
+                const [cat] = await db
+                  .select()
+                  .from(categories)
+                  .where(eq(categories.id, post.categoryId))
+                category = cat ?? null
+              }
+
+              return { ...data, post: { ...post, bodyHtml, tocHtml }, category }
             }
-            return { ...data, post: null }
+            return { ...data, post: null, category: null }
           }
         }
 
