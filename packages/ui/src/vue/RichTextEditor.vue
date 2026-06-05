@@ -1,11 +1,30 @@
 <script setup lang="ts">
-import Link from '@tiptap/extension-link'
+import { Color } from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
-import { onBeforeUnmount, watch } from 'vue'
+import { inject, onBeforeUnmount, ref, watch } from 'vue'
+
+const COLOR_PALETTE = [
+  '#000000',
+  '#374151',
+  '#6b7280',
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#10b981',
+  '#06b6d4',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#ffffff',
+]
 
 const props = defineProps<{
   modelValue: string
@@ -16,6 +35,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+const showColorMenu = ref(false)
+
 const editor = useEditor({
   content: props.modelValue || '',
   extensions: [
@@ -24,6 +45,8 @@ const editor = useEditor({
     Image,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     Underline,
+    TextStyle,
+    Color,
   ],
   onUpdate({ editor: e }) {
     emit('update:modelValue', e.getHTML())
@@ -56,11 +79,29 @@ function setLink() {
   editor.value.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
 }
 
-function addImage() {
+const imagePicker = inject<(() => Promise<string | null>) | null>('imagePicker', null)
+
+async function addImage() {
   if (!editor.value) return
-  const url = window.prompt('Image URL')
+  const url = imagePicker ? await imagePicker() : window.prompt('Image URL')
   if (!url) return
   editor.value.chain().focus().setImage({ src: url }).run()
+}
+
+function setColor(color: string) {
+  if (!editor.value) return
+  editor.value.chain().focus().setColor(color).run()
+  showColorMenu.value = false
+}
+
+function unsetColor() {
+  if (!editor.value) return
+  editor.value.chain().focus().unsetColor().run()
+  showColorMenu.value = false
+}
+
+function activeColor(): string {
+  return editor.value?.getAttributes('textStyle').color ?? ''
 }
 </script>
 
@@ -80,11 +121,42 @@ function addImage() {
       <button type="button" :class="{ active: editor.isActive('heading', { level: 2 }) }" @click="editor.chain().focus().toggleHeading({ level: 2 }).run()">H2</button>
       <button type="button" :class="{ active: editor.isActive('heading', { level: 3 }) }" @click="editor.chain().focus().toggleHeading({ level: 3 }).run()">H3</button>
       <span class="rte-divider" />
+      <button type="button" :class="{ active: editor.isActive({ textAlign: 'left' }) }" title="Align left" @click="editor.chain().focus().setTextAlign('left').run()">&#8676;</button>
+      <button type="button" :class="{ active: editor.isActive({ textAlign: 'center' }) }" title="Align center" @click="editor.chain().focus().setTextAlign('center').run()">&#8596;</button>
+      <button type="button" :class="{ active: editor.isActive({ textAlign: 'right' }) }" title="Align right" @click="editor.chain().focus().setTextAlign('right').run()">&#8677;</button>
+      <button type="button" :class="{ active: editor.isActive({ textAlign: 'justify' }) }" title="Justify" @click="editor.chain().focus().setTextAlign('justify').run()">&#8644;</button>
+      <span class="rte-divider" />
       <button type="button" :class="{ active: editor.isActive('bulletList') }" @click="editor.chain().focus().toggleBulletList().run()">• List</button>
       <button type="button" :class="{ active: editor.isActive('orderedList') }" @click="editor.chain().focus().toggleOrderedList().run()">1. List</button>
       <span class="rte-divider" />
       <button type="button" :class="{ active: editor.isActive('link') }" @click="setLink">Link</button>
       <button type="button" @click="addImage">Image</button>
+      <span class="rte-divider" />
+      <div class="rte-color-wrap">
+        <button
+          type="button"
+          class="rte-color-btn"
+          title="Text color"
+          @click="showColorMenu = !showColorMenu"
+        >
+          <span class="rte-color-label" :style="{ borderBottomColor: activeColor() || 'transparent' }">A</span>
+          <span class="rte-color-arrow">▾</span>
+        </button>
+        <div v-if="showColorMenu" class="rte-color-menu">
+          <div class="rte-color-palette">
+            <button
+              v-for="color in COLOR_PALETTE"
+              :key="color"
+              type="button"
+              class="rte-color-swatch"
+              :style="{ backgroundColor: color }"
+              :title="color"
+              @click="setColor(color)"
+            />
+          </div>
+          <button type="button" class="rte-color-reset" @click="unsetColor">Reset màu</button>
+        </div>
+      </div>
     </div>
     <EditorContent :editor="editor" class="rte-body" :data-placeholder="placeholder" />
   </div>
@@ -155,5 +227,80 @@ function addImage() {
   pointer-events: none;
   height: 0;
   float: left;
+}
+
+.rte-color-wrap {
+  position: relative;
+}
+
+.rte-color-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 6px;
+}
+
+.rte-color-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-bottom: 3px solid transparent;
+  line-height: 1.2;
+  padding-bottom: 1px;
+}
+
+.rte-color-arrow {
+  font-size: 0.6rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.rte-color-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  min-width: 130px;
+}
+
+.rte-color-palette {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.rte-color-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid rgb(0 0 0 / 0.15);
+  padding: 0;
+  cursor: pointer;
+}
+
+.rte-color-swatch:hover {
+  transform: scale(1.2);
+  border-color: rgb(0 0 0 / 0.4);
+}
+
+.rte-color-reset {
+  width: 100%;
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #374151;
+  text-align: center;
+}
+
+.rte-color-reset:hover {
+  background: #e5e7eb;
 }
 </style>

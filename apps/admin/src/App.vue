@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAdminSiteContext } from './composables/useAdminSiteContext'
+import { useMediaPicker } from './composables/useMediaPicker'
 import MediaPickerModal from './components/MediaPickerModal.vue'
 import AdminLayout from './layouts/AdminLayout.vue'
 
@@ -10,6 +11,9 @@ const route = useRoute()
 
 const routeViewKey = computed(() => activeSiteId.value)
 const useAdminLayout = computed(() => route.path !== '/login' && route.path !== '/setup')
+
+const { openMediaPicker } = useMediaPicker()
+provide('imagePicker', openMediaPicker)
 </script>
 
 <template>

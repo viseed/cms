@@ -481,7 +481,6 @@ function insertWidget(widgetId: string, widgetType: string) {
 .content-editor {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  overflow: hidden;
   background: #fff;
 }
 
@@ -492,6 +491,7 @@ function insertWidget(widgetId: string, widgetType: string) {
   padding: 6px 8px;
   border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
+  border-radius: 8px 8px 0 0;
 }
 
 .toolbar-group {
