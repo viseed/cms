@@ -55,6 +55,22 @@ function buildFileUrl(
   return adapter.getUrl(file.path, file.siteId)
 }
 
+/**
+ * Resolves the public base URL (scheme + host) from a Hono context.
+ *
+ * Behind a TLS-terminating reverse proxy the internal request arrives over
+ * plain HTTP, so `c.req.url` has `http:` even when the public site is HTTPS.
+ * Standard proxies (nginx, Caddy, Traefik…) forward the original scheme via
+ * the `X-Forwarded-Proto` header and the original host via `X-Forwarded-Host`
+ * (or the standard `Forwarded` header). We honour those when present.
+ */
+function resolveBaseUrl(c: { req: { url: string; header: (name: string) => string | undefined } }): string {
+  const requestUrl = new URL(c.req.url)
+  const proto = c.req.header('x-forwarded-proto') ?? requestUrl.protocol.replace(/:$/, '')
+  const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? requestUrl.host
+  return `${proto}://${host}`
+}
+
 export function setupMediaRoutes(
   app: Hono,
   helpers: CMSRouteContextHelpers,
@@ -78,9 +94,7 @@ export function setupMediaRoutes(
 
     const { site } = helpers.resolveRequestContext(c)
 
-    // Extract base URL from request
-    const requestUrl = new URL(c.req.url)
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+    const baseUrl = resolveBaseUrl(c)
 
     const baseCondition = eq(mediaFiles.siteId, site.id)
 
@@ -174,9 +188,7 @@ export function setupMediaRoutes(
 
     const { site, actor } = helpers.resolveRequestContext(c)
 
-    // Extract base URL from request
-    const requestUrl = new URL(c.req.url)
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+    const baseUrl = resolveBaseUrl(c)
 
     const inserted: object[] = []
 
@@ -279,9 +291,7 @@ export function setupMediaRoutes(
     const [updated] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, fileId))
     if (!updated) return c.json({ error: 'File not found after update' }, 500)
 
-    // Extract base URL from request
-    const requestUrl = new URL(c.req.url)
-    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`
+    const baseUrl = resolveBaseUrl(c)
 
     return c.json({
       message: 'File updated',
