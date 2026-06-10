@@ -8,7 +8,7 @@ import {
   updateContentSchema,
 } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
-import type { Hono, Context } from 'hono'
+import type { Context, Hono } from 'hono'
 import { categories, posts } from './schema'
 
 export function setupBlogRoutes(
@@ -61,7 +61,7 @@ export function setupBlogRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const slug = c.req.param('slug')
+    const slug = c.req.param('slug') as string
     console.log('slug', slug)
     const { site } = helpers.resolveRequestContext(c)
 
@@ -114,7 +114,7 @@ export function setupBlogRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const body = await c.req.json()
     const result = updateContentSchema.safeParse(body)
     if (!result.success) {
@@ -156,7 +156,7 @@ export function setupBlogRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const { site } = helpers.resolveRequestContext(c)
 
     const [existing] = await db
@@ -210,7 +210,7 @@ export function setupBlogRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const body = await c.req.json()
     const result = updateCategorySchema.safeParse(body)
     if (!result.success) {
@@ -242,7 +242,7 @@ export function setupBlogRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const { site } = helpers.resolveRequestContext(c)
 
     const [existing] = await db

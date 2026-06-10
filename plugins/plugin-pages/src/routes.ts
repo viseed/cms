@@ -55,8 +55,9 @@ export function setupPagesRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const slug = c.req.param('slug')
+    const slug = c.req.param('slug') as string
     const { site } = helpers.resolveRequestContext(c)
+
 
     const [page] = await db
       .select()
@@ -106,7 +107,7 @@ export function setupPagesRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const body = await c.req.json()
     const result = updateContentSchema.safeParse(body)
     if (!result.success) {
@@ -147,7 +148,7 @@ export function setupPagesRoutes(
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
-    const id = c.req.param('id')
+    const id = c.req.param('id') as string
     const { site } = helpers.resolveRequestContext(c)
 
     const [existing] = await db
