@@ -1,7 +1,7 @@
 ﻿import type { DatabaseInstance } from '@viseed/core'
 import type { CMSRouteContextHelpers } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
-import type { Hono } from 'hono'
+import type { Hono, Context } from 'hono'
 import { menuItems, menus } from './schema'
 
 export function setupMenuRoutes(
@@ -11,7 +11,7 @@ export function setupMenuRoutes(
 ): void {
   const router = helpers.createSubApp('/api/menus')
 
-  router.get('/', async (c) => {
+  router.get('/', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -20,7 +20,7 @@ export function setupMenuRoutes(
     return c.json({ menus: rows })
   })
 
-  router.post('/', async (c) => {
+  router.post('/', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -44,11 +44,12 @@ export function setupMenuRoutes(
     return c.json({ menu: created }, 201)
   })
 
-  router.put('/:id', async (c) => {
+  router.put('/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const id = c.req.param('id')
+    if (!id) return c.json({ error: 'id is required' }, 400)
     const body = await c.req.json()
 
     const [existing] = await db.select().from(menus).where(eq(menus.id, id))
@@ -63,11 +64,12 @@ export function setupMenuRoutes(
     return c.json({ menu: updated })
   })
 
-  router.delete('/:id', async (c) => {
+  router.delete('/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const id = c.req.param('id')
+    if (!id) return c.json({ error: 'id is required' }, 400)
     const [existing] = await db.select().from(menus).where(eq(menus.id, id))
     if (!existing) return c.json({ error: 'Menu not found' }, 404)
 
@@ -76,11 +78,12 @@ export function setupMenuRoutes(
     return c.json({ message: 'Menu deleted', id })
   })
 
-  router.get('/:id/items', async (c) => {
+  router.get('/:id/items', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const id = c.req.param('id')
+    if (!id) return c.json({ error: 'id is required' }, 400)
     const items = await db
       .select()
       .from(menuItems)
@@ -90,11 +93,12 @@ export function setupMenuRoutes(
     return c.json({ items })
   })
 
-  router.put('/:id/items', async (c) => {
+  router.put('/:id/items', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
     const menuId = c.req.param('id')
+    if (!menuId) return c.json({ error: 'id is required' }, 400)
     const body = await c.req.json()
     const incomingItems: Array<{
       id?: string
