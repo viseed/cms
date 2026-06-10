@@ -9,7 +9,7 @@
     ["@viseed/theme-blog", "@viseed/theme-insurance"]
   ],
   "access": "public",
-  "baseBranch": "main",
+  "baseBranch": "master",
   "updateInternalDependencies": "patch",
   "ignore": [
     "@viseed/config",
