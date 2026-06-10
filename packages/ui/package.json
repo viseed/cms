@@ -1,23 +1,20 @@
 {
   "name": "@viseed/ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./vue": {
-      "import": "./src/vue/index.ts",
-      "types": "./src/vue/index.d.ts"
+      "types": "./src/vue/index.ts",
+      "import": "./src/vue/index.ts"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "dev": "bunup --watch",

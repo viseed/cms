@@ -8,15 +8,15 @@ import {
   updateContentSchema,
 } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 import { categories, posts } from './schema'
 
 export function setupBlogRoutes(
-  app: Hono,
+  _app: Hono,
   helpers: CMSRouteContextHelpers,
   getDb: () => DatabaseInstance | null,
 ): void {
-  const blog = new Hono()
+  const blog = helpers.createSubApp('/api/blog')
 
   blog.get('/posts', async (c) => {
     const db = getDb()
@@ -258,6 +258,4 @@ export function setupBlogRoutes(
 
     return c.json({ message: 'Category deleted', id })
   })
-
-  app.route('/api/blog', blog)
 }

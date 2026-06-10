@@ -6,6 +6,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "@viseed/core#build": {
+      "dependsOn": ["@viseed/admin#build", "^build"],
+      "outputs": ["dist/**"]
+    },
     "build:admin": {
       "dependsOn": ["build"],
       "outputs": ["dist/admin/**"]

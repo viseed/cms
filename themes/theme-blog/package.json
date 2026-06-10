@@ -1,16 +1,17 @@
 {
   "name": "@viseed/theme-blog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "bun": "./src/index.ts",
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.js"
     }
   },
   "files": [
     "dist",
+    "src",
     "templates",
     "static"
   ],

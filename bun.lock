@@ -208,14 +208,15 @@
       "name": "@viseed/plugin-auth",
       "version": "0.1.0",
       "dependencies": {
-        "@viseed/schema": "workspace:*",
         "@viseed/types": "workspace:*",
-        "@viseed/validator": "workspace:*",
-        "drizzle-orm": "^0.44.0",
-        "hono": "^4.7.0",
       },
       "devDependencies": {
         "@viseed/config": "workspace:*",
+        "@viseed/validator": "workspace:*",
+        "hono": "^4.7.0",
+      },
+      "peerDependencies": {
+        "@viseed/validator": "workspace:*",
       },
     },
     "plugins/plugin-blog": {
@@ -223,16 +224,21 @@
       "version": "0.1.0",
       "dependencies": {
         "@viseed/types": "workspace:*",
-        "@viseed/validator": "workspace:*",
-        "drizzle-orm": "^0.44.0",
-        "hono": "^4.7.0",
       },
       "devDependencies": {
         "@viseed/config": "workspace:*",
         "@viseed/core": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
+        "drizzle-orm": "^0.44.0",
+        "hono": "^4.7.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
+      },
+      "peerDependencies": {
+        "@viseed/core": "workspace:*",
+        "@viseed/validator": "workspace:*",
+        "drizzle-orm": "^0.44.0",
       },
     },
     "plugins/plugin-common-widgets": {
@@ -240,11 +246,11 @@
       "version": "0.1.0",
       "dependencies": {
         "@viseed/types": "workspace:*",
-        "@viseed/ui": "workspace:*",
       },
       "devDependencies": {
         "@viseed/config": "workspace:*",
         "@viseed/core": "workspace:*",
+        "@viseed/ui": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
         "vite": "^6.2.0",
         "vite-plugin-css-injected-by-js": "^3.5.2",
@@ -256,16 +262,19 @@
       "version": "0.1.0",
       "dependencies": {
         "@viseed/types": "workspace:*",
-        "drizzle-orm": "^0.44.0",
-        "hono": "^4.7.0",
       },
       "devDependencies": {
         "@viseed/config": "workspace:*",
         "@viseed/core": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
+        "drizzle-orm": "^0.44.0",
+        "hono": "^4.7.0",
         "vite": "^6.2.0",
         "vite-plugin-css-injected-by-js": "^3.5.2",
         "vue": "^3.5.0",
+      },
+      "peerDependencies": {
+        "drizzle-orm": "^0.44.0",
       },
     },
     "plugins/plugin-pages": {
@@ -273,16 +282,21 @@
       "version": "0.1.0",
       "dependencies": {
         "@viseed/types": "workspace:*",
-        "@viseed/validator": "workspace:*",
-        "drizzle-orm": "^0.44.0",
-        "hono": "^4.7.0",
       },
       "devDependencies": {
         "@viseed/config": "workspace:*",
         "@viseed/core": "workspace:*",
+        "@viseed/validator": "workspace:*",
         "@vitejs/plugin-vue": "^5.2.0",
+        "drizzle-orm": "^0.44.0",
+        "hono": "^4.7.0",
         "vite": "^6.2.0",
         "vue": "^3.5.0",
+      },
+      "peerDependencies": {
+        "@viseed/core": "workspace:*",
+        "@viseed/validator": "workspace:*",
+        "drizzle-orm": "^0.44.0",
       },
     },
     "themes/theme-blog": {

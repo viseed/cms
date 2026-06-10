@@ -17,7 +17,21 @@ export class PluginRouteRegistry {
 
     const subRouter = new Hono()
     if (plugin.routes) {
-      plugin.routes(subRouter, helpers)
+      // Hono's `app.route()` snapshots the sub-app's routes at call time, so we
+      // must mount each sub-app AFTER the plugin has defined its routes on it.
+      const pendingSubApps: Array<{ basePath: string; app: Hono }> = []
+      const pluginHelpers: CMSRouteContextHelpers = {
+        ...helpers,
+        createSubApp: (basePath: string) => {
+          const child = new Hono()
+          pendingSubApps.push({ basePath, app: child })
+          return child
+        },
+      }
+      plugin.routes(subRouter, pluginHelpers)
+      for (const { basePath, app } of pendingSubApps) {
+        subRouter.route(basePath, app)
+      }
     }
 
     this.installed.set(plugin.name, { plugin, subRouter })

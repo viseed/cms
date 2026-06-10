@@ -1,8 +1,9 @@
-﻿import { loginSchema } from '@viseed/validator'
-import { Hono } from 'hono'
+﻿import type { CMSRouteContextHelpers } from '@viseed/types'
+import { loginSchema } from '@viseed/validator'
+import type { Hono } from 'hono'
 
-export function setupAuthRoutes(app: Hono): void {
-  const auth = new Hono()
+export function setupAuthRoutes(_app: Hono, helpers: CMSRouteContextHelpers): void {
+  const auth = helpers.createSubApp('/api/auth')
 
   auth.post('/login', async (c) => {
     const body = await c.req.json()
@@ -25,6 +26,4 @@ export function setupAuthRoutes(app: Hono): void {
     // TODO: implement site-user session based retrieval (separate from admin auth in core)
     return c.json({ message: 'Current site user endpoint' })
   })
-
-  app.route('/api/auth', auth)
 }

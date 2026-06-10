@@ -1,15 +1,15 @@
 ﻿import type { DatabaseInstance } from '@viseed/core'
 import type { CMSRouteContextHelpers } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 import { menuItems, menus } from './schema'
 
 export function setupMenuRoutes(
-  app: Hono,
+  _app: Hono,
   helpers: CMSRouteContextHelpers,
   getDb: () => DatabaseInstance | null,
 ): void {
-  const router = new Hono()
+  const router = helpers.createSubApp('/api/menus')
 
   router.get('/', async (c) => {
     const db = getDb()
@@ -178,6 +178,4 @@ export function setupMenuRoutes(
 
     return c.json({ items: saved })
   })
-
-  app.route('/api/menus', router)
 }

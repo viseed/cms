@@ -985,6 +985,15 @@ export class ViseedCMS {
     return {
       resolveRequestContext: (context) => this.resolveRequestContext(context),
       hasPermission: (context, permission) => this.hasPermission(context, permission),
+      // Fallback for core-internal helpers. Plugin routes instead receive a
+      // deferred createSubApp from PluginRouteRegistry (which mounts the sub-app
+      // after the plugin defines its routes), so this immediate-mount variant is
+      // only safe for callers that register routes before requests are served.
+      createSubApp: (basePath) => {
+        const child = new Hono()
+        this.app.route(basePath, child)
+        return child
+      },
     }
   }
 

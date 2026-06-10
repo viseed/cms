@@ -64,6 +64,14 @@ interface CMSPlugin {
   public?: PluginPublicConfig         // public-facing ESM bundle (Vue widget renderers)
   // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
   // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
+  // helpers.createSubApp(basePath): core tạo + mount Hono sub-app cho plugin
+  //   (plugin KHÔNG tự `new Hono()`, chỉ `import type { Hono }`)
+}
+
+interface CMSRouteContextHelpers {
+  resolveRequestContext: (c: Context) => RequestContext
+  hasPermission: (c: Context, permission: Permission) => boolean
+  createSubApp: (basePath: string) => Hono   // core owns Hono; mount sau khi plugin định nghĩa routes
 }
 
 interface CMSPluginHooks {
@@ -128,20 +136,27 @@ export const schema = { posts }
 ### Routes
 
 ```typescript
-// ✅ Đúng
-export function routes(app: Hono, helpers: CMSRouteContextHelpers): void {
-  app.get('/blog/posts', async (c) => {
+// ✅ Đúng — dùng helpers.createSubApp, KHÔNG import hono runtime
+import type { Hono } from 'hono'
+import type { CMSRouteContextHelpers } from '@viseed/types'
+
+export function setupBlogRoutes(_app: Hono, helpers: CMSRouteContextHelpers): void {
+  const blog = helpers.createSubApp('/api/blog') // core tạo + mount sub-app
+  blog.get('/posts', async (c) => {
     if (!helpers.hasPermission(c, 'site.content.read')) {
       return c.json({ error: 'Forbidden' }, 403)
     }
-    // lấy db qua context hoặc dependency injection
-    return c.json({ posts: [] })
+    return c.json({ posts: [] }) // lấy db qua cms:init hook
   })
 }
 ```
 
-- Routes prefix bằng tên plugin: `/blog/`, `/auth/`, `/media/`
-- KHÔNG tự tạo Hono instance riêng — nhận `app` từ param
+- Routes prefix bằng tên plugin: `/api/blog`, `/api/auth`, `/api/menus`
+- KHÔNG `new Hono()` và KHÔNG `import { Hono } from 'hono'` (runtime). Chỉ
+  `import type { Hono }`; tạo sub-app qua `helpers.createSubApp(basePath)`.
+  Core mount sub-app SAU khi plugin định nghĩa xong routes (Hono snapshot routes
+  tại thời điểm `.route()`), nên không cần tự mount.
+- `hono` là devDependency (type-only); KHÔNG đặt ở dependencies.
 - KHÔNG tự tạo DB connection — nhận qua `cms:init` hook
 
 ### Hooks
@@ -273,6 +288,7 @@ Convention: admin barrel nên re-export public renderer với tên `previewCompo
 
 ## Last updated
 
+2026-06-10 — `CMSRouteContextHelpers.createSubApp(basePath)`: core sở hữu Hono, plugin không `new Hono()` / không import hono runtime (chỉ `import type`). Core mount sub-app sau khi plugin định nghĩa routes. `hono` thành devDependency type-only của plugin.
 2026-05-12 — Fix TipTap NodeView preview: `WidgetEmbedView.vue` giờ truyền `config` thật (không còn `{}`) vào `previewComponent`. Convention: admin barrel re-export public renderer làm preview.
 2026-05-11 — Widget system v1: `WidgetTypeDef`, `PluginPublicConfig`, `widgets`, `public` fields on CMSPlugin; widget CRUD/public routes; WidgetTypeRegistry rebuilds on plugin enable/disable.
 2026-04-10 — Added `PluginAdminConfig`, `PluginAdminMenuItem`, admin UI registration via ESM dynamic import

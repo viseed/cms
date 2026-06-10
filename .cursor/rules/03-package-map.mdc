@@ -17,7 +17,7 @@ alwaysApply: false
 | `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, widget CRUD API, public widget hydration routes | plugins, apps, CLI |
 | `packages/registry` | `@viseed/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@viseed/core`, `@viseed/ui` |
 | `packages/ui` | `@viseed/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
-| `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Private** — exposed via `@viseed/cms` bin, không publish riêng | standalone binary |
+| `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Published** — là runtime dependency của `@viseed/cms` (umbrella re-export bin `viseed`); end-user cài `@viseed/cms` sẽ kéo theo cli | `@viseed/cms`, standalone binary |
 | `packages/config` | `@viseed/config` | Shared tsconfig (`tsconfig.base.json`, `tsconfig.app.json`, `tsconfig.lib.json`). **Private** | Tất cả packages |
 
 ## Plugins (`plugins/`)
@@ -88,6 +88,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-10 — `@viseed/cli` chuyển từ private → **published** (bỏ `private`, bỏ khỏi changeset `ignore`, thêm vào linked group cùng `@viseed/cms`). Lý do: `@viseed/cms` externalize và re-export cli ở runtime nên cli phải publish, nếu không cài `@viseed/cms` sẽ thiếu dependency. Bundling cli vào cms không khả thi do bug Bun bundler trên Windows (backslash path panic). Các package `@viseed/config`, `@viseed/admin`, `@viseed/docs`, `@viseed/starter` vẫn private/ignored.
 2026-05-12 — Added `plugin-common-widgets` (`@viseed/plugin-common-widgets`): Tabs + Q&A widget types with TipTap rich content forms. `RichTextEditor` shared component added to `@viseed/ui` at `./vue` subpath export.
 2026-05-11 — Widget system v1: `widgets` table in `@viseed/schema` coreSchema; `WidgetTypeRegistry` + CRUD/public routes in `@viseed/core`; Widgets built-in admin view (order 25) in `apps/admin`; `plugin-blog` adds `blog/latest-posts` demo widget type.
 2026-05-10 — Đổi tất cả plugins/themes/umbrella sang @viseed org scope: `@viseed/cms`, `@viseed/plugin-*`, `@viseed/theme-*`.

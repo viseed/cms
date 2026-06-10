@@ -1,19 +1,23 @@
 {
   "name": "@viseed/cms",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./admin": "./dist/admin/index.html",
     "./admin/*": "./dist/admin/*"
   },
-  "bin": { "viseed": "./dist/cli.js" },
-  "files": ["dist"],
+  "bin": {
+    "viseed": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "bunup",
+    "build": "rimraf dist && bunup",
     "clean": "rimraf dist"
   },
   "dependencies": {

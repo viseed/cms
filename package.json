@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "turbo run build --filter=!@viseed/docs",
+    "build:docs": "turbo run build --filter=@viseed/docs",
     "build:plugins": "turbo run build --filter=\"./plugins/*\"",
     "clean": "turbo run clean && rimraf .turbo node_modules/.cache",
     "dev:docs": "turbo run dev --filter=@viseed/docs",

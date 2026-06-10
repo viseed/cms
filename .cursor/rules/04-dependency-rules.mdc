@@ -27,9 +27,17 @@ alwaysApply: false
 
 @viseed/cli       ←── @viseed/core
 
-@viseed/plugin-* ←── @viseed/types, @viseed/core, @viseed/ui  (KHÔNG import từ nhau)
+@viseed/plugin-* ←── @viseed/types, @viseed/core, @viseed/validator, drizzle-orm  (KHÔNG import từ nhau)
+  ├── Server runtime deps đặt là PEER (không phải dependencies): @viseed/core,
+  │   drizzle-orm, và @viseed/validator (cho plugin nào dùng). End-user cài
+  │   @viseed/cms (kéo core → drizzle-orm, validator) nên bun hoisting thoả mãn
+  │   peer và đảm bảo single instance. Chỉ @viseed/types là `dependencies` thật.
+  ├── KHÔNG `new Hono()` / `import { Hono } from 'hono'` runtime. Dùng
+  │   `helpers.createSubApp(basePath)` do core cấp; chỉ `import type { Hono }`.
+  │   → `hono` là devDependency (type-only).
   └── plugin admin bundles có thể import @viseed/ui/vue (Vue source subpath, consumer tự compile)
       để dùng shared components như RichTextEditor. KHÔNG external @viseed/ui/vue khi build.
+      @viseed/ui chỉ cần lúc build bundle → devDependency (bundle prebuilt vào dist).
 
 @viseed/theme-*  ←── @viseed/types  (CHỈ import types, KHÔNG import core/schema/plugin)
 
@@ -92,19 +100,35 @@ import { CMSPlugin } from '@viseed/types'
 
 ## Workspace References
 
-Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps:
+Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps (kể cả
+`peerDependencies`). Changesets thay `workspace:*` bằng version range lúc publish.
 
 ```json
 {
   "dependencies": {
-    "@viseed/types": "workspace:*",
-    "@viseed/schema": "workspace:*"
+    "@viseed/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@viseed/core": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "drizzle-orm": "^0.44.0"
+  },
+  "devDependencies": {
+    "@viseed/core": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "hono": "^4.7.0"
   }
 }
 ```
 
+> Peer deps cũng liệt kê trong `devDependencies` để build/type-check trong monorepo
+> resolve được. Mỗi package có `bun` export trỏ `src` thì PHẢI ship cả `src` lẫn
+> `dist` trong `files` (Bun consumer resolve `src`, Node consumer resolve `dist`).
+
 ## Last updated
 
+2026-06-10 — Publish-readiness: plugin runtime deps (`@viseed/core`, `drizzle-orm`, `@viseed/validator`) chuyển sang `peerDependencies` (+ mirror trong devDependencies); `hono` thành devDependency type-only (plugin dùng `helpers.createSubApp`); `@viseed/ui` của plugin là devDependency (bundle prebuilt). Mọi package có `bun` export ship thêm `src` trong `files`. Export conditions đặt `types` trước, bỏ `require`/`./components` chết.
 2026-05-12 — `@viseed/ui` thêm `./vue` subpath export trỏ source `.vue` files (RichTextEditor). Consumer plugin Vite tự compile, không publish dist cho subpath này. `@viseed/ui` thêm `@tiptap/*` dependencies.
 2026-05-11 — Widget system v1: no new packages; `@viseed/schema` now exports `widgets` (part of `coreSchema`); `@viseed/core` adds `WidgetTypeRegistry`, imports `@tiptap/core`. No graph changes.
 2026-05-10 — Đổi plugin/theme/umbrella sang @viseed org scope: `@viseed/plugin-*`, `@viseed/theme-*`, `@viseed/cms`.

@@ -1,15 +1,13 @@
 {
   "name": "@viseed/cli",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "type": "module",
   "bin": {
     "viseed": "./dist/index.js"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.js"
     }
   },
   "files": [

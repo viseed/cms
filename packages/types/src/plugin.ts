@@ -13,6 +13,12 @@ export interface ThemeRenderRequestContext {
 export interface CMSRouteContextHelpers {
   resolveRequestContext: (context: Context) => RequestContext
   hasPermission: (context: Context, permission: Permission) => boolean
+  /**
+   * Create a Hono sub-app and mount it at `basePath` on the plugin's router.
+   * The core owns the single Hono instance, so plugins must not import `hono`
+   * at runtime — they only need its type.
+   */
+  createSubApp: (basePath: string) => Hono
 }
 
 export interface PluginLifecycle {

@@ -2,15 +2,15 @@
 import type { CMSRouteContextHelpers } from '@viseed/types'
 import { contentQuerySchema, createContentSchema, updateContentSchema } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 import { pages } from './schema'
 
 export function setupPagesRoutes(
-  app: Hono,
+  _app: Hono,
   helpers: CMSRouteContextHelpers,
   getDb: () => DatabaseInstance | null,
 ): void {
-  const pagesApi = new Hono()
+  const pagesApi = helpers.createSubApp('/api/pages')
 
   pagesApi.get('/', async (c) => {
     const db = getDb()
@@ -160,6 +160,4 @@ export function setupPagesRoutes(
     await db.delete(pages).where(eq(pages.id, id))
     return c.json({ message: 'Page deleted', id })
   })
-
-  app.route('/api/pages', pagesApi)
 }

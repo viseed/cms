@@ -78,7 +78,7 @@ export default defineConfig(() => {
     },
     plugins: [vue(), viseedImportMapPlugin()],
     build: {
-      outDir: '../../packages/core/dist/admin',
+      outDir: 'dist',
       emptyOutDir: true,
       rollupOptions: {
         input: {

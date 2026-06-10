@@ -1,21 +1,22 @@
 {
   "name": "@viseed/plugin-auth",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "bun": "./src/index.ts",
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.js"
     },
     "./schema": {
+      "types": "./dist/schema.d.ts",
       "bun": "./src/schema.ts",
-      "import": "./dist/schema.js",
-      "types": "./dist/schema.d.ts"
+      "import": "./dist/schema.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "build": "bunup",
@@ -23,13 +24,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "workspace:*",
-    "@viseed/schema": "workspace:*",
-    "@viseed/validator": "workspace:*",
-    "hono": "^4.7.0",
-    "drizzle-orm": "^0.44.0"
+    "@viseed/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@viseed/validator": "workspace:*"
   },
   "devDependencies": {
-    "@viseed/config": "workspace:*"
+    "@viseed/config": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "hono": "^4.7.0"
   }
 }
