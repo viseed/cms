@@ -1,5 +1,11 @@
 # @viseed/cli
 
+## 0.2.1
+
+### Patch Changes
+
+- Remove unused `@viseed/types` workspace dependency. It was declared as a runtime dependency with `workspace:*` but never imported, which caused `bunx @viseed/cli` to fail resolving `@viseed/types@workspace:*` outside the monorepo.
+
 ## 0.2.0
 
 ### Minor Changes
