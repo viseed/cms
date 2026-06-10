@@ -8,7 +8,7 @@ import {
   updateContentSchema,
 } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
-import type { Hono } from 'hono'
+import type { Hono, Context } from 'hono'
 import { categories, posts } from './schema'
 
 export function setupBlogRoutes(
@@ -18,7 +18,7 @@ export function setupBlogRoutes(
 ): void {
   const blog = helpers.createSubApp('/api/blog')
 
-  blog.get('/posts', async (c) => {
+  blog.get('/posts', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -57,7 +57,7 @@ export function setupBlogRoutes(
     })
   })
 
-  blog.get('/posts/:slug', async (c) => {
+  blog.get('/posts/:slug', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -74,7 +74,7 @@ export function setupBlogRoutes(
     return c.json({ post })
   })
 
-  blog.post('/posts', async (c) => {
+  blog.post('/posts', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -110,7 +110,7 @@ export function setupBlogRoutes(
     return c.json({ post: created }, 201)
   })
 
-  blog.put('/posts/:id', async (c) => {
+  blog.put('/posts/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -152,7 +152,7 @@ export function setupBlogRoutes(
     return c.json({ post: updated })
   })
 
-  blog.delete('/posts/:id', async (c) => {
+  blog.delete('/posts/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -170,7 +170,7 @@ export function setupBlogRoutes(
     return c.json({ message: 'Post deleted', id })
   })
 
-  blog.get('/categories', async (c) => {
+  blog.get('/categories', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -180,7 +180,7 @@ export function setupBlogRoutes(
     return c.json({ categories: rows })
   })
 
-  blog.post('/categories', async (c) => {
+  blog.post('/categories', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -206,7 +206,7 @@ export function setupBlogRoutes(
     return c.json({ category: created }, 201)
   })
 
-  blog.put('/categories/:id', async (c) => {
+  blog.put('/categories/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -238,7 +238,7 @@ export function setupBlogRoutes(
     return c.json({ category: updated })
   })
 
-  blog.delete('/categories/:id', async (c) => {
+  blog.delete('/categories/:id', async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
