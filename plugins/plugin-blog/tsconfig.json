@@ -4,5 +4,6 @@
     "isolatedDeclarations": false,
     "rootDir": "src"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/admin", "src/public", "src/*.test.ts"]
 }

@@ -14,7 +14,7 @@
     "src"
   ],
   "scripts": {
-    "build": "bunup",
+    "build": "bunup --no-dts && tsc -p tsconfig.build.json",
     "dev": "bunup --no-dts --watch",
     "dev:post": "tsc --watch -p tsconfig.build.json",
     "clean": "rimraf dist",

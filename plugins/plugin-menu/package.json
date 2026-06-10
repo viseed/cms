@@ -14,7 +14,7 @@
     "src"
   ],
   "scripts": {
-    "build": "bunup && bun run build-admin.ts",
+    "build": "bunup --no-dts && tsc -p tsconfig.json && bun run build-admin.ts",
     "build:admin": "bun run build-admin.ts",
     "clean": "rimraf dist",
     "test": "bun test"
