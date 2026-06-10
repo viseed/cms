@@ -1,6 +1,9 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  // Served from https://viseed.github.io/cms/ on GitHub Pages.
+  // Local dev/preview stays at root for convenience.
+  base: process.env.GITHUB_ACTIONS ? '/cms/' : '/',
   title: 'Viseed CMS',
   description: 'A lightweight, extensible CMS framework for Bun',
   themeConfig: {
