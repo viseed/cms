@@ -1,0 +1,13 @@
+﻿{
+  "extends": "@viseed/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "isolatedDeclarations": false,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "./dist/tsconfig.build.tsbuildinfo",
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["src/admin"]
+}

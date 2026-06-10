@@ -1,6 +1,6 @@
 ﻿import { defineConfig } from 'bunup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  sourcemap: 'linked',
   external: ['@viseed/types', '@viseed/core', 'hono', 'drizzle-orm'],
 })
