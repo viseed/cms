@@ -5,8 +5,12 @@
   "fixed": [],
   "linked": [
     ["@viseed/core", "@viseed/schema", "@viseed/types", "@viseed/validator", "@viseed/ui", "@viseed/registry", "@viseed/cms", "@viseed/cli"],
-    ["@viseed/plugin-auth", "@viseed/plugin-blog", "@viseed/plugin-menu", "@viseed/plugin-pages"],
-    ["@viseed/theme-blog", "@viseed/theme-insurance"]
+    ["@viseed/plugin-auth"],
+    ["@viseed/plugin-blog"],
+    ["@viseed/plugin-menu"],
+    ["@viseed/plugin-pages"],
+    ["@viseed/theme-blog"],
+    ["@viseed/theme-insurance"]
   ],
   "access": "public",
   "baseBranch": "master",
