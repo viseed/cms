@@ -1,5 +1,17 @@
 # @viseed/core
 
+## 0.2.3
+
+### Patch Changes
+
+- Republish every package so all internal dependencies resolve to existing,
+  fixed versions. The previous release only bumped a subset, leaving published
+  packages pointing at older versions that still contained literal `workspace:*`.
+- Updated dependencies
+  - @viseed/types@0.2.3
+  - @viseed/schema@0.2.3
+  - @viseed/validator@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes
