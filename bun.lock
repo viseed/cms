@@ -80,12 +80,11 @@
     },
     "packages/cli": {
       "name": "@viseed/cli",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "bin": {
         "viseed": "./dist/index.js",
       },
       "dependencies": {
-        "@viseed/types": "workspace:*",
         "drizzle-kit": "^0.31.10",
       },
       "devDependencies": {
@@ -99,7 +98,7 @@
     },
     "packages/core": {
       "name": "@viseed/core",
-      "version": "0.2.0",
+      "version": "0.2.2",
       "dependencies": {
         "@tiptap/core": "3.22.3",
         "@tiptap/extension-color": "^3.22.3",
@@ -190,7 +189,7 @@
     },
     "packages/viseed": {
       "name": "@viseed/cms",
-      "version": "0.2.0",
+      "version": "0.2.2",
       "bin": {
         "viseed": "./dist/cli.js",
       },
@@ -206,7 +205,7 @@
     },
     "plugins/plugin-auth": {
       "name": "@viseed/plugin-auth",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
@@ -221,7 +220,7 @@
     },
     "plugins/plugin-blog": {
       "name": "@viseed/plugin-blog",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
@@ -243,7 +242,7 @@
     },
     "plugins/plugin-common-widgets": {
       "name": "@viseed/plugin-common-widgets",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
@@ -279,7 +278,7 @@
     },
     "plugins/plugin-pages": {
       "name": "@viseed/plugin-pages",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
@@ -301,7 +300,7 @@
     },
     "themes/theme-blog": {
       "name": "@viseed/theme-blog",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },

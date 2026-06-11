@@ -1,5 +1,12 @@
 # @viseed/cms
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [da69549]
+  - @viseed/core@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes

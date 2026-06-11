@@ -1,5 +1,14 @@
 # @viseed/plugin-auth
 
+## 1.0.1
+
+### Patch Changes
+
+- da69549: Fix publishing so the `workspace:*` protocol is resolved to real versions before
+  packages are pushed to npm. Previously `changeset publish` (which falls back to
+  `npm publish` on Bun) shipped literal `workspace:*` ranges, breaking every
+  external install. Republishing all packages with resolved dependency versions.
+
 ## 1.0.0
 
 ### Minor Changes
