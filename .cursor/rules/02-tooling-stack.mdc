@@ -75,9 +75,24 @@ Config: `turbo.json` (root)
 
 ```bash
 bun run changeset          # tạo changeset mới
-bun run version-packages   # bump versions
-bun run publish-packages   # publish lên npm
+bun run version-packages   # changeset version && bun install (sync lockfile)
+bun run publish-packages   # bun run scripts/publish-packages.ts
 ```
+
+**Lưu ý quan trọng — Bun + Changesets:** Changesets KHÔNG hỗ trợ Bun, bước
+`changeset publish` của nó fallback sang `npm publish` → **không** thay
+`workspace:*` thành version thật → publish literal `workspace:*` lên npm và làm
+hỏng install của mọi consumer bên ngoài.
+
+Vì vậy publish đi qua wrapper `scripts/publish-packages.ts`:
+1. Resolve mọi `workspace:` range trong tất cả manifest sang version thật
+   (giống mapping của `bun publish`: `workspace:*` → `1.2.3`, `workspace:^` → `^1.2.3`).
+2. Chạy `changeset publish` (vẫn giữ tagging / dist-tag / idempotency của changesets).
+3. Restore lại manifest về `workspace:*` cho local dev.
+
+`scripts/publish-packages.ts --dry-run` để xem trước phần resolve mà không publish.
+
+**KHÔNG** chạy `changeset publish` trực tiếp (sẽ publish literal `workspace:*`).
 
 ## Frontend (apps/admin)
 
@@ -96,4 +111,5 @@ Build output của admin → embedded vào `core/dist/admin`
 
 ## Last updated
 
+2026-06-11 — Publish đi qua wrapper `scripts/publish-packages.ts` để resolve `workspace:*` (fix Bun + Changesets)
 2026-03-21 — Removed `apps/playground` dev command
