@@ -1,5 +1,18 @@
 # @viseed/core
 
+## 0.2.4
+
+### Patch Changes
+
+- Fix `viseed init` template and core no-theme fallback.
+
+  - **cli**: Replace `@viseed/plugin-auth` with `@viseed/theme-blog` and `pg` in the generated starter. Add `.env` and `viseed.config.ts` scaffold files. Remove deprecated `admin.bootstrapAdmin` config from generated `src/index.ts`. Update default DB name from `hana` to `viseed`.
+  - **core**: Add a no-theme fallback that redirects `/` to the admin path when no theme is registered. Fix `setupAdminServing` to treat an absent `enabled` field as enabled (was previously falsy-checking `undefined`).
+  - **schema**: Add `"default"` export condition so the package resolves correctly in non-Bun environments that fall through to the default condition.
+
+- Updated dependencies
+  - @viseed/schema@0.2.4
+
 ## 0.2.3
 
 ### Patch Changes

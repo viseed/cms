@@ -24,8 +24,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "changeset": "changeset",
-    "version-packages": "changeset version && bun install",
-    "publish-packages": "bun run scripts/publish-packages.ts"
+    "version": "changeset version && bun install",
+    "publish": "bun run scripts/publish-packages.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.0",

@@ -1,5 +1,14 @@
 # @viseed/cms
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @viseed/cli@0.2.4
+  - @viseed/core@0.2.4
+  - @viseed/schema@0.2.4
+
 ## 0.2.3
 
 ### Patch Changes

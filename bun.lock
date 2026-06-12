@@ -80,7 +80,7 @@
     },
     "packages/cli": {
       "name": "@viseed/cli",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "bin": {
         "viseed": "./dist/index.js",
       },
@@ -98,7 +98,7 @@
     },
     "packages/core": {
       "name": "@viseed/core",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "@tiptap/core": "3.22.3",
         "@tiptap/extension-color": "^3.22.3",
@@ -140,7 +140,7 @@
     },
     "packages/schema": {
       "name": "@viseed/schema",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "dependencies": {
         "drizzle-orm": "^0.44.0",
       },
@@ -189,7 +189,7 @@
     },
     "packages/viseed": {
       "name": "@viseed/cms",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "bin": {
         "viseed": "./dist/cli.js",
       },
@@ -220,7 +220,7 @@
     },
     "plugins/plugin-blog": {
       "name": "@viseed/plugin-blog",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
@@ -278,7 +278,7 @@
     },
     "plugins/plugin-pages": {
       "name": "@viseed/plugin-pages",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "dependencies": {
         "@viseed/types": "workspace:*",
       },
