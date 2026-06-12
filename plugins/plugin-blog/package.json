@@ -6,12 +6,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "bun": "./src/index.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./schema": {
       "types": "./dist/schema.d.ts",
       "bun": "./src/schema.ts",
-      "import": "./dist/schema.js"
+      "import": "./dist/schema.js",
+      "default": "./dist/schema.js"
     }
   },
   "files": [

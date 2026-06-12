@@ -166,6 +166,8 @@ export class ViseedCMS {
         }
         await this.hooks.run(HOOK_KEY.THEME_MOUNT, activeTheme)
       }
+    } else {
+      this.mountNoThemeFallback()
     }
 
     this.mountUploadsServing()
@@ -388,6 +390,11 @@ export class ViseedCMS {
         rewriteRequestPath: (path) => path.replace('/uploads', ''),
       }),
     )
+  }
+
+  private mountNoThemeFallback(): void {
+    const adminPath = this.config.admin?.path ?? '/admin'
+    this.app.get('/', (c) => c.redirect(adminPath, 302))
   }
 
   private mountThemeRoutes(): void {
@@ -954,8 +961,8 @@ export class ViseedCMS {
   }
 
   private setupAdminServing(): void {
-    const adminConfig = this.config.admin ?? { enabled: true, path: '/admin' }
-    if (!adminConfig.enabled) return
+    const adminConfig = this.config.admin ?? {}
+    if (adminConfig.enabled === false) return
 
     const adminPath = adminConfig.path ?? '/admin'
     const adminRoot = resolve(import.meta.dirname, '../dist/admin')

@@ -56,7 +56,7 @@ function generateDrizzleConfig(): string {
 
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './${HANA_DIR}/${SCHEMA_FILE}',
+  schema: ['./${HANA_DIR}/${SCHEMA_FILE}'],
   out: './drizzle',
   dbCredentials: {
     url: process.env.DATABASE_URL!,
