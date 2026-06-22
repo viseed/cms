@@ -13,8 +13,8 @@ alwaysApply: false
 | `packages/viseed` | `@viseed/cms` | **Umbrella package** — re-export từ tất cả `@viseed/*` core, include admin dist, expose CLI bin `viseed` | end-users |
 | `packages/types` | `@viseed/types` | TypeScript interfaces/types ONLY — không có runtime logic | Tất cả packages, plugins, apps |
 | `packages/validator` | `@viseed/validator` | Zod schemas cho content, user, media, plugin | `@viseed/core`, plugins, admin |
-| `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`, **`widgets`**), `mergeSchemas()` helper | `@viseed/core`, plugins |
-| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, widget CRUD API, public widget hydration routes. Subpath `@viseed/core/build` exports `buildPluginAdmin()` / `buildPluginPublic()` — Vite build helpers for plugin bundles | plugins, apps, CLI |
+| `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`, **`widgets`**, **`dashboard_widgets`**), `mergeSchemas()` helper | `@viseed/core`, plugins |
+| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, **`DashboardWidgetRegistry`**, widget + dashboard-widget CRUD API, public widget hydration routes. Subpath `@viseed/core/build` exports `buildPluginAdmin()` / `buildPluginPublic()` — Vite build helpers for plugin bundles | plugins, apps, CLI |
 | `packages/registry` | `@viseed/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@viseed/core`, `@viseed/ui` |
 | `packages/ui` | `@viseed/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
 | `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Published** — là runtime dependency của `@viseed/cms` (umbrella re-export bin `viseed`); end-user cài `@viseed/cms` sẽ kéo theo cli | `@viseed/cms`, standalone binary |
@@ -28,7 +28,7 @@ alwaysApply: false
 | Plugin | Npm package | Tính năng |
 |---|---|---|
 | `plugins/plugin-auth` | `@viseed/plugin-auth` | Schema + routes cho authentication (đăng ký, đăng nhập, sessions) |
-| `plugins/plugin-blog` | `@viseed/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView) |
+| `plugins/plugin-blog` | `@viseed/plugin-blog` | Posts/categories schema + CRUD REST routes + admin views (PostsView, CategoriesView). Widget `blog/latest-posts`; dashboard widget `blog/recent-posts` (RecentPostsCard) |
 | `plugins/plugin-common-widgets` | `@viseed/plugin-common-widgets` | Common widget types: `common-widgets/tabs` (vertical/horizontal tabs với rich content), `common-widgets/qa` (single-open accordion Q&A). No schema, no routes — chỉ widget types với admin config forms + public renderers |
 | `plugins/plugin-menu` | `@viseed/plugin-menu` | Menu management — schema + CRUD REST routes + admin view (MenusView). Injects `menuMain`/`menuFooter` into theme context via `theme:beforeRender` hook |
 | `plugins/plugin-pages` | `@viseed/plugin-pages` | Standalone pages schema + CRUD routes, `theme:beforeRender` data injection + admin view (PagesView) |
@@ -47,7 +47,7 @@ alwaysApply: false
 
 | App | Filter name | Mô tả | Port mặc định |
 |---|---|---|---|
-| `apps/admin` | `@viseed/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin`. Built-in views: Dashboard, Content, Media, **Widgets** (order 25), Plugins, Themes… | 5173 (dev) |
+| `apps/admin` | `@viseed/admin` | Vue 3 SPA admin dashboard, build output embed vào `core/dist/admin`. Built-in views: **Dashboard** (grid dashboard widgets, order 0), Content, Media, **Widgets** (order 25), Plugins, Themes… | 5173 (dev) |
 | `apps/docs` | `@viseed/docs` | VitePress documentation site | 5174 |
 | `apps/starter` | `@viseed/starter` | Template project cho end-users clone | — |
 
@@ -89,6 +89,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-22 — Dashboard Widget system: bảng `dashboard_widgets` (per-site) trong `@viseed/schema` coreSchema; `DashboardWidgetRegistry` + dashboard-widget CRUD/reorder routes trong `@viseed/core`; `DashboardView.vue` (order 0) render grid 4 cột với dashboard widgets từ admin bundle; `plugin-blog` thêm dashboard widget demo `blog/recent-posts`.
 2026-06-22 — `@viseed/core/build` subpath added: `buildPluginAdmin()`, `buildPluginPublic()`, `buildPluginBundle()` — Vite helpers for plugin admin/public bundles. Vite devDeps added to core. All 6 plugin build scripts refactored to use helper.
 2026-06-10 — `@viseed/cli` chuyển từ private → **published** (bỏ `private`, bỏ khỏi changeset `ignore`, thêm vào linked group cùng `@viseed/cms`). Lý do: `@viseed/cms` externalize và re-export cli ở runtime nên cli phải publish, nếu không cài `@viseed/cms` sẽ thiếu dependency. Bundling cli vào cms không khả thi do bug Bun bundler trên Windows (backslash path panic). Các package `@viseed/config`, `@viseed/admin`, `@viseed/docs`, `@viseed/starter` vẫn private/ignored.
 2026-05-12 — Added `plugin-common-widgets` (`@viseed/plugin-common-widgets`): Tabs + Q&A widget types with TipTap rich content forms. `RichTextEditor` shared component added to `@viseed/ui` at `./vue` subpath export.

@@ -53,6 +53,18 @@ export function blogPlugin(): CMSPlugin {
         defaultConfig: { count: 5, title: 'Latest Posts' },
       },
     ],
+    dashboardWidgets: [
+      {
+        id: 'blog/recent-posts',
+        label: 'Recent Posts',
+        icon: '✎',
+        description: 'Shows the most recently updated posts at a glance',
+        pluginName: 'blog',
+        component: 'RecentPostsCard',
+        supportedSizes: ['1x1', '2x1', '2x2'],
+        defaultSize: '2x2',
+      },
+    ],
     public: {
       bundlePath: resolve(__dirname, '../dist/public/index.js'),
     },

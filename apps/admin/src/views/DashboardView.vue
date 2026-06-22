@@ -173,7 +173,7 @@ async function move(item: DashboardWidgetItem, direction: -1 | 1) {
   const target = index + direction
   if (target < 0 || target >= items.value.length) return
   const next = [...items.value]
-  ;[next[index], next[target]] = [next[target], next[index]]
+  ;[next[index], next[target]] = [next[target]!, next[index]!]
   items.value = next
   await persistOrder()
 }
@@ -184,7 +184,6 @@ async function move(item: DashboardWidgetItem, direction: -1 | 1) {
     <div class="view-header">
       <div>
         <h1>Dashboard</h1>
-        <p class="subtitle">Welcome to Viseed CMS</p>
       </div>
       <div class="header-actions">
         <button
