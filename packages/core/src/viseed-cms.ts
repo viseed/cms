@@ -35,6 +35,7 @@ import { setupMediaRoutes } from './media-routes'
 import { LocalStorageAdapter } from './media-storage'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
+import { DashboardWidgetRegistry } from './dashboard-widget-registry'
 import { WidgetTypeRegistry } from './widget-type-registry'
 import {
   resolveTemplateDirFromAbsoluteRoot,
@@ -49,6 +50,7 @@ import { registerAuthRoutes } from './admin-routes/auth'
 import { registerPluginRoutes } from './admin-routes/plugins'
 import { registerThemeRoutes } from './admin-routes/themes'
 import { registerWidgetRoutes } from './admin-routes/widgets'
+import { registerDashboardWidgetRoutes } from './admin-routes/dashboard-widgets'
 
 const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
   home: '/',
@@ -89,6 +91,7 @@ export class ViseedCMS {
   private activeThemeName: string | null = null
   private pluginRegistry = new PluginRouteRegistry()
   private widgetTypeRegistry = new WidgetTypeRegistry()
+  private dashboardWidgetRegistry = new DashboardWidgetRegistry()
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -299,7 +302,9 @@ export class ViseedCMS {
   }
 
   private rebuildWidgetTypeRegistry(): void {
-    this.widgetTypeRegistry.rebuild(this.plugins, (name) => this.pluginRegistry.isActive(name))
+    const isActive = (name: string) => this.pluginRegistry.isActive(name)
+    this.widgetTypeRegistry.rebuild(this.plugins, isActive)
+    this.dashboardWidgetRegistry.rebuild(this.plugins, isActive)
   }
 
   private async registerPluginHooks(plugin: CMSPlugin): Promise<void> {
@@ -785,6 +790,13 @@ export class ViseedCMS {
       plugins: this.plugins,
       pluginRegistry: this.pluginRegistry,
       widgetTypeRegistry: this.widgetTypeRegistry,
+      resolveRequestContext: (c) => this.resolveRequestContext(c),
+    })
+
+    registerDashboardWidgetRoutes(registerAdminRoute, {
+      getDatabase: () => this.getDatabase(),
+      pluginRegistry: this.pluginRegistry,
+      dashboardWidgetRegistry: this.dashboardWidgetRegistry,
       resolveRequestContext: (c) => this.resolveRequestContext(c),
     })
 

@@ -23,6 +23,7 @@ export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 export { PluginRouteRegistry } from './plugin-route-registry'
 export { WidgetTypeRegistry } from './widget-type-registry'
+export { DashboardWidgetRegistry } from './dashboard-widget-registry'
 export { renderBody, renderBodyWithToc } from './render-body'
 export { createLayoutHelpers, renderSeoHead } from './seo-head'
 export {

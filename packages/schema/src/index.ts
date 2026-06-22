@@ -1,4 +1,5 @@
 export { mergeSchemas } from './schema-builder'
+export { dashboardWidgets } from './tables/dashboard-widgets'
 export { installedPlugins } from './tables/installed-plugins'
 export { installedThemes } from './tables/installed-themes'
 export { mediaFiles } from './tables/media-files'
@@ -10,6 +11,7 @@ export { userSiteRoles } from './tables/user-site-roles'
 export { users } from './tables/users'
 export { widgets } from './tables/widgets'
 
+import { dashboardWidgets } from './tables/dashboard-widgets'
 import { installedPlugins } from './tables/installed-plugins'
 import { installedThemes } from './tables/installed-themes'
 import { mediaFiles } from './tables/media-files'
@@ -32,4 +34,5 @@ export const coreSchema = {
   themeState,
   mediaFiles,
   widgets,
+  dashboardWidgets,
 }

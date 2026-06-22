@@ -75,6 +75,34 @@ export interface WidgetTypeDef {
   defaultConfig?: Record<string, unknown>
 }
 
+/**
+ * Grid size of a dashboard widget, expressed as `{colspan}x{rowspan}`.
+ * Columns are capped at the dashboard grid width (4).
+ */
+export type DashboardWidgetSize = '1x1' | '2x1' | '3x1' | '4x1' | '2x2' | '3x2' | '4x2'
+
+/**
+ * Declares a widget kind that plugins can contribute to the admin dashboard.
+ * Unlike `WidgetTypeDef` (content widgets rendered on the public site), dashboard
+ * widgets render inside the admin SPA. Their component is resolved from the
+ * plugin's admin bundle, so no public bundle is required.
+ */
+export interface DashboardWidgetDef {
+  /** Unique id, recommended pattern: '{pluginName}/{widgetName}', e.g. 'plugin-blog/recent-posts' */
+  id: string
+  label: string
+  icon?: string
+  description?: string
+  /** Must match the CMSPlugin.name of the plugin that declares this widget */
+  pluginName: string
+  /** Export name of the Vue component in the plugin admin bundle */
+  component: string
+  /** Grid sizes this widget supports */
+  supportedSizes: DashboardWidgetSize[]
+  /** Default size used when the widget is first placed on the dashboard */
+  defaultSize: DashboardWidgetSize
+}
+
 export interface CMSPlugin {
   name: string
   version: string
@@ -85,6 +113,8 @@ export interface CMSPlugin {
   admin?: PluginAdminConfig
   /** Widget types this plugin contributes */
   widgets?: WidgetTypeDef[]
+  /** Dashboard widgets this plugin contributes to the admin dashboard */
+  dashboardWidgets?: DashboardWidgetDef[]
   /** Public-facing ESM bundle (Vue widget renderers for CSR hydration) */
   public?: PluginPublicConfig
 }

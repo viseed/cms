@@ -38,6 +38,8 @@ export type {
   CMSPlugin,
   CMSPluginHooks,
   CMSRouteContextHelpers,
+  DashboardWidgetDef,
+  DashboardWidgetSize,
   PluginAdminConfig,
   PluginAdminMenuItem,
   PluginFactory,
