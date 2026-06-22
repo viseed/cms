@@ -1,4 +1,4 @@
-﻿---
+---
 description: Tooling stack — Các tools chính xác đang dùng, tránh AI suggest sai tools
 alwaysApply: false
 ---
@@ -103,6 +103,22 @@ Vì vậy publish đi qua wrapper `scripts/publish-packages.ts`:
 
 Build output của admin → embedded vào `core/dist/admin`
 
+## Plugin Bundle Build
+
+Plugin admin và public bundles dùng Vite (không phải bunup). Helper được đóng gói trong `@viseed/core/build`:
+
+```typescript
+import { buildPluginAdmin } from '@viseed/core/build'
+await buildPluginAdmin()   // → dist/admin/index.js (ESM, vue + vue-router external, CSS injected)
+
+import { buildPluginPublic } from '@viseed/core/build'
+await buildPluginPublic()  // → dist/public/index.js (ESM, vue external, CSS injected)
+```
+
+Chạy qua script `build-admin.ts` / `build-public.ts` ở root mỗi plugin với `bun run build-admin.ts`.
+
+**KHÔNG** copy cấu hình Vite thủ công vào từng plugin — dùng helper.
+
 ## Documentation
 
 | Tool | App |
@@ -111,5 +127,6 @@ Build output của admin → embedded vào `core/dist/admin`
 
 ## Last updated
 
+2026-06-22 — Plugin bundle build helpers: `buildPluginAdmin()` / `buildPluginPublic()` added to `@viseed/core/build`; all plugin build scripts use helper.
 2026-06-11 — Publish đi qua wrapper `scripts/publish-packages.ts` để resolve `workspace:*` (fix Bun + Changesets)
 2026-03-21 — Removed `apps/playground` dev command

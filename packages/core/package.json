@@ -7,6 +7,11 @@
       "types": "./dist/index.d.ts",
       "bun": "./src/index.ts",
       "import": "./dist/index.js"
+    },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "bun": "./src/build.ts",
+      "import": "./dist/build.js"
     }
   },
   "files": [
@@ -45,6 +50,9 @@
   },
   "devDependencies": {
     "@viseed/config": "workspace:*",
-    "@types/node": "^25.5.0"
+    "@types/node": "^25.5.0",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "vite": "^6.2.0",
+    "vite-plugin-css-injected-by-js": "^3.5.2"
   }
 }

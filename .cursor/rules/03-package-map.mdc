@@ -1,4 +1,4 @@
-﻿---
+---
 description: Package map — Danh sách đầy đủ packages, plugins, apps và vai trò của từng phần
 alwaysApply: false
 ---
@@ -14,7 +14,7 @@ alwaysApply: false
 | `packages/types` | `@viseed/types` | TypeScript interfaces/types ONLY — không có runtime logic | Tất cả packages, plugins, apps |
 | `packages/validator` | `@viseed/validator` | Zod schemas cho content, user, media, plugin | `@viseed/core`, plugins, admin |
 | `packages/schema` | `@viseed/schema` | Drizzle base tables (`users`, `sessions`, `installed_plugins`, `media_files`, **`widgets`**), `mergeSchemas()` helper | `@viseed/core`, plugins |
-| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, widget CRUD API, public widget hydration routes | plugins, apps, CLI |
+| `packages/core` | `@viseed/core` | `ViseedCMS` class, `HookRegistry`, `createDatabase()`, `LocalStorageAdapter`, core media routes (`/api/media`), static admin serve, **`WidgetTypeRegistry`**, widget CRUD API, public widget hydration routes. Subpath `@viseed/core/build` exports `buildPluginAdmin()` / `buildPluginPublic()` — Vite build helpers for plugin bundles | plugins, apps, CLI |
 | `packages/registry` | `@viseed/registry` | `PluginRegistryClient` — fetch plugin list, install/uninstall, verify SHA-256 integrity | `@viseed/core`, `@viseed/ui` |
 | `packages/ui` | `@viseed/ui` | Vue `ComponentRegistry`, `themeWidgetRegistry` (theme extension widgets by slot), base components, Plugin Marketplace UI | `apps/admin`, plugins |
 | `packages/cli` | `@viseed/cli` | CLI commands: `viseed init`, `viseed db push/generate/migrate`, `viseed plugin install/uninstall`. **Published** — là runtime dependency của `@viseed/cms` (umbrella re-export bin `viseed`); end-user cài `@viseed/cms` sẽ kéo theo cli | `@viseed/cms`, standalone binary |
@@ -71,6 +71,7 @@ packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
 packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
+packages/core/src/build.ts          → buildPluginAdmin() / buildPluginPublic() / buildPluginBundle() — Vite helpers for plugin admin + public bundles (@viseed/core/build subpath)
 packages/cli/src/commands/db.ts     → viseedbi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
 packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
@@ -88,6 +89,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-22 — `@viseed/core/build` subpath added: `buildPluginAdmin()`, `buildPluginPublic()`, `buildPluginBundle()` — Vite helpers for plugin admin/public bundles. Vite devDeps added to core. All 6 plugin build scripts refactored to use helper.
 2026-06-10 — `@viseed/cli` chuyển từ private → **published** (bỏ `private`, bỏ khỏi changeset `ignore`, thêm vào linked group cùng `@viseed/cms`). Lý do: `@viseed/cms` externalize và re-export cli ở runtime nên cli phải publish, nếu không cài `@viseed/cms` sẽ thiếu dependency. Bundling cli vào cms không khả thi do bug Bun bundler trên Windows (backslash path panic). Các package `@viseed/config`, `@viseed/admin`, `@viseed/docs`, `@viseed/starter` vẫn private/ignored.
 2026-05-12 — Added `plugin-common-widgets` (`@viseed/plugin-common-widgets`): Tabs + Q&A widget types with TipTap rich content forms. `RichTextEditor` shared component added to `@viseed/ui` at `./vue` subpath export.
 2026-05-11 — Widget system v1: `widgets` table in `@viseed/schema` coreSchema; `WidgetTypeRegistry` + CRUD/public routes in `@viseed/core`; Widgets built-in admin view (order 25) in `apps/admin`; `plugin-blog` adds `blog/latest-posts` demo widget type.

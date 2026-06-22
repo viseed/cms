@@ -9,6 +9,8 @@ import { defineConfig } from 'bunup'
 const ADMIN_DIST_SOURCE = '../../apps/admin/dist'
 
 export default defineConfig({
+  entry: ['src/index.ts', 'src/build.ts'],
+  external: ['vite', '@vitejs/plugin-vue', 'vite-plugin-css-injected-by-js'],
   sourcemap: 'linked',
   onSuccess: async () => {
     if (existsSync(ADMIN_DIST_SOURCE)) {

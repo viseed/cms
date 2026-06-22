@@ -42,6 +42,7 @@ export default defineConfig({
           text: 'Plugins',
           items: [
             { text: 'Overview', link: '/plugins/overview' },
+            { text: 'Widgets', link: '/plugins/widgets' },
           ],
         },
       ],

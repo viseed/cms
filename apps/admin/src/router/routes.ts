@@ -28,17 +28,6 @@ export const adminRoutes: Array<RouteRecordRaw> = [
     }),
   },
   {
-    path: '/content',
-    component: () => import('../views/ContentView.vue'),
-    meta: meta({
-      requiresAuth: true,
-      requiredPermissions: ['site.content.read'],
-      navigation: { label: 'Content', icon: '✎' },
-      siteScoped: true,
-      order: 10,
-    }),
-  },
-  {
     path: '/media',
     component: () => import('../views/MediaView.vue'),
     meta: meta({

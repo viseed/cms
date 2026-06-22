@@ -1,19 +1,3 @@
-import vue from '@vitejs/plugin-vue'
-import { build } from 'vite'
-import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
+import { buildPluginAdmin } from '@viseed/core/build'
 
-await build({
-  plugins: [vue(), cssInjectedByJsPlugin()],
-  build: {
-    lib: {
-      entry: 'src/admin/index.ts',
-      formats: ['es'],
-      fileName: 'index',
-    },
-    outDir: 'dist/admin',
-    emptyOutDir: true,
-    rollupOptions: {
-      external: ['vue', 'vue-router'],
-    },
-  },
-})
+await buildPluginAdmin()
