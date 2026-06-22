@@ -15,7 +15,8 @@
     "declarationMap": true,
     "sourceMap": true,
     "noUncheckedIndexedAccess": true,
-    "noEmit": true
+    "noEmit": true,
+    "customConditions": ["source"]
   },
   "exclude": ["node_modules", "dist"]
 }

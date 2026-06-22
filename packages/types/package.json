@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "bun": "./src/index.ts",
       "import": "./dist/index.js"
