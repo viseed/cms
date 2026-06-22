@@ -7,7 +7,7 @@
 
 ## Quick Start
 
-The fastest way to create a new Viseed CMS project is with the `viseedbi` CLI.
+The fastest way to create a new Viseed CMS project is with the `viseed` CLI.
 
 ```bash
 bunx @viseed/cli init my-site
@@ -24,7 +24,7 @@ export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
 Push the schema to your database and start the server:
 
 ```bash
-bunx viseedbi db push
+bunx viseed db push
 bun run dev
 ```
 
@@ -56,7 +56,7 @@ If you prefer to scaffold the project yourself instead of using the CLI:
 ```bash
 mkdir my-site && cd my-site
 bun init -y
-bun add @viseed/core viseed-plugin-auth viseed-plugin-blog
+bun add @viseed/core @viseed/plugin-auth @viseed/plugin-blog
 bun add -d @viseed/cli
 ```
 
@@ -64,23 +64,13 @@ Create `src/index.ts`:
 
 ```typescript
 import { createCMS } from '@viseed/core'
-import { authPlugin } from 'viseed-plugin-auth'
-import { blogPlugin } from 'viseed-plugin-blog'
+import { authPlugin } from '@viseed/plugin-auth'
+import { blogPlugin } from '@viseed/plugin-blog'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
     url: process.env.DATABASE_URL ?? 'postgresql://localhost:5432/hana',
-  },
-  admin: {
-    bootstrapAdmin:
-      process.env.HANA_ADMIN_EMAIL && process.env.HANA_ADMIN_PASSWORD
-        ? {
-            email: process.env.HANA_ADMIN_EMAIL,
-            password: process.env.HANA_ADMIN_PASSWORD,
-            name: process.env.HANA_ADMIN_NAME ?? 'Administrator',
-          }
-        : undefined,
   },
 })
 
@@ -89,17 +79,17 @@ cms.use(blogPlugin())
 
 const app = await cms.launch()
 
-export default {
+Bun.serve({
   port: Number(process.env.PORT) || 3000,
   fetch: app.fetch,
-}
+})
 ```
 
 Push schema and run:
 
 ```bash
 export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
-bunx viseedbi db push
+bunx viseed db push
 bun run src/index.ts
 ```
 
@@ -117,7 +107,7 @@ my-site/
 └── tsconfig.json
 ```
 
-The CLI-generated project (`viseedbi init`) produces the same structure with sensible defaults already configured.
+The CLI-generated project (`viseed init`) produces the same structure with sensible defaults already configured.
 
 ---
 
@@ -126,4 +116,4 @@ The CLI-generated project (`viseedbi init`) produces the same structure with sen
 - [Configuration](/guide/configuration) — all `CMSConfig` options
 - [Plugin System](/guide/plugins) — add built-in and custom plugins
 - [Themes](/guide/themes) — set up and switch themes
-- [CLI Reference](/guide/cli) — all `viseedbi` commands
+- [CLI Reference](/guide/cli) — all `viseed` commands
