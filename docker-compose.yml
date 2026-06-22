@@ -9,9 +9,7 @@ x-logging: &default-logging
 
 services:
   insurance:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nshermione/mipu_insurance:${IMAGE_TAG:-latest}
     env_file: .env.insurance
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ca-certificate.crt

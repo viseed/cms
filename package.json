@@ -25,7 +25,8 @@
     "db:studio": "drizzle-kit studio",
     "changeset": "changeset",
     "version": "changeset version && bun install",
-    "publish": "bun run scripts/publish-packages.ts"
+    "publish": "bun run scripts/publish-packages.ts",
+    "docker:push": "bun run scripts/deploy.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.0",
