@@ -157,6 +157,10 @@
       "version": "0.2.3",
       "devDependencies": {
         "@viseed/config": "workspace:*",
+        "hono": "^4.7.0",
+      },
+      "peerDependencies": {
+        "hono": "^4.7.0",
       },
     },
     "packages/ui": {

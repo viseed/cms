@@ -21,7 +21,11 @@
     "clean": "rimraf dist",
     "test": "bun test"
   },
+  "peerDependencies": {
+    "hono": "^4.7.0"
+  },
   "devDependencies": {
-    "@viseed/config": "workspace:*"
+    "@viseed/config": "workspace:*",
+    "hono": "^4.7.0"
   }
 }
