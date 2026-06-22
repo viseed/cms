@@ -1,5 +1,16 @@
 # @viseed/plugin-menu
 
+## 1.1.0
+
+### Minor Changes
+
+- Update docs
+
+### Patch Changes
+
+- Updated dependencies
+  - @viseed/types@0.3.0
+
 ## 1.0.2
 
 ### Patch Changes

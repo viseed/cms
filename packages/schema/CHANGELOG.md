@@ -1,5 +1,11 @@
 # @viseed/schema
 
+## 0.3.0
+
+### Minor Changes
+
+- Update docs
+
 ## 0.2.4
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@viseed/cli",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "type": "module",
   "bin": {
     "viseed": "./dist/index.js"
@@ -23,7 +23,7 @@
     "drizzle-kit": "^0.31.10"
   },
   "devDependencies": {
-    "@viseed/config": "workspace:*",
+    "@viseed/config": "0.1.0",
     "@types/node": "^25.5.0"
   }
 }

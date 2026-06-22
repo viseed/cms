@@ -1,6 +1,6 @@
 {
   "name": "@viseed/plugin-auth",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "type": "module",
   "exports": {
     ".": {
@@ -24,14 +24,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "workspace:*"
+    "@viseed/types": "0.3.0"
   },
   "peerDependencies": {
-    "@viseed/validator": "workspace:*"
+    "@viseed/validator": "0.3.0"
   },
   "devDependencies": {
-    "@viseed/config": "workspace:*",
-    "@viseed/validator": "workspace:*",
+    "@viseed/config": "0.1.0",
+    "@viseed/validator": "0.3.0",
     "hono": "^4.7.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@viseed/ui",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "type": "module",
   "exports": {
     ".": {
@@ -23,7 +23,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "workspace:*",
+    "@viseed/types": "0.3.0",
     "vue": "^3.5.0",
     "@tiptap/core": "^3.22.3",
     "@tiptap/vue-3": "^3.22.3",
@@ -36,6 +36,6 @@
     "@tiptap/extension-color": "^3.22.3"
   },
   "devDependencies": {
-    "@viseed/config": "workspace:*"
+    "@viseed/config": "0.1.0"
   }
 }

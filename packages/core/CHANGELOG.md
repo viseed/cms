@@ -1,5 +1,18 @@
 # @viseed/core
 
+## 0.3.0
+
+### Minor Changes
+
+- Update docs
+
+### Patch Changes
+
+- Updated dependencies
+  - @viseed/schema@0.3.0
+  - @viseed/types@0.3.0
+  - @viseed/validator@0.3.0
+
 ## 0.2.4
 
 ### Patch Changes

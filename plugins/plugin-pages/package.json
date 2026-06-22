@@ -1,6 +1,6 @@
 {
   "name": "@viseed/plugin-pages",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "type": "module",
   "exports": {
     ".": {
@@ -25,17 +25,17 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "workspace:*"
+    "@viseed/types": "0.3.0"
   },
   "peerDependencies": {
-    "@viseed/core": "workspace:*",
-    "@viseed/validator": "workspace:*",
+    "@viseed/core": "0.3.0",
+    "@viseed/validator": "0.3.0",
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@viseed/config": "workspace:*",
-    "@viseed/core": "workspace:*",
-    "@viseed/validator": "workspace:*",
+    "@viseed/config": "0.1.0",
+    "@viseed/core": "0.3.0",
+    "@viseed/validator": "0.3.0",
     "drizzle-orm": "^0.44.0",
     "hono": "^4.7.0",
     "@vitejs/plugin-vue": "^5.2.0",

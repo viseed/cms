@@ -1,5 +1,17 @@
 # @viseed/registry
 
+## 0.3.0
+
+### Minor Changes
+
+- Update docs
+
+### Patch Changes
+
+- Updated dependencies
+  - @viseed/types@0.3.0
+  - @viseed/validator@0.3.0
+
 ## 0.2.3
 
 ### Patch Changes
