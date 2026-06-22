@@ -24,14 +24,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "0.3.0"
+    "@viseed/types": "workspace:*"
   },
   "peerDependencies": {
-    "@viseed/validator": "0.3.0"
+    "@viseed/validator": "workspace:*"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0",
-    "@viseed/validator": "0.3.0",
+    "@viseed/config": "workspace:*",
+    "@viseed/validator": "workspace:*",
     "hono": "^4.7.0"
   }
 }

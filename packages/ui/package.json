@@ -23,7 +23,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "0.3.0",
+    "@viseed/types": "workspace:*",
     "vue": "^3.5.0",
     "@tiptap/core": "^3.22.3",
     "@tiptap/vue-3": "^3.22.3",
@@ -36,6 +36,6 @@
     "@tiptap/extension-color": "^3.22.3"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0"
+    "@viseed/config": "workspace:*"
   }
 }

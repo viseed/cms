@@ -23,7 +23,7 @@
     "drizzle-kit": "^0.31.10"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0",
+    "@viseed/config": "workspace:*",
     "@types/node": "^25.5.0"
   }
 }

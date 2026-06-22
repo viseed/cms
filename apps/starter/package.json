@@ -9,15 +9,15 @@
     "build": "bun build src/index.ts --outdir dist --target bun"
   },
   "dependencies": {
-    "@viseed/core": "0.3.0",
-    "@viseed/plugin-auth": "2.0.0",
-    "@viseed/plugin-blog": "2.0.0",
-    "@viseed/plugin-common-widgets": "0.3.0",
-    "@viseed/plugin-menu": "1.1.0",
-    "@viseed/plugin-pages": "2.0.0"
+    "@viseed/core": "workspace:*",
+    "@viseed/plugin-auth": "workspace:*",
+    "@viseed/plugin-blog": "workspace:*",
+    "@viseed/plugin-common-widgets": "workspace:*",
+    "@viseed/plugin-menu": "workspace:*",
+    "@viseed/plugin-pages": "workspace:*"
   },
   "devDependencies": {
-    "@viseed/theme-blog": "0.2.0",
-    "@viseed/theme-insurance": "0.2.0"
+    "@viseed/theme-blog": "workspace:*",
+    "@viseed/theme-insurance": "workspace:*"
   }
 }

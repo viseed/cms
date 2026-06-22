@@ -22,9 +22,9 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "0.3.0"
+    "@viseed/types": "workspace:*"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0"
+    "@viseed/config": "workspace:*"
   }
 }

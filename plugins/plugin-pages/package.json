@@ -25,17 +25,17 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@viseed/types": "0.3.0"
+    "@viseed/types": "workspace:*"
   },
   "peerDependencies": {
-    "@viseed/core": "0.3.0",
-    "@viseed/validator": "0.3.0",
+    "@viseed/core": "workspace:*",
+    "@viseed/validator": "workspace:*",
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0",
-    "@viseed/core": "0.3.0",
-    "@viseed/validator": "0.3.0",
+    "@viseed/config": "workspace:*",
+    "@viseed/core": "workspace:*",
+    "@viseed/validator": "workspace:*",
     "drizzle-orm": "^0.44.0",
     "hono": "^4.7.0",
     "@vitejs/plugin-vue": "^5.2.0",

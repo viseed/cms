@@ -21,12 +21,12 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@viseed/core": "0.3.0",
-    "@viseed/schema": "0.3.0",
-    "@viseed/types": "0.3.0",
-    "@viseed/validator": "0.3.0",
-    "@viseed/ui": "0.3.0",
-    "@viseed/registry": "0.3.0",
-    "@viseed/cli": "0.3.0"
+    "@viseed/core": "workspace:*",
+    "@viseed/schema": "workspace:*",
+    "@viseed/types": "workspace:*",
+    "@viseed/validator": "workspace:*",
+    "@viseed/ui": "workspace:*",
+    "@viseed/registry": "workspace:*",
+    "@viseed/cli": "workspace:*"
   }
 }

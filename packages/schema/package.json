@@ -25,7 +25,7 @@
     "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
-    "@viseed/config": "0.1.0",
-    "@viseed/types": "0.3.0"
+    "@viseed/config": "workspace:*",
+    "@viseed/types": "workspace:*"
   }
 }
