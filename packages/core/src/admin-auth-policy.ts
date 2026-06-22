@@ -83,7 +83,7 @@ export function getSessionToken(c: Context): string | null {
     }
   }
 
-  const cookieToken = getCookie(c, 'hana_admin_session')
+  const cookieToken = getCookie(c, 'viseed_admin_session')
   if (cookieToken?.trim()) {
     return cookieToken.trim()
   }

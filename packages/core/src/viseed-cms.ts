@@ -322,7 +322,7 @@ export class ViseedCMS {
     const activeRuntime = this.themeRuntimes.get(this.activeThemeName)
     if (!activeTheme || !activeRuntime) return null
 
-    const token = c.req.query('hana_preview') ?? getCookie(c, 'hana_preview')
+    const token = c.req.query('viseed_preview') ?? getCookie(c, 'viseed_preview')
     if (token) {
       const db = this.getDatabase()
       const [row] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
@@ -355,7 +355,7 @@ export class ViseedCMS {
   }
 
   private clearThemePreviewCookie(c: Context): void {
-    setCookie(c, 'hana_preview', '', { path: '/', maxAge: 0 })
+    setCookie(c, 'viseed_preview', '', { path: '/', maxAge: 0 })
   }
 
   private async clearThemePreviewState(c: Context) {

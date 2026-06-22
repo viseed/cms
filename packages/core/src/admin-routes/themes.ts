@@ -163,7 +163,7 @@ function handleSetThemePreview(ctx: AdminThemeContext): Handler {
     }
 
     if (b.skipCookie !== true) {
-      setCookie(c, 'hana_preview', token, {
+      setCookie(c, 'viseed_preview', token, {
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
@@ -172,7 +172,7 @@ function handleSetThemePreview(ctx: AdminThemeContext): Handler {
     }
 
     const url = new URL(c.req.url)
-    const previewQueryExample = `${url.origin}/?hana_preview=${encodeURIComponent(token)}`
+    const previewQueryExample = `${url.origin}/?viseed_preview=${encodeURIComponent(token)}`
 
     return c.json({
       message: 'Theme preview enabled for this browser.',

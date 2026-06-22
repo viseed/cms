@@ -107,7 +107,7 @@ function handleLogin(ctx: AdminAuthContext): Handler {
       expiresAt: new Date(Date.now() + ADMIN_SESSION_TTL_MS),
     })
 
-    setCookie(c, 'hana_admin_session', token, {
+    setCookie(c, 'viseed_admin_session', token, {
       path: '/',
       httpOnly: true,
       sameSite: 'Lax',
@@ -145,7 +145,7 @@ function handleLogout(ctx: AdminAuthContext): Handler {
       }
     }
 
-    setCookie(c, 'hana_admin_session', '', {
+    setCookie(c, 'viseed_admin_session', '', {
       path: '/',
       httpOnly: true,
       sameSite: 'Lax',

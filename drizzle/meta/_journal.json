@@ -15,6 +15,13 @@
       "when": 1776784588096,
       "tag": "0001_ancient_gorilla_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750603200000,
+      "tag": "0002_rename_hana_to_viseed",
+      "breakpoints": true
     }
   ]
 }

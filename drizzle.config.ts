@@ -12,6 +12,6 @@ export default defineConfig({
   ],
   out: './drizzle',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/viseed',
   },
 })
