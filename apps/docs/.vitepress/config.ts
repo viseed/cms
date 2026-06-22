@@ -47,6 +47,6 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/viseed-cms/viseed' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/viseed/cms' }],
   },
 })
