@@ -11,7 +11,7 @@
   "scripts": {
     "build": "turbo run build --filter=!@viseed/docs",
     "build:docs": "turbo run build --filter=@viseed/docs",
-    "build:plugins": "turbo run build --filter=\"./plugins/*\"",
+    "build:plugins": "turbo run build --filter='./plugins/*'",
     "clean": "turbo run clean && rimraf .turbo node_modules/.cache",
     "dev:docs": "turbo run dev --filter=@viseed/docs",
     "dev": "turbo run dev --filter=@viseed/schema --filter=@viseed/types --filter=@viseed/validator --filter=@viseed/core --filter=@viseed/admin --filter=@viseed/starter --filter=@viseed/theme-insurance",
