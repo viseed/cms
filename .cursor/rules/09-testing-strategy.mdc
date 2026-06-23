@@ -69,7 +69,14 @@ bun run test:integration # root: turbo run test:integration — cần DATABASE_U
 - **Chỉ package có test file mới khai báo script `test`** — `bun test` thoát code 1 khi `No tests found!`, làm fail cả `turbo run test`. Hiện có: `@viseed/core`, `@viseed/validator`, `@viseed/registry`, `@viseed/plugin-blog`. Khi thêm test file đầu tiên vào một package, nhớ thêm lại script `test` (và `test:unit`/`test:integration` nếu cần).
 - Chỉ package có integration test mới khai báo script `test:integration` (`@viseed/core`, `@viseed/plugin-blog`).
 
+## CI
+
+- Workflow `.github/workflows/ci.yml` chạy khi push `master` và mọi PR: `bun install` → `bun run test` (turbo run test, đã depend `build`).
+- Badge CI pass/fail dùng native GitHub Actions (`.../actions/workflows/ci.yml/badge.svg`) trên README — KHÔNG dùng coverage service (Codecov/Coveralls) hay coverage badge.
+- KHÔNG chạy `biome check` trong CI hiện tại (repo còn nhiều lỗi lint chưa cleanup → luôn đỏ).
+
 ## Last updated
 
 2026-06-23 — Initial creation: test-first cho code mới, tách unit/integration, skipIf cho integration.
 2026-06-23 — Quy ước: chỉ package có test file mới khai báo script `test` (tránh `No tests found!` fail turbo).
+2026-06-23 — Thêm CI `ci.yml` (test trên push master + PR) + badge CI native; bỏ ý tưởng coverage chi tiết.

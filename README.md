@@ -1,5 +1,7 @@
 ﻿# Viseed CMS
 
+[![CI](https://github.com/viseed/cms/actions/workflows/ci.yml/badge.svg)](https://github.com/viseed/cms/actions/workflows/ci.yml)
+
 A lightweight, extensible CMS framework built on **Hono** + **Drizzle** + **Vue 3** for the **Bun** runtime.
 
 ## Architecture
