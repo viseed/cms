@@ -18,8 +18,7 @@
   "scripts": {
     "dev": "bunup --watch",
     "build": "bunup",
-    "clean": "rimraf dist",
-    "test": "bun test"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@viseed/types": "workspace:*"

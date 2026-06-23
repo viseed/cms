@@ -18,8 +18,7 @@
     "build": "bunup --no-dts && tsc -p tsconfig.build.json",
     "clean": "rimraf dist",
     "dev": "bunup --no-dts --watch",
-    "dev:post": "tsc --watch -p tsconfig.build.json",
-    "test": "bun test"
+    "dev:post": "tsc --watch -p tsconfig.build.json"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.0"

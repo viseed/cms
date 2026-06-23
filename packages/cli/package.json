@@ -16,8 +16,7 @@
   "scripts": {
     "dev": "bunup --watch",
     "build": "bunup",
-    "clean": "rimraf dist",
-    "test": "bun test"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "drizzle-kit": "^0.31.10"

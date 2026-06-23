@@ -16,6 +16,8 @@
     "dev:docs": "turbo run dev --filter=@viseed/docs",
     "dev": "turbo run dev --filter=@viseed/schema --filter=@viseed/types --filter=@viseed/validator --filter=@viseed/core --filter=@viseed/admin --filter=@viseed/starter --filter=@viseed/theme-insurance",
     "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

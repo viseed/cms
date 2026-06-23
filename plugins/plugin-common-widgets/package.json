@@ -17,8 +17,7 @@
     "build": "bunup && bun run build-admin.ts && bun run build-public.ts",
     "build:admin": "bun run build-admin.ts",
     "build:public": "bun run build-public.ts",
-    "clean": "rimraf dist",
-    "test": "bun test"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@viseed/types": "workspace:*"

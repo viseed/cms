@@ -16,8 +16,7 @@
   "scripts": {
     "build": "bunup --no-dts && tsc -p tsconfig.build.json && bun run build-admin.ts",
     "build:admin": "bun run build-admin.ts",
-    "clean": "rimraf dist",
-    "test": "bun test"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@viseed/types": "workspace:*"

@@ -6,8 +6,9 @@ import { createCMS } from './viseed-cms'
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed_test'
 const DEFAULT_SITE_ID = 'default'
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
 
-describe('admin runtime tenancy and guards', () => {
+describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
   test('rejects admin API requests without session token', async () => {
     const cms = createCMS({
       db: { driver: 'postgres', url: DATABASE_URL },

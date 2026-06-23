@@ -3,6 +3,7 @@ import { createCMS } from '@viseed/core'
 import { blogPlugin } from './index'
 
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed_test'
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
 
 function createMultisiteCMS() {
   return createCMS({
@@ -12,7 +13,7 @@ function createMultisiteCMS() {
   })
 }
 
-describe('blog plugin site isolation', () => {
+describe.skipIf(!hasDatabaseUrl)('blog plugin site isolation', () => {
   test('blog routes resolve site context and include siteId in response', async () => {
     const cms = createMultisiteCMS()
     const app = await cms.launch()

@@ -1,0 +1,75 @@
+---
+description: Testing strategy — Test-first cho code mới, quy ước unit vs integration, lệnh chạy test
+globs: ["**/*.test.ts", "**/*.integration.test.ts"]
+alwaysApply: false
+---
+
+# Testing Strategy — Viseed CMS
+
+> Test runner là `bun test` (xem `02-tooling-stack`). KHÔNG dùng vitest/jest/mocha.
+
+## Test-first (TDD) — Bắt buộc cho code mới
+
+Khi thêm **mới** các phần dưới đây, PHẢI viết test **trước** khi (hoặc cùng PR với) code:
+
+| Vùng | Lý do |
+|---|---|
+| Validator mới trong `packages/validator/` | Là "firewall" dữ liệu — mọi route đi qua. Test thuần `schema.safeParse`, không cần I/O |
+| Hook mới trong `HookRegistry` / `CMSPluginHooks` (`packages/core/src/hook-registry.ts`) | Logic waterfall chạy mỗi request, dễ regression |
+| Pure logic mới trong `packages/core` (vd: `toc.ts`, `seo-head.ts`, `site-resolver` helpers) | Input → output thuần, test rẻ và ổn định |
+| Integrity / security helper mới trong `packages/registry` | Sai sót ảnh hưởng chuỗi tin cậy plugin |
+
+**Khuyến khích (không bắt buộc):** Vue components trong `apps/admin`, code wiring/glue thuần.
+
+## Quy ước đặt tên
+
+| Pattern | Loại | Phụ thuộc | Khi nào chạy |
+|---|---|---|---|
+| `*.test.ts` | Unit | KHÔNG I/O (DB, network, fs) | Mọi lúc, không cần hạ tầng |
+| `*.integration.test.ts` | Integration | Cần PostgreSQL / network | Chỉ khi có `DATABASE_URL` |
+
+- Đặt test cạnh source (`foo.ts` → `foo.test.ts`).
+- Import từ `bun:test`: `import { describe, expect, test } from 'bun:test'`.
+- Style theo Biome: single quote, no semicolon, 2-space indent (xem `07-coding-standards`).
+
+## Integration test — Bắt buộc skip rõ ràng
+
+Integration test PHẢI tự skip khi thiếu env, KHÔNG được `return` âm thầm (gây false-positive):
+
+```typescript
+// ✅ Đúng — skip hiện rõ trong report
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
+describe.skipIf(!hasDatabaseUrl)('blog plugin site isolation', () => { ... })
+
+// ✅ Hoặc ở cấp test
+test.skipIf(!process.env.DATABASE_URL)('creates a database instance', async () => { ... })
+
+// ❌ Sai — giả vờ pass khi không có DB
+test('...', async () => {
+  if (!process.env.DATABASE_URL) return
+})
+```
+
+## Definition of Done
+
+- Feature mới = code + test trong **cùng PR**.
+- Unit test phải xanh mà không cần DB/network/secrets.
+- Integration test phải `skipIf` khi thiếu env; cấm swallow lỗi.
+
+## Lệnh chạy
+
+```bash
+bun test                 # trong 1 package: chạy tất cả (integration tự skip nếu không có DATABASE_URL)
+bun run test:unit        # root: turbo run test:unit — build-independent, nhanh
+bun run test:integration # root: turbo run test:integration — cần DATABASE_URL (depends build)
+```
+
+- `test:unit` (turbo) **không** depend `build` → vòng feedback nhanh.
+- `test:integration` (turbo) depend `build` và yêu cầu `DATABASE_URL`.
+- **Chỉ package có test file mới khai báo script `test`** — `bun test` thoát code 1 khi `No tests found!`, làm fail cả `turbo run test`. Hiện có: `@viseed/core`, `@viseed/validator`, `@viseed/registry`, `@viseed/plugin-blog`. Khi thêm test file đầu tiên vào một package, nhớ thêm lại script `test` (và `test:unit`/`test:integration` nếu cần).
+- Chỉ package có integration test mới khai báo script `test:integration` (`@viseed/core`, `@viseed/plugin-blog`).
+
+## Last updated
+
+2026-06-23 — Initial creation: test-first cho code mới, tách unit/integration, skipIf cho integration.
+2026-06-23 — Quy ước: chỉ package có test file mới khai báo script `test` (tránh `No tests found!` fail turbo).

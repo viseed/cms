@@ -18,7 +18,8 @@
     "dev": "bunup --no-dts --watch",
     "dev:post": "tsc --watch -p tsconfig.build.json",
     "clean": "rimraf dist",
-    "test": "bun test"
+    "test": "bun test",
+    "test:unit": "bun test"
   },
   "dependencies": {
     "zod": "^3.24.0"

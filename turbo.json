@@ -25,6 +25,10 @@
     "test": {
       "dependsOn": ["build"]
     },
+    "test:unit": {},
+    "test:integration": {
+      "dependsOn": ["build"]
+    },
     "lint": {
       "dependsOn": ["^build"]
     },

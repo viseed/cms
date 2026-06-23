@@ -18,8 +18,7 @@
     "build": "bunup",
     "dev": "bunup --no-dts --watch",
     "dev:post": "tsc --watch -p tsconfig.build.json",
-    "clean": "rimraf dist",
-    "test": "bun test"
+    "clean": "rimraf dist"
   },
   "peerDependencies": {
     "hono": "^4.7.0"
