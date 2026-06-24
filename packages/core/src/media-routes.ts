@@ -6,7 +6,12 @@ import type { DatabaseInstance } from './database'
 import { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 
 export interface MediaRouteOptions {
-  storage?: StorageAdapter
+  /**
+   * Resolves the active storage adapter at request time. Using a getter (not a
+   * fixed instance) lets the CMS hot-swap the adapter without re-registering
+   * routes.
+   */
+  getAdapter?: () => StorageAdapter
   maxFileSizeMb?: number
 }
 
@@ -80,7 +85,8 @@ export function setupMediaRoutes(
   options?: MediaRouteOptions,
 ): void {
   const media = new Hono()
-  const adapter = options?.storage ?? new LocalStorageAdapter()
+  const fallbackAdapter = new LocalStorageAdapter()
+  const getAdapter = options?.getAdapter ?? (() => fallbackAdapter)
   const maxBytes = (options?.maxFileSizeMb ?? 10) * 1024 * 1024
 
   // GET /api/media — list files for site with search + pagination
@@ -96,6 +102,7 @@ export function setupMediaRoutes(
 
     const { site } = helpers.resolveRequestContext(c)
 
+    const adapter = getAdapter()
     const baseUrl = resolveBaseUrl(c)
 
     const baseCondition = eq(mediaFiles.siteId, site.id)
@@ -144,6 +151,13 @@ export function setupMediaRoutes(
 
     if (!found) return c.json({ error: 'Not found' }, 404)
 
+    const adapter = getAdapter()
+
+    // Remote adapters (S3/R2) serve files directly from their public/CDN URL.
+    if (!adapter.isLocal()) {
+      return c.redirect(adapter.getUrl(found.path, site.id), 302)
+    }
+
     const bunFile = Bun.file(found.path)
     if (!(await bunFile.exists())) {
       return c.json({ error: 'File not found on disk' }, 404)
@@ -190,6 +204,7 @@ export function setupMediaRoutes(
 
     const { site, actor } = helpers.resolveRequestContext(c)
 
+    const adapter = getAdapter()
     const baseUrl = resolveBaseUrl(c)
 
     const inserted: object[] = []
@@ -199,7 +214,7 @@ export function setupMediaRoutes(
       const fileName = slugify(file.name)
       const uniqueName = `${Date.now()}-${fileName}`
       const buffer = await file.arrayBuffer()
-      const path = await adapter.save(uniqueName, buffer, site.id)
+      const path = await adapter.save(uniqueName, buffer, site.id, file.type)
       const autoSlug = await generateUniqueSlug(db, site.id, fileName)
 
       await db.insert(mediaFiles).values({
@@ -233,6 +248,7 @@ export function setupMediaRoutes(
 
     const fileId = c.req.param('id')
     const { site, actor } = helpers.resolveRequestContext(c)
+    const adapter = getAdapter()
 
     const [existing] = await db
       .select()
@@ -270,7 +286,7 @@ export function setupMediaRoutes(
       }
       const uniqueName = `${Date.now()}-${newFile.name}`
       const buffer = await newFile.arrayBuffer()
-      const newPath = await adapter.save(uniqueName, buffer, site.id)
+      const newPath = await adapter.save(uniqueName, buffer, site.id, newFile.type)
 
       try {
         await adapter.delete(existing.path)
@@ -308,6 +324,7 @@ export function setupMediaRoutes(
 
     const fileId = c.req.param('id')
     const { site } = helpers.resolveRequestContext(c)
+    const adapter = getAdapter()
 
     const [existing] = await db.select().from(mediaFiles).where(eq(mediaFiles.id, fileId))
 

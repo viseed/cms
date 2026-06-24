@@ -20,10 +20,17 @@ export { DashboardWidgetRegistry } from './dashboard-widget-registry'
 export { createDatabase, type DatabaseInstance } from './database'
 export { HookRegistry } from './hook-registry'
 export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
-export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
+export {
+  createStorageAdapter,
+  LocalStorageAdapter,
+  type StorageAdapter,
+  type StorageConfig,
+  type StorageType,
+} from './media-storage'
 export { PluginRouteRegistry } from './plugin-route-registry'
 export { renderBody, renderBodyWithToc } from './render-body'
 export { createLayoutHelpers, renderSeoHead } from './seo-head'
+export { StorageProviderRegistry } from './storage-provider-registry'
 export {
   computeThemeAssetFingerprint,
   createThemeRuntime,

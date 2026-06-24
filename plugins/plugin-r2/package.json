@@ -1,0 +1,27 @@
+{
+  "name": "@viseed/plugin-r2",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "bunup",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
+    "@viseed/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@viseed/config": "workspace:*"
+  }
+}

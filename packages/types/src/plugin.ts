@@ -1,5 +1,5 @@
 import type { Context, Hono } from 'hono'
-import type { HOOK_KEY, Permission, RequestContext, ViseedCMS } from './cms'
+import type { HOOK_KEY, Permission, RequestContext, StorageProviderDef, ViseedCMS } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
@@ -117,6 +117,8 @@ export interface CMSPlugin {
   dashboardWidgets?: DashboardWidgetDef[]
   /** Public-facing ESM bundle (Vue widget renderers for CSR hydration) */
   public?: PluginPublicConfig
+  /** Media storage providers this plugin contributes (e.g. S3, R2) */
+  storageProviders?: StorageProviderDef[]
 }
 
 export interface CMSPluginHooks {

@@ -13,7 +13,7 @@ export interface AdminPluginContext {
   getDatabase: () => DatabaseInstance
   plugins: CMSPlugin[]
   pluginRegistry: PluginRouteRegistry
-  rebuildWidgetTypeRegistry: () => void
+  rebuildRegistries: () => void
   hooks: HookRegistry
   cms: ViseedCMS
 }
@@ -172,7 +172,7 @@ function handleEnablePlugin(ctx: AdminPluginContext): Handler {
     }
 
     ctx.pluginRegistry.activate(name)
-    ctx.rebuildWidgetTypeRegistry()
+    ctx.rebuildRegistries()
 
     const db = ctx.getDatabase()
     await db
@@ -208,7 +208,7 @@ function handleDisablePlugin(ctx: AdminPluginContext): Handler {
     }
 
     ctx.pluginRegistry.deactivate(name)
-    ctx.rebuildWidgetTypeRegistry()
+    ctx.rebuildRegistries()
 
     const db = ctx.getDatabase()
     await db

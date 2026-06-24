@@ -14,7 +14,8 @@
     "@viseed/plugin-blog": "workspace:*",
     "@viseed/plugin-common-widgets": "workspace:*",
     "@viseed/plugin-menu": "workspace:*",
-    "@viseed/plugin-pages": "workspace:*"
+    "@viseed/plugin-pages": "workspace:*",
+    "@viseed/plugin-s3": "workspace:*"
   },
   "devDependencies": {
     "@viseed/theme-blog": "workspace:*",

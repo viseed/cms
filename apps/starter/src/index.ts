@@ -4,13 +4,14 @@ import { blogPlugin } from '@viseed/plugin-blog'
 import { commonWidgetsPlugin } from '@viseed/plugin-common-widgets'
 import { menuPlugin } from '@viseed/plugin-menu'
 import { pagesPlugin } from '@viseed/plugin-pages'
+import { s3Plugin } from '@viseed/plugin-s3'
 import { blogTheme } from '@viseed/theme-blog'
 import { insuranceTheme } from '@viseed/theme-insurance'
 
 const cms = createCMS({
   db: {
     driver: 'postgres',
-    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana',
+    url: process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/viseed',
   },
   themes: [blogTheme(), insuranceTheme()],
   defaultTheme: 'blog',
@@ -21,6 +22,7 @@ cms.use(blogPlugin())
 cms.use(commonWidgetsPlugin())
 cms.use(menuPlugin())
 cms.use(pagesPlugin())
+cms.use(s3Plugin())
 
 const app = await cms.launch()
 

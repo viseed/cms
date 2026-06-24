@@ -1,0 +1,7 @@
+{
+  "extends": "@viseed/config/tsconfig.lib.json",
+  "compilerOptions": {
+    "rootDir": "src"
+  },
+  "include": ["src"]
+}

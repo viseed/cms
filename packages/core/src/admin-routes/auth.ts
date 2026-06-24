@@ -8,6 +8,7 @@ import type { Context, Handler } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { getSessionToken } from '../admin-auth-policy'
 import type { DatabaseInstance } from '../database'
+import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 
 const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
 
@@ -257,6 +258,10 @@ function handleSetup(ctx: AdminAuthContext): Handler {
       siteId: SINGLE_SITE_CONTEXT.id,
       role: 'admin',
     })
+
+    if (!hasEncryptionKey()) {
+      generateAndActivateEncryptionKey()
+    }
 
     return c.json({ ok: true })
   }

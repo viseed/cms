@@ -169,7 +169,70 @@ export interface CMSConfig {
     uploadDir?: string
     /** Maximum allowed upload file size in megabytes. Defaults to 10. */
     maxFileSizeMb?: number
+    /**
+     * Initial/fallback storage configuration. Used to seed the DB-backed
+     * `media_storage_config` row on first boot. Once a row exists, the DB value
+     * wins and can be changed at runtime via the admin API.
+     */
+    storage?: MediaStorageConfig
   }
+}
+
+/**
+ * Resolved (decrypted) media storage configuration.
+ *
+ * `local` is the only provider built into core. Remote providers (S3, R2, …)
+ * are contributed by plugins via {@link StorageProviderDef}; their settings are
+ * stored generically as arbitrary string fields, so core never needs to know
+ * about a provider's specific parameters.
+ */
+export type MediaStorageConfig =
+  | { type: 'local'; uploadDir?: string }
+  | ({ type: string } & Record<string, unknown>)
+
+/**
+ * Storage backend abstraction. `local` is built into core; remote providers are
+ * supplied by plugins. Implementations live in core (Local) or in plugins (S3,
+ * R2, …) and are constructed via {@link StorageProviderDef.createAdapter}.
+ */
+export interface StorageAdapter {
+  save(filename: string, data: ArrayBuffer, siteId: string, contentType?: string): Promise<string>
+  delete(path: string): Promise<void>
+  getUrl(path: string, siteId: string): string
+  /** True when files live on the local filesystem and can be streamed from disk. */
+  isLocal(): boolean
+}
+
+/**
+ * Declarative description of a single configuration field for a storage
+ * provider. The admin Settings UI renders these dynamically, so a plugin can
+ * introduce any parameter without core-side changes ("extra field" support).
+ */
+export interface StorageProviderField {
+  /** Key persisted into the `media_storage_config.config` payload. */
+  name: string
+  label: string
+  type: 'text' | 'password'
+  required?: boolean
+  /** Encrypted at rest and masked in API responses. */
+  secret?: boolean
+  placeholder?: string
+  hint?: string
+}
+
+/**
+ * A storage provider contributed by a plugin (e.g. S3, R2). Core builds a
+ * registry from all active plugins' providers and uses it to render the admin
+ * form, validate input, encrypt secrets, and construct the adapter.
+ */
+export interface StorageProviderDef {
+  /** Unique provider key stored in `media_storage_config.type`, e.g. 's3'. */
+  type: string
+  /** Human-readable name shown in the admin provider dropdown, e.g. 'Amazon S3'. */
+  label: string
+  fields: StorageProviderField[]
+  /** Builds an adapter from the resolved (decrypted) config payload. */
+  createAdapter: (config: Record<string, unknown>) => StorageAdapter
 }
 
 export interface ViseedCMS {
