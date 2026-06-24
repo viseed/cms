@@ -1,5 +1,20 @@
 # @viseed/cms
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [d530e05]
+- Updated dependencies [7e8d4c1]
+- Updated dependencies [533ac4c]
+  - @viseed/schema@0.4.0
+  - @viseed/types@0.4.0
+  - @viseed/core@0.4.0
+  - @viseed/cli@0.4.0
+  - @viseed/registry@0.4.0
+  - @viseed/ui@0.4.0
+  - @viseed/validator@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes

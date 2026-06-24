@@ -1,6 +1,6 @@
 {
   "name": "@viseed/cli",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "bin": {
     "viseed": "./dist/index.js"

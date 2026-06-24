@@ -1,5 +1,16 @@
 # @viseed/plugin-pages
 
+## 3.0.0
+
+### Patch Changes
+
+- d530e05: refactor: re-format project by biome rules
+- Updated dependencies [d530e05]
+- Updated dependencies [533ac4c]
+  - @viseed/types@0.4.0
+  - @viseed/core@0.4.0
+  - @viseed/validator@0.3.0
+
 ## 2.0.0
 
 ### Minor Changes

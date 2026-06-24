@@ -1,5 +1,16 @@
 # @viseed/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 533ac4c: Add media plugins: plugin-s3, plugin-r2
+
+### Patch Changes
+
+- d530e05: refactor: re-format project by biome rules
+- 7e8d4c1: fix: sửa chuỗi user-facing `viseedbi` thành `viseed` (đúng bin name) trong CLI usage/help messages
+
 ## 0.3.0
 
 ### Minor Changes
