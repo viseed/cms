@@ -3,7 +3,7 @@
     <div class="settings-intro">
       <h2>Storage Provider</h2>
       <p class="subtitle">
-        Choose where uploaded media files are stored. Changes apply immediately — no restart needed.
+        Choose where uploaded media files are stored. Old media will not be moved automatically.
       </p>
     </div>
 
@@ -144,6 +144,8 @@ const values = reactive<Record<string, string>>({})
 // on first focus and avoid re-sending the mask accidentally.
 const maskedSecrets = reactive<Record<string, boolean>>({})
 const unavailableType = ref('')
+// Server-loaded config per provider type — restored when user switches back.
+const serverConfigs = new Map<string, Record<string, unknown>>()
 
 const allProviders = computed<ProviderDef[]>(() => [LOCAL_PROVIDER, ...providers.value])
 
@@ -186,7 +188,7 @@ function resetValues(forType: string, config: Record<string, unknown> = {}) {
 function onProviderChange() {
   unavailableType.value = ''
   message.value = ''
-  resetValues(type.value)
+  resetValues(type.value, serverConfigs.get(type.value) ?? {})
 }
 
 function onFieldFocus(field: ProviderField) {
@@ -253,6 +255,17 @@ async function loadConfig() {
   const savedType: string = data.type ?? 'local'
   const config: Record<string, unknown> = data.config ?? {}
 
+  // Populate serverConfigs for every provider returned by the server so that
+  // switching providers restores previously saved values without a round-trip.
+  const allConfigsFromServer = data.allConfigs as Record<string, Record<string, unknown>> | undefined
+  if (allConfigsFromServer && typeof allConfigsFromServer === 'object') {
+    for (const [providerType, providerConfig] of Object.entries(allConfigsFromServer)) {
+      serverConfigs.set(providerType, providerConfig)
+    }
+  } else {
+    serverConfigs.set(savedType, config)
+  }
+
   if (!allProviders.value.some((p) => p.type === savedType)) {
     unavailableType.value = savedType
   }
@@ -285,7 +298,16 @@ async function save() {
     if (!res.ok) throw new Error(data.error ?? `Save failed (${res.status})`)
     unavailableType.value = ''
     type.value = data.type ?? type.value
-    resetValues(type.value, data.config ?? {})
+    const savedConfig: Record<string, unknown> = data.config ?? {}
+    const allConfigsFromServer = data.allConfigs as Record<string, Record<string, unknown>> | undefined
+    if (allConfigsFromServer && typeof allConfigsFromServer === 'object') {
+      for (const [providerType, providerConfig] of Object.entries(allConfigsFromServer)) {
+        serverConfigs.set(providerType, providerConfig)
+      }
+    } else {
+      serverConfigs.set(type.value, savedConfig)
+    }
+    resetValues(type.value, savedConfig)
     setMessage('Storage configuration saved.', 'success')
   } catch (err) {
     setMessage(err instanceof Error ? err.message : 'Save failed', 'error')

@@ -7,9 +7,11 @@ import { createStorageAdapter, type StorageConfig } from '../media-storage'
 import {
   maskStoredConfig,
   prepareConfigForStorage,
+  readProviderConfigs,
   resolveStoredConfig,
   SECRET_MASK,
   type StorageConfigPayload,
+  writeProviderConfigs,
 } from '../media-storage-config'
 import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 import type { StorageProviderRegistry } from '../storage-provider-registry'
@@ -87,14 +89,39 @@ async function loadStoredRow(
   return { type: row.type, config: (row.config as StorageConfigPayload) ?? {} }
 }
 
+/**
+ * Returns masked configs for every provider that has a stored config.
+ * Used in both GET and PUT responses so the frontend can populate all
+ * provider fields without losing data when switching providers.
+ */
+function maskAllProviderConfigs(
+  allConfigs: Record<string, StorageConfigPayload>,
+  ctx: AdminMediaStorageContext,
+): Record<string, StorageConfigPayload> {
+  const result: Record<string, StorageConfigPayload> = {}
+  for (const [providerType, providerConfig] of Object.entries(allConfigs)) {
+    const sf =
+      providerType === 'local' ? [] : ctx.getProviderRegistry().secretFieldsOf(providerType)
+    result[providerType] = maskStoredConfig(providerConfig, sf)
+  }
+  return result
+}
+
 function handleGet(ctx: AdminMediaStorageContext): Handler {
   return async (c) => {
     const db = ctx.getDatabase()
     const stored = await loadStoredRow(db)
     const type = stored?.type ?? 'local'
-    const config = stored?.config ?? {}
+    const rawConfig = stored?.config ?? {}
+    const allConfigs = readProviderConfigs(rawConfig, type)
+    const activeConfig = allConfigs[type] ?? {}
     const secretFields = ctx.getProviderRegistry().secretFieldsOf(type)
-    return c.json({ type, config: maskStoredConfig(config, secretFields) })
+    const maskedAllConfigs = maskAllProviderConfigs(allConfigs, ctx)
+    return c.json({
+      type,
+      config: maskStoredConfig(activeConfig, secretFields),
+      allConfigs: maskedAllConfigs,
+    })
   }
 }
 
@@ -125,32 +152,46 @@ function handlePut(ctx: AdminMediaStorageContext): Handler {
     const existing = await loadStoredRow(db)
     const secretFields = registry.secretFieldsOf(parsed.value.type)
 
-    let stored: { type: string; config: StorageConfigPayload }
+    // Read the full per-provider config store so we can update only the
+    // active provider's entry without discarding other providers' configs.
+    const allConfigs = readProviderConfigs(existing?.config ?? {}, existing?.type ?? 'local')
+    const previousProviderConfig = allConfigs[parsed.value.type]
+
+    let prepared: { type: string; config: StorageConfigPayload }
     try {
-      stored = prepareConfigForStorage(parsed.value, secretFields, existing?.config)
+      prepared = prepareConfigForStorage(parsed.value, secretFields, previousProviderConfig)
     } catch (err) {
       return c.json({ error: (err as Error).message }, 400)
     }
+
+    // Merge the updated provider config back into the store.
+    allConfigs[prepared.type] = prepared.config
+    const newStoreConfig = writeProviderConfigs(allConfigs)
 
     const now = new Date()
     if (existing) {
       await db
         .update(mediaStorageConfig)
-        .set({ type: stored.type, config: stored.config, updatedAt: now })
+        .set({ type: prepared.type, config: newStoreConfig, updatedAt: now })
         .where(eq(mediaStorageConfig.id, ROW_ID))
     } else {
       await db
         .insert(mediaStorageConfig)
-        .values({ id: ROW_ID, type: stored.type, config: stored.config, updatedAt: now })
+        .values({ id: ROW_ID, type: prepared.type, config: newStoreConfig, updatedAt: now })
     }
 
     try {
-      ctx.applyConfig(resolveStoredConfig(stored.type, stored.config, secretFields))
+      ctx.applyConfig(resolveStoredConfig(prepared.type, prepared.config, secretFields))
     } catch (err) {
       return c.json({ error: (err as Error).message }, 400)
     }
 
-    return c.json({ type: stored.type, config: maskStoredConfig(stored.config, secretFields) })
+    const maskedAllConfigs = maskAllProviderConfigs(allConfigs, ctx)
+    return c.json({
+      type: prepared.type,
+      config: maskStoredConfig(prepared.config, secretFields),
+      allConfigs: maskedAllConfigs,
+    })
   }
 }
 
@@ -167,10 +208,14 @@ function handleTest(ctx: AdminMediaStorageContext): Handler {
     const existing = await loadStoredRow(db)
     const secretFields = registry.secretFieldsOf(parsed.value.type)
 
+    // Resolve secrets using only the stored config for this specific provider.
+    const allConfigs = readProviderConfigs(existing?.config ?? {}, existing?.type ?? 'local')
+    const previousProviderConfig = allConfigs[parsed.value.type]
+
     let resolved: MediaStorageConfig
     try {
-      const stored = prepareConfigForStorage(parsed.value, secretFields, existing?.config)
-      resolved = resolveStoredConfig(stored.type, stored.config, secretFields)
+      const prepared = prepareConfigForStorage(parsed.value, secretFields, previousProviderConfig)
+      resolved = resolveStoredConfig(prepared.type, prepared.config, secretFields)
     } catch (err) {
       return c.json({ ok: false, error: (err as Error).message }, 200)
     }
