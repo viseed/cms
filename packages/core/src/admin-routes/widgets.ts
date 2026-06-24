@@ -100,7 +100,10 @@ function handleCreateWidget(ctx: AdminWidgetContext): Handler {
       return c.json({ error: 'Field "type" is required.' }, 400)
     }
     if (!ctx.widgetTypeRegistry.has(type)) {
-      return c.json({ error: `Widget type "${type}" is not registered or plugin is inactive.` }, 400)
+      return c.json(
+        { error: `Widget type "${type}" is not registered or plugin is inactive.` },
+        400,
+      )
     }
 
     const requestContext = ctx.resolveRequestContext(c)

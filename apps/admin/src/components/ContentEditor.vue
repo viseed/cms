@@ -14,8 +14,8 @@ import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useMediaPicker } from '../composables/useMediaPicker'
-import { WidgetEmbedExtension } from './editor/widget-embed-extension'
 import WidgetInsertModal from './editor/WidgetInsertModal.vue'
+import { WidgetEmbedExtension } from './editor/widget-embed-extension'
 
 const COLOR_PALETTE = [
   '#000000',
@@ -113,11 +113,7 @@ async function addImage() {
 
 function insertTable() {
   if (!editor.value) return
-  editor.value
-    .chain()
-    .focus()
-    .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-    .run()
+  editor.value.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
 }
 
 function setTextColor(color: string) {
@@ -141,10 +137,14 @@ const showWidgetModal = ref(false)
 
 function insertWidget(widgetId: string, widgetType: string) {
   if (!editor.value) return
-  editor.value.chain().focus().insertContent({
-    type: 'widgetEmbed',
-    attrs: { widgetId, widgetType },
-  }).run()
+  editor.value
+    .chain()
+    .focus()
+    .insertContent({
+      type: 'widgetEmbed',
+      attrs: { widgetId, widgetType },
+    })
+    .run()
   showWidgetModal.value = false
 }
 </script>

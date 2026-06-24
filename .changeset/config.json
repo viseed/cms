@@ -4,7 +4,16 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    ["@viseed/core", "@viseed/schema", "@viseed/types", "@viseed/validator", "@viseed/ui", "@viseed/registry", "@viseed/cms", "@viseed/cli"],
+    [
+      "@viseed/core",
+      "@viseed/schema",
+      "@viseed/types",
+      "@viseed/validator",
+      "@viseed/ui",
+      "@viseed/registry",
+      "@viseed/cms",
+      "@viseed/cli"
+    ],
     ["@viseed/plugin-auth"],
     ["@viseed/plugin-blog"],
     ["@viseed/plugin-menu"],
@@ -15,10 +24,5 @@
   "access": "public",
   "baseBranch": "master",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@viseed/config",
-    "@viseed/admin",
-    "@viseed/docs",
-    "@viseed/starter"
-  ]
+  "ignore": ["@viseed/config", "@viseed/admin", "@viseed/docs", "@viseed/starter"]
 }

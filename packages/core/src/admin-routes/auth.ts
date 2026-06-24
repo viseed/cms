@@ -207,10 +207,7 @@ function handleSetup(ctx: AdminAuthContext): Handler {
       return c.json({ error: 'Admin name is required.' }, 400)
     }
 
-    const [existingSite] = await db
-      .select()
-      .from(sites)
-      .where(eq(sites.id, SINGLE_SITE_CONTEXT.id))
+    const [existingSite] = await db.select().from(sites).where(eq(sites.id, SINGLE_SITE_CONTEXT.id))
 
     if (!existingSite) {
       await db.insert(sites).values({

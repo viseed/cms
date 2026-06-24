@@ -57,7 +57,7 @@ function slugify(text: string): string {
   for (let i = 0, l = from.length; i < l; i++) {
     text = text.replace(RegExp(from[i] ?? '', 'gi'), to[i] ?? '')
   }
-  
+
   return text
     .toLowerCase()
     .trim()
@@ -167,7 +167,7 @@ async function savePost() {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}))
       throw new Error(err.error ?? `HTTP ${res.status}`)
-    } 
+    }
 
     // closeEditor()
     // await fetchPosts()

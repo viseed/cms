@@ -3,6 +3,7 @@
  * Run after migrate-hana-to-viseed.ts.
  */
 import { SQL } from 'bun'
+
 const rawUrl = process.env.DATABASE_URL ?? 'postgresql://postgres:admin@localhost:5432/hana'
 // Bun SQL nhận ssl options riêng, không qua URL
 const url = new URL(rawUrl)

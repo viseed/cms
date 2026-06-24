@@ -20,9 +20,7 @@ export function commonWidgetsPlugin(): CMSPlugin {
         publicComponent: 'TabsRenderer',
         defaultConfig: {
           orientation: 'horizontal',
-          tabs: [
-            { id: 'tab-1', title: 'Tab 1', content: '' },
-          ],
+          tabs: [{ id: 'tab-1', title: 'Tab 1', content: '' }],
         },
       },
       {
@@ -35,9 +33,7 @@ export function commonWidgetsPlugin(): CMSPlugin {
         previewComponent: 'QaRenderer',
         publicComponent: 'QaRenderer',
         defaultConfig: {
-          items: [
-            { id: 'qa-1', question: '', answer: '' },
-          ],
+          items: [{ id: 'qa-1', question: '', answer: '' }],
         },
       },
     ],

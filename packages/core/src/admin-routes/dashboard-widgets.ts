@@ -3,8 +3,8 @@ import { dashboardWidgets } from '@viseed/schema'
 import type { RequestContext } from '@viseed/types'
 import { and, asc, eq, inArray, max } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
-import type { DatabaseInstance } from '../database'
 import type { DashboardWidgetRegistry } from '../dashboard-widget-registry'
+import type { DatabaseInstance } from '../database'
 import type { PluginRouteRegistry } from '../plugin-route-registry'
 import type { RegisterAdminRoute } from './auth'
 
@@ -74,7 +74,10 @@ function handleCreateDashboardWidget(ctx: AdminDashboardWidgetContext): Handler 
 
     const def = ctx.dashboardWidgetRegistry.get(type)
     if (!def) {
-      return c.json({ error: `Dashboard widget "${type}" is not registered or plugin is inactive.` }, 400)
+      return c.json(
+        { error: `Dashboard widget "${type}" is not registered or plugin is inactive.` },
+        400,
+      )
     }
 
     const resolvedSize = typeof size === 'string' && size ? size : def.defaultSize
@@ -176,7 +179,9 @@ function handleReorderDashboardWidgets(ctx: AdminDashboardWidgetContext): Handle
     const owned = await db
       .select({ id: dashboardWidgets.id })
       .from(dashboardWidgets)
-      .where(and(eq(dashboardWidgets.siteId, siteId), inArray(dashboardWidgets.id, ids as string[])))
+      .where(
+        and(eq(dashboardWidgets.siteId, siteId), inArray(dashboardWidgets.id, ids as string[])),
+      )
     const ownedIds = new Set(owned.map((r) => r.id))
 
     const now = new Date()
@@ -217,10 +222,40 @@ export function registerDashboardWidgetRoutes(
   registerRoute: RegisterAdminRoute,
   context: AdminDashboardWidgetContext,
 ): void {
-  registerRoute('GET', '/dashboard-widget-types', 'site.content.read', handleListDashboardWidgetTypes(context))
-  registerRoute('GET', '/dashboard-widgets', 'site.content.read', handleListDashboardWidgets(context))
-  registerRoute('POST', '/dashboard-widgets', 'site.widgets.manage', handleCreateDashboardWidget(context))
-  registerRoute('PUT', '/dashboard-widgets/reorder', 'site.widgets.manage', handleReorderDashboardWidgets(context))
-  registerRoute('PUT', '/dashboard-widgets/:id', 'site.widgets.manage', handleUpdateDashboardWidget(context))
-  registerRoute('DELETE', '/dashboard-widgets/:id', 'site.widgets.manage', handleDeleteDashboardWidget(context))
+  registerRoute(
+    'GET',
+    '/dashboard-widget-types',
+    'site.content.read',
+    handleListDashboardWidgetTypes(context),
+  )
+  registerRoute(
+    'GET',
+    '/dashboard-widgets',
+    'site.content.read',
+    handleListDashboardWidgets(context),
+  )
+  registerRoute(
+    'POST',
+    '/dashboard-widgets',
+    'site.widgets.manage',
+    handleCreateDashboardWidget(context),
+  )
+  registerRoute(
+    'PUT',
+    '/dashboard-widgets/reorder',
+    'site.widgets.manage',
+    handleReorderDashboardWidgets(context),
+  )
+  registerRoute(
+    'PUT',
+    '/dashboard-widgets/:id',
+    'site.widgets.manage',
+    handleUpdateDashboardWidget(context),
+  )
+  registerRoute(
+    'DELETE',
+    '/dashboard-widgets/:id',
+    'site.widgets.manage',
+    handleDeleteDashboardWidget(context),
+  )
 }

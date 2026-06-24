@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, provide } from 'vue'
 import { useRoute } from 'vue-router'
+import MediaPickerModal from './components/MediaPickerModal.vue'
 import { useAdminSiteContext } from './composables/useAdminSiteContext'
 import { useMediaPicker } from './composables/useMediaPicker'
-import MediaPickerModal from './components/MediaPickerModal.vue'
 import AdminLayout from './layouts/AdminLayout.vue'
 
 const { activeSiteId } = useAdminSiteContext()

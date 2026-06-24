@@ -13,4 +13,3 @@ export const mediaFiles = pgTable('media_files', {
   uploadedBy: text('uploaded_by'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 })
-

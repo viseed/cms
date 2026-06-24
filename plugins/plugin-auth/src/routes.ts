@@ -1,6 +1,6 @@
 ﻿import type { CMSRouteContextHelpers } from '@viseed/types'
 import { loginSchema } from '@viseed/validator'
-import type { Hono, Context } from 'hono'
+import type { Context, Hono } from 'hono'
 
 export function setupAuthRoutes(_app: Hono, helpers: CMSRouteContextHelpers): void {
   const auth = helpers.createSubApp('/api/auth')

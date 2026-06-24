@@ -11,6 +11,7 @@ Thank you for considering a contribution to Viseed CMS. This guide covers everyt
 - [Project Structure](#project-structure)
 - [Dependency Graph](#dependency-graph)
 - [Development Workflow](#development-workflow)
+- [Contributing a Feature or Bug Fix](#contributing-a-feature-or-bug-fix)
 - [Adding a New Package or Plugin](#adding-a-new-package-or-plugin)
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
@@ -207,6 +208,146 @@ See the [Testing](#testing) section for test organisation conventions.
 
 ---
 
+## Contributing a Feature or Bug Fix
+
+This section walks you through the complete lifecycle of a contribution — from forking the repo to getting your PR merged. If you are new to open source, read this carefully before opening a PR.
+
+### Step 1 — Fork and clone
+
+If you are an external contributor, fork the repository first. If you have been added as a collaborator, clone directly.
+
+```bash
+# External contributor: fork on GitHub first, then clone your fork
+git clone https://github.com/<your-username>/cms.git
+cd cms
+
+# Add the upstream remote so you can stay up to date
+git remote add upstream https://github.com/viseed/cms.git
+
+# Internal collaborator: clone directly
+git clone https://github.com/viseed/cms.git
+cd cms
+```
+
+### Step 2 — Keep your fork up to date
+
+Before starting any new work, sync with the latest `master`:
+
+```bash
+git checkout master
+git pull upstream master   # or: git pull origin master (collaborators)
+```
+
+### Step 3 — Create a branch
+
+Branch off `master` with a short, descriptive name. Use the prefixes below:
+
+| Prefix | When to use |
+|--------|-------------|
+| `feat/` | New feature or enhancement |
+| `fix/` | Bug fix |
+| `docs/` | Documentation only |
+| `refactor/` | Code change with no feature or fix |
+| `chore/` | Tooling, config, CI, dependencies |
+| `test/` | Adding or fixing tests |
+
+```bash
+git checkout -b feat/plugin-hook-system
+git checkout -b fix/admin-login-redirect
+```
+
+### Step 4 — Make your changes
+
+- Follow the [Coding Standards](#coding-standards) section.
+- Keep commits focused. Each commit should represent one logical change.
+- You do not need perfectly clean commits at this stage — squash happens on merge.
+
+```bash
+git add .
+git commit -m "feat: add onBeforeRender hook to plugin registry"
+```
+
+### Step 5 — Run all checks locally
+
+Make sure everything passes before pushing. CI will run the same checks.
+
+```bash
+bun run lint        # Must produce zero errors
+bun test            # All tests must pass
+bun run build       # Build must succeed
+```
+
+If `lint:fix` can resolve issues automatically:
+
+```bash
+bun run lint:fix
+bun run format
+```
+
+### Step 6 — Add a changeset (required for published packages)
+
+If your change affects any package published to npm (anything under `packages/`, `plugins/`, or `themes/` that is not `private: true`), you must include a changeset.
+
+```bash
+bun run changeset
+```
+
+The interactive CLI will ask:
+1. **Which packages changed?** — use `space` to toggle, `enter` to confirm.
+2. **Bump type?** — `patch` for bug fixes, `minor` for new features, `major` for breaking changes.
+3. **Summary** — write a short user-facing description. This becomes the changelog entry.
+
+A file is created under `.changeset/`. Commit it alongside your code:
+
+```bash
+git add .changeset/
+git commit -m "chore: add changeset for plugin hook system"
+```
+
+> If your change is docs-only, a CI config tweak, or affects only private packages (`@viseed/admin`, `@viseed/docs`, `@viseed/starter`, `@viseed/config`), **skip this step**.
+
+### Step 7 — Push and open a pull request
+
+```bash
+git push -u origin feat/plugin-hook-system
+```
+
+Then open a pull request on GitHub against the `master` branch.
+
+**PR title format** — use the same prefix as your branch:
+
+```
+feat: add onBeforeRender hook to plugin registry
+fix: admin login redirect after session expiry
+docs: clarify plugin setup order in CONTRIBUTING
+```
+
+**PR description should include:**
+- What changed and why (not just what the diff shows).
+- Any breaking changes, with a migration note.
+- How to test the change manually if automated tests do not cover it.
+- Screenshots or logs for UI or CLI changes.
+
+### Step 8 — Respond to review feedback
+
+- Address each review comment with either a code change or a reply explaining your reasoning.
+- Push new commits to the same branch — the PR updates automatically.
+- Once all comments are resolved, re-request review if needed.
+- A maintainer will squash and merge your PR when it is approved.
+
+### Step 9 — After your PR is merged
+
+```bash
+# Pull the latest master
+git checkout master
+git pull upstream master
+
+# Delete your local branch (it is no longer needed)
+git branch -d feat/plugin-hook-system
+```
+
+---
+
 ## Adding a New Package or Plugin
 
 ### New core package (`packages/`)
@@ -309,7 +450,7 @@ The publish script (`scripts/publish-packages.ts`) resolves `workspace:*` to rea
 
 ## Submitting a Pull Request
 
-1. **Fork** the repository and create a feature branch from `main`:
+1. **Fork** the repository and create a feature branch from `master`:
    ```bash
    git checkout -b feat/my-feature
    ```
@@ -329,7 +470,7 @@ The publish script (`scripts/publish-packages.ts`) resolves `workspace:*` to rea
    ```
    Select the affected packages and choose the correct bump type (`patch`, `minor`, or `major`).
 
-5. Push and open a pull request against `main`. Describe:
+5. Push and open a pull request against `master`. Describe:
    - **What** changed and **why**.
    - Any breaking changes.
    - How to test the change manually if automated tests do not cover it.

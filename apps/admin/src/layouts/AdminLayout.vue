@@ -88,7 +88,7 @@ async function handleLogout() {
 
 async function handleClickMenuItem(event: MouseEvent, path: string) {
   if (event.ctrlKey || event.metaKey) {
-    const routeData = router.resolve(path);
+    const routeData = router.resolve(path)
     window.open(routeData.href, '_blank')
     return
   }

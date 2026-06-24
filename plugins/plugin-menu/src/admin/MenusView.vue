@@ -173,7 +173,10 @@ async function deleteMenu(menu: Menu) {
     if (selectedMenuId.value === menu.id) {
       selectedMenuId.value = menus.value[0]?.id ?? null
       if (selectedMenuId.value) await loadMenuItems(selectedMenuId.value)
-      else { flatItems.value = []; treeItems.value = [] }
+      else {
+        flatItems.value = []
+        treeItems.value = []
+      }
     }
   } catch {
     error.value = 'Failed to delete menu'

@@ -11,4 +11,3 @@ export const users = pgTable('viseed_users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
-

@@ -21,4 +21,3 @@ export const sessions = pgTable(
     siteTokenUnique: uniqueIndex('viseed_sessions_site_token_unique').on(table.siteId, table.token),
   }),
 )
-

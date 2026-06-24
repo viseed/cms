@@ -1,8 +1,13 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { installedThemes, themeState } from '@viseed/schema'
-import type { CMSPlugin, CMSRouteContextHelpers, CMSTheme, ViseedCMS } from '@viseed/types'
+import type {
+  CMSPlugin,
+  CMSRouteContextHelpers,
+  CMSTheme,
+  RequiredLayoutKey,
+  ViseedCMS,
+} from '@viseed/types'
 import { HOOK_KEY } from '@viseed/types'
-import type { RequiredLayoutKey } from '@viseed/types'
 import { eq } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { setCookie } from 'hono/cookie'
@@ -196,10 +201,7 @@ function handleInstallTheme(ctx: AdminThemeContext): Handler {
     if (!name) return c.json({ error: 'Theme name is required.' }, 400)
     const db = ctx.getDatabase()
 
-    const [existing] = await db
-      .select()
-      .from(installedThemes)
-      .where(eq(installedThemes.name, name))
+    const [existing] = await db.select().from(installedThemes).where(eq(installedThemes.name, name))
 
     if (existing) {
       return c.json({ error: `Theme "${name}" is already installed.` }, 409)
@@ -235,10 +237,7 @@ function handleUninstallTheme(ctx: AdminThemeContext): Handler {
       )
     }
 
-    const [existing] = await db
-      .select()
-      .from(installedThemes)
-      .where(eq(installedThemes.name, name))
+    const [existing] = await db.select().from(installedThemes).where(eq(installedThemes.name, name))
 
     if (!existing) {
       return c.json({ error: `Theme "${name}" is not installed.` }, 404)
@@ -300,10 +299,7 @@ function handleActivateTheme(ctx: AdminThemeContext): Handler {
       await ctx.hooks.run(HOOK_KEY.PLUGIN_DISABLED, previousTheme.companionPlugin.name)
     }
 
-    const [existingRow] = await db
-      .select()
-      .from(themeState)
-      .where(eq(themeState.siteId, 'default'))
+    const [existingRow] = await db.select().from(themeState).where(eq(themeState.siteId, 'default'))
 
     if (existingRow) {
       await db
@@ -408,11 +404,46 @@ export function registerThemeRoutes(
   registerRoute('GET', '/themes/active', 'platform.sites.read', handleGetActiveTheme(context))
   registerRoute('GET', '/themes/preview', 'platform.sites.read', handleGetThemePreview(context))
   registerRoute('POST', '/themes/preview', 'platform.sites.manage', handleSetThemePreview(context))
-  registerRoute('DELETE', '/themes/preview', 'platform.sites.manage', handleClearThemePreview(context))
-  registerRoute('POST', '/themes/preview/clear', 'platform.sites.manage', handleClearThemePreview(context))
-  registerRoute('POST', '/themes/:name/install', 'platform.sites.manage', handleInstallTheme(context))
-  registerRoute('POST', '/themes/:name/uninstall', 'platform.sites.manage', handleUninstallTheme(context))
-  registerRoute('POST', '/themes/:name/activate', 'platform.sites.manage', handleActivateTheme(context))
-  registerRoute('GET', '/themes/:name/settings', 'site.content.read', handleGetThemeSettings(context))
-  registerRoute('PUT', '/themes/:name/settings', 'site.content.write', handleUpdateThemeSettings(context))
+  registerRoute(
+    'DELETE',
+    '/themes/preview',
+    'platform.sites.manage',
+    handleClearThemePreview(context),
+  )
+  registerRoute(
+    'POST',
+    '/themes/preview/clear',
+    'platform.sites.manage',
+    handleClearThemePreview(context),
+  )
+  registerRoute(
+    'POST',
+    '/themes/:name/install',
+    'platform.sites.manage',
+    handleInstallTheme(context),
+  )
+  registerRoute(
+    'POST',
+    '/themes/:name/uninstall',
+    'platform.sites.manage',
+    handleUninstallTheme(context),
+  )
+  registerRoute(
+    'POST',
+    '/themes/:name/activate',
+    'platform.sites.manage',
+    handleActivateTheme(context),
+  )
+  registerRoute(
+    'GET',
+    '/themes/:name/settings',
+    'site.content.read',
+    handleGetThemeSettings(context),
+  )
+  registerRoute(
+    'PUT',
+    '/themes/:name/settings',
+    'site.content.write',
+    handleUpdateThemeSettings(context),
+  )
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { RichTextEditor } from '@viseed/ui/vue'
+import { ref } from 'vue'
 
 interface QaItem {
   id: string
@@ -26,9 +26,7 @@ function update(patch: Partial<QaConfig>) {
 }
 
 function updateItem(index: number, patch: Partial<QaItem>) {
-  const items = props.modelValue.items.map((it, i) =>
-    i === index ? { ...it, ...patch } : it,
-  )
+  const items = props.modelValue.items.map((it, i) => (i === index ? { ...it, ...patch } : it))
   update({ items })
 }
 

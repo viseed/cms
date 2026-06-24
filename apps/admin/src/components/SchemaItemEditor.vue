@@ -53,9 +53,7 @@ const propertyKeys = computed(() => {
   return Object.keys(props.modelValue).filter((k) => k !== '@type' && k !== '@id')
 })
 
-const usedPropertyIris = computed(() =>
-  propertyKeys.value.map((k) => `schema:${k}`),
-)
+const usedPropertyIris = computed(() => propertyKeys.value.map((k) => `schema:${k}`))
 
 function updateClass(newIri: string) {
   // Reset properties when class changes; keep @id if any

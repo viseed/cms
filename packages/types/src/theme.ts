@@ -1,4 +1,4 @@
-﻿import type { ViseedCMS, HOOK_KEY } from './cms'
+﻿import type { HOOK_KEY, ViseedCMS } from './cms'
 import type { CMSPlugin } from './plugin'
 import type { ThemeExtensionManifest } from './theme-extension-points'
 import type {

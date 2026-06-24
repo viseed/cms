@@ -27,8 +27,8 @@ const triggerRef = ref<HTMLButtonElement | null>(null)
 const dropdownRef = ref<HTMLDivElement | null>(null)
 const { position: dropdownPos } = useFloatingPosition(triggerRef, isOpen)
 
-const selectedClass = computed(() =>
-  allClasses.value.find((c) => c.iri === props.modelValue) ?? null,
+const selectedClass = computed(
+  () => allClasses.value.find((c) => c.iri === props.modelValue) ?? null,
 )
 
 const filteredClasses = computed(() => {
