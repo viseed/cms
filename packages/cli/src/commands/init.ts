@@ -15,7 +15,7 @@ const STARTER_PACKAGE_JSON = (name: string): string =>
         '@viseed/cms': 'latest',
         '@viseed/plugin-blog': 'latest',
         '@viseed/theme-blog': 'latest',
-        'pg': '^8.21.0',
+        pg: '^8.21.0',
       },
     },
     null,

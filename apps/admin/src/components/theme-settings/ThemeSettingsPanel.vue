@@ -106,7 +106,9 @@ async function saveSettings() {
       throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`)
     }
     saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
+    setTimeout(() => {
+      saveSuccess.value = false
+    }, 3000)
   } catch (err) {
     saveError.value = err instanceof Error ? err.message : 'Failed to save settings.'
   } finally {

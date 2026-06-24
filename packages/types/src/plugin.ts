@@ -1,5 +1,5 @@
 import type { Context, Hono } from 'hono'
-import type { ViseedCMS, HOOK_KEY, Permission, RequestContext } from './cms'
+import type { HOOK_KEY, Permission, RequestContext, ViseedCMS } from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 

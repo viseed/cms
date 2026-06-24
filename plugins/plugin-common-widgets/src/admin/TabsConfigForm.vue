@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { RichTextEditor } from '@viseed/ui/vue'
+import { computed, ref } from 'vue'
 
 interface Tab {
   id: string
@@ -38,9 +38,7 @@ function update(patch: Partial<NormalizedTabsConfig>) {
 }
 
 function updateTab(index: number, patch: Partial<Tab>) {
-  const tabs = normalized.value.tabs.map((t, i) =>
-    i === index ? { ...t, ...patch } : t,
-  )
+  const tabs = normalized.value.tabs.map((t, i) => (i === index ? { ...t, ...patch } : t))
   update({ tabs })
 }
 

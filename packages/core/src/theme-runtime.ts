@@ -3,8 +3,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { CMSTheme, LayoutContext, ThemeAssets } from '@viseed/types'
 import { Eta } from 'eta'
-import type { ViseedCMS } from './viseed-cms'
 import { createLayoutHelpers } from './seo-head'
+import type { ViseedCMS } from './viseed-cms'
 
 export interface ThemeRenderOptions {
   /** Absolute directory that contains `.eta` templates (see `resolveTemplateDirFromAbsoluteRoot`). */

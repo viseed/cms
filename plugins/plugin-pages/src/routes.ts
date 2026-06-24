@@ -2,7 +2,7 @@
 import type { CMSRouteContextHelpers } from '@viseed/types'
 import { contentQuerySchema, createContentSchema, updateContentSchema } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
-import type { Hono, Context } from 'hono'
+import type { Context, Hono } from 'hono'
 import { pages } from './schema'
 
 export function setupPagesRoutes(
@@ -57,7 +57,6 @@ export function setupPagesRoutes(
 
     const slug = c.req.param('slug') as string
     const { site } = helpers.resolveRequestContext(c)
-
 
     const [page] = await db
       .select()

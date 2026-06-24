@@ -16,14 +16,12 @@
   ThemeMenuItem,
   ThemeSettingsValue,
 } from '@viseed/types'
+export { DashboardWidgetRegistry } from './dashboard-widget-registry'
 export { createDatabase, type DatabaseInstance } from './database'
-export { createCMS, ViseedCMS } from './viseed-cms'
 export { HookRegistry } from './hook-registry'
 export { type MediaRouteOptions, setupMediaRoutes } from './media-routes'
 export { LocalStorageAdapter, type StorageAdapter } from './media-storage'
 export { PluginRouteRegistry } from './plugin-route-registry'
-export { WidgetTypeRegistry } from './widget-type-registry'
-export { DashboardWidgetRegistry } from './dashboard-widget-registry'
 export { renderBody, renderBodyWithToc } from './render-body'
 export { createLayoutHelpers, renderSeoHead } from './seo-head'
 export {
@@ -36,3 +34,5 @@ export {
   type ThemeRuntime,
 } from './theme-runtime'
 export { annotateHeadings, buildTocHtml, type TocHeading } from './toc'
+export { createCMS, ViseedCMS } from './viseed-cms'
+export { WidgetTypeRegistry } from './widget-type-registry'

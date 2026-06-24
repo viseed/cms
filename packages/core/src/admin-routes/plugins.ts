@@ -232,8 +232,28 @@ export function registerPluginRoutes(
   registerRoute('GET', '/plugins', 'platform.sites.read', handleListPlugins(context))
   registerRoute('GET', '/plugin-manifest', 'site.content.read', handleGetPluginManifest(context))
   registerRoute('GET', '/plugins/:name/ui.js', 'site.content.read', handleGetPluginBundle(context))
-  registerRoute('POST', '/plugins/:name/install', 'platform.sites.manage', handleInstallPlugin(context))
-  registerRoute('POST', '/plugins/:name/uninstall', 'platform.sites.manage', handleUninstallPlugin(context))
-  registerRoute('POST', '/plugins/:name/enable', 'platform.sites.manage', handleEnablePlugin(context))
-  registerRoute('POST', '/plugins/:name/disable', 'platform.sites.manage', handleDisablePlugin(context))
+  registerRoute(
+    'POST',
+    '/plugins/:name/install',
+    'platform.sites.manage',
+    handleInstallPlugin(context),
+  )
+  registerRoute(
+    'POST',
+    '/plugins/:name/uninstall',
+    'platform.sites.manage',
+    handleUninstallPlugin(context),
+  )
+  registerRoute(
+    'POST',
+    '/plugins/:name/enable',
+    'platform.sites.manage',
+    handleEnablePlugin(context),
+  )
+  registerRoute(
+    'POST',
+    '/plugins/:name/disable',
+    'platform.sites.manage',
+    handleDisablePlugin(context),
+  )
 }

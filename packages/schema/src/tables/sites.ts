@@ -17,4 +17,3 @@ export const sites = pgTable(
     slugUnique: uniqueIndex('viseed_sites_slug_unique').on(table.slug),
   }),
 )
-

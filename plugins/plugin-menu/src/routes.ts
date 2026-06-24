@@ -1,7 +1,7 @@
 ﻿import type { DatabaseInstance } from '@viseed/core'
 import type { CMSRouteContextHelpers } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
-import type { Hono, Context } from 'hono'
+import type { Context, Hono } from 'hono'
 import { menuItems, menus } from './schema'
 
 export function setupMenuRoutes(

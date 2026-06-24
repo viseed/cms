@@ -104,9 +104,7 @@ function rewriteManifest(manifest: PackageManifest, versions: Map<string, string
       if (!range.startsWith('workspace:')) continue
       const version = versions.get(depName)
       if (!version) {
-        throw new Error(
-          `Cannot resolve "${depName}": "${range}" — not a known workspace package.`,
-        )
+        throw new Error(`Cannot resolve "${depName}": "${range}" — not a known workspace package.`)
       }
       deps[depName] = resolveWorkspaceRange(range, version)
       changed = true

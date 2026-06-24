@@ -98,9 +98,7 @@ async function mountWidget(el: HTMLElement): Promise<void> {
 }
 
 async function init(): Promise<void> {
-  const placeholders = Array.from(
-    document.querySelectorAll<HTMLElement>('[data-widget-id]'),
-  )
+  const placeholders = Array.from(document.querySelectorAll<HTMLElement>('[data-widget-id]'))
 
   if (placeholders.length === 0) return
 

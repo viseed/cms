@@ -71,7 +71,7 @@ export function menuPlugin(): CMSPlugin {
       [HOOK_KEY.THEME_BEFORE_RENDER]: async (
         _layoutKey: string,
         data: Record<string, unknown>,
-        reqCtx: ThemeRenderRequestContext,
+        _reqCtx: ThemeRenderRequestContext,
       ) => {
         if (!db) return data
 

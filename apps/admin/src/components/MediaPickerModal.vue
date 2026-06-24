@@ -87,8 +87,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { adminFetch } from '../lib/admin-api'
 import { useMediaPicker } from '../composables/useMediaPicker'
+import { adminFetch } from '../lib/admin-api'
 
 interface MediaFile {
   id: string

@@ -131,10 +131,7 @@ function resolveSubject(context: LayoutContext): SeoSubject {
   const siteName =
     pickString(settings['general.siteName'], settings['general.siteTitle'], settings.siteTitle) ??
     'Viseed CMS'
-  const siteDescription = pickString(
-    settings['general.siteDescription'],
-    settings.siteDescription,
-  )
+  const siteDescription = pickString(settings['general.siteDescription'], settings.siteDescription)
 
   const post = data.post as Record<string, unknown> | undefined
   const page = data.page as Record<string, unknown> | undefined
@@ -151,7 +148,8 @@ function resolveSubject(context: LayoutContext): SeoSubject {
       title: `${title} — ${siteName}`,
       description,
       image: pickString(meta?.ogImage, readStr(post, 'coverImage')),
-      canonical: pickString(meta?.canonicalUrl) ?? `/post/${pickString(readStr(post, 'slug')) ?? ''}`,
+      canonical:
+        pickString(meta?.canonicalUrl) ?? `/post/${pickString(readStr(post, 'slug')) ?? ''}`,
       ogType: 'article',
       jsonLd: readSchemaOrg(post),
     }
@@ -245,10 +243,8 @@ export function renderSeoHead(context: LayoutContext): string {
 
   for (const item of subject.jsonLd) {
     if (!item || typeof item !== 'object') continue
-    const withContext = ('@context' in item) ? item : { '@context': 'https://schema.org', ...item }
-    push(
-      `<script type="application/ld+json">${escapeJsonLd(withContext)}</script>`,
-    )
+    const withContext = '@context' in item ? item : { '@context': 'https://schema.org', ...item }
+    push(`<script type="application/ld+json">${escapeJsonLd(withContext)}</script>`)
   }
 
   return lines.join('\n')

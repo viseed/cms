@@ -97,7 +97,10 @@ const ilDragOverIndex = ref<number | null>(null)
 function ilOnDragStart(index: number, e: Event) {
   ilDragIndex.value = index
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dt = (e as any).dataTransfer as { effectAllowed: string; setData(f: string, v: string): void } | null
+  const dt = (e as any).dataTransfer as {
+    effectAllowed: string
+    setData(f: string, v: string): void
+  } | null
   if (dt) {
     dt.effectAllowed = 'move'
     dt.setData('text/plain', String(index))

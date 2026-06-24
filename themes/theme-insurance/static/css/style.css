@@ -3,8 +3,8 @@
    Color scheme: Blue (#003087 primary, #0057B8 accent)
    ========================================================= */
 
-  /* ----- CSS Variables ----- */
-  :root {
+/* ----- CSS Variables ----- */
+:root {
   --color-primary: #cce9ff;
   --color-accent: #f1f1f1;
   --color-accent-light: #c8dcff;
@@ -1294,7 +1294,7 @@ button {
 }
 
 .toc::before {
-  content: 'Mục lục';
+  content: "Mục lục";
   display: block;
   font-weight: 700;
   font-size: 1rem;
@@ -1408,7 +1408,7 @@ button {
 }
 
 .tabs-widget .tab-content ul li::before {
-  content: '■';
+  content: "■";
   position: absolute;
   left: 0;
   top: 0.05em;

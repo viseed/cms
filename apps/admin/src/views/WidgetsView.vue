@@ -91,7 +91,11 @@ function openCreate() {
 
 function openEdit(widget: WidgetItem) {
   editingWidget.value = widget
-  form.value = { name: widget.name, type: widget.type, config: { ...(widget.config as Record<string, unknown>) } }
+  form.value = {
+    name: widget.name,
+    type: widget.type,
+    config: { ...(widget.config as Record<string, unknown>) },
+  }
   typeSearch.value = ''
   const wType = widgetTypes.value.find((t) => t.id === widget.type)
   if (wType) {

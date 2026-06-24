@@ -64,7 +64,9 @@ function buildFileUrl(
  * the `X-Forwarded-Proto` header and the original host via `X-Forwarded-Host`
  * (or the standard `Forwarded` header). We honour those when present.
  */
-function resolveBaseUrl(c: { req: { url: string; header: (name: string) => string | undefined } }): string {
+function resolveBaseUrl(c: {
+  req: { url: string; header: (name: string) => string | undefined }
+}): string {
   const requestUrl = new URL(c.req.url)
   const proto = c.req.header('x-forwarded-proto') ?? requestUrl.protocol.replace(/:$/, '')
   const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? requestUrl.host

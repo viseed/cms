@@ -1,13 +1,6 @@
 ﻿import { randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
-import {
-  installedPlugins,
-  sites,
-  themeState,
-  userSiteRoles,
-  users,
-  widgets,
-} from '@viseed/schema'
+import { installedPlugins, sites, themeState, userSiteRoles, users, widgets } from '@viseed/schema'
 import type {
   CMSConfig,
   CMSPlugin,
@@ -29,28 +22,26 @@ import {
   resolveSessionActorContext,
   setRequestContext,
 } from './admin-auth-policy'
+import { registerAuthRoutes } from './admin-routes/auth'
+import { registerDashboardWidgetRoutes } from './admin-routes/dashboard-widgets'
+import { registerPluginRoutes } from './admin-routes/plugins'
+import { registerThemeRoutes } from './admin-routes/themes'
+import { registerWidgetRoutes } from './admin-routes/widgets'
+import { DashboardWidgetRegistry } from './dashboard-widget-registry'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
 import { setupMediaRoutes } from './media-routes'
 import { LocalStorageAdapter } from './media-storage'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
-import { DashboardWidgetRegistry } from './dashboard-widget-registry'
-import { WidgetTypeRegistry } from './widget-type-registry'
+import { resolveValidatedPreviewRoot } from './theme-preview-path'
 import {
+  createThemeRuntime,
   resolveTemplateDirFromAbsoluteRoot,
   resolveThemeStaticDirFromRoot,
-  createThemeRuntime,
   type ThemeRuntime,
 } from './theme-runtime'
-import {
-  resolveValidatedPreviewRoot,
-} from './theme-preview-path'
-import { registerAuthRoutes } from './admin-routes/auth'
-import { registerPluginRoutes } from './admin-routes/plugins'
-import { registerThemeRoutes } from './admin-routes/themes'
-import { registerWidgetRoutes } from './admin-routes/widgets'
-import { registerDashboardWidgetRoutes } from './admin-routes/dashboard-widgets'
+import { WidgetTypeRegistry } from './widget-type-registry'
 
 const DEFAULT_LAYOUT_ROUTES: Record<string, string> = {
   home: '/',
@@ -774,7 +765,9 @@ export class ViseedCMS {
       getDatabase: () => this.getDatabase(),
       themeRegistry: this.themeRegistry,
       getActiveThemeName: () => this.activeThemeName,
-      setActiveThemeName: (name) => { this.activeThemeName = name },
+      setActiveThemeName: (name) => {
+        this.activeThemeName = name
+      },
       pluginRegistry: this.pluginRegistry,
       hooks: this.hooks,
       createRouteContextHelpers: () => this.createRouteContextHelpers(),
@@ -814,9 +807,10 @@ export class ViseedCMS {
     // Resolve vue's package root then pick the pre-built browser ESM file.
     // This avoids re-bundling Vue through Bun.build (which drops named exports).
     const vuePkgDir = resolve(Bun.resolveSync('vue/package.json', import.meta.dirname), '..')
-    const distFile = process.env.NODE_ENV === 'production'
-      ? 'dist/vue.esm-browser.prod.js'
-      : 'dist/vue.esm-browser.js'
+    const distFile =
+      process.env.NODE_ENV === 'production'
+        ? 'dist/vue.esm-browser.prod.js'
+        : 'dist/vue.esm-browser.js'
 
     const file = Bun.file(resolve(vuePkgDir, distFile))
     if (!(await file.exists())) {
@@ -1038,5 +1032,3 @@ export class ViseedCMS {
 export function createCMS(config: CMSConfig): ViseedCMS {
   return new ViseedCMS(config)
 }
-
-

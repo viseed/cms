@@ -98,9 +98,11 @@ async function loadAdapter(): Promise<SDOAdapterLike> {
   return adapterPromise
 }
 
-function safeGetTermSummary(
-  term: { getIRI: (t?: 'Compact') => string; getName: () => string | null; getDescription: () => string | null },
-): SchemaTermSummary {
+function safeGetTermSummary(term: {
+  getIRI: (t?: 'Compact') => string
+  getName: () => string | null
+  getDescription: () => string | null
+}): SchemaTermSummary {
   return {
     iri: term.getIRI('Compact'),
     label: term.getName() ?? term.getIRI('Compact'),
@@ -197,7 +199,19 @@ async function getEnumerationMembers(enumIri: string): Promise<SchemaTermSummary
   }
 }
 
-function classifyRange(rangeIri: string): 'text' | 'url' | 'number' | 'integer' | 'boolean' | 'date' | 'datetime' | 'time' | 'enum' | 'class' {
+function classifyRange(
+  rangeIri: string,
+):
+  | 'text'
+  | 'url'
+  | 'number'
+  | 'integer'
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'time'
+  | 'enum'
+  | 'class' {
   switch (rangeIri) {
     case 'schema:Text':
     case 'schema:CssSelectorType':

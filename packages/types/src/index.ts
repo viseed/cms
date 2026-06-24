@@ -4,7 +4,6 @@ export type {
   AuthContextPayload,
   CMSConfig,
   DatabaseConfig,
-  ViseedCMS,
   Permission,
   PermissionChecker,
   PermissionCheckInput,
@@ -12,6 +11,7 @@ export type {
   RequestContext,
   RoleAssignment,
   SiteContext,
+  ViseedCMS,
 } from './cms'
 export {
   checkPermission,
