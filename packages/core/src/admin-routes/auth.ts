@@ -1,6 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { sessions, siteDomains, sites, userSiteRoles, users } from '@viseed/schema'
-import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 import type { Permission, RequestContext } from '@viseed/types'
 import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@viseed/types'
 import { loginSchema } from '@viseed/validator'
@@ -9,6 +8,7 @@ import type { Context, Handler } from 'hono'
 import { setCookie } from 'hono/cookie'
 import { getSessionToken } from '../admin-auth-policy'
 import type { DatabaseInstance } from '../database'
+import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 
 const ADMIN_SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
 

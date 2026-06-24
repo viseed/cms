@@ -182,12 +182,8 @@
           "name": "viseed_installed_plugins_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_installed_plugins",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -349,12 +345,8 @@
           "name": "viseed_installed_themes_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_installed_themes",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -558,12 +550,8 @@
           "name": "viseed_sessions_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_sessions",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -571,12 +559,8 @@
           "name": "viseed_sessions_user_id_viseed_users_id_fk",
           "tableFrom": "viseed_sessions",
           "tableTo": "viseed_users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -673,12 +657,8 @@
           "name": "viseed_site_domains_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_site_domains",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -861,12 +841,8 @@
           "name": "viseed_theme_state_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_theme_state",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -941,12 +917,8 @@
           "name": "viseed_user_site_roles_user_id_viseed_users_id_fk",
           "tableFrom": "viseed_user_site_roles",
           "tableTo": "viseed_users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -954,12 +926,8 @@
           "name": "viseed_user_site_roles_site_id_viseed_sites_id_fk",
           "tableFrom": "viseed_user_site_roles",
           "tableTo": "viseed_sites",
-          "columnsFrom": [
-            "site_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["site_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1027,9 +995,7 @@
         "viseed_users_email_unique": {
           "name": "viseed_users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1137,10 +1103,7 @@
         "widgets_site_name_unique": {
           "name": "widgets_site_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "site_id",
-            "name"
-          ]
+          "columns": ["site_id", "name"]
         }
       },
       "policies": {},
