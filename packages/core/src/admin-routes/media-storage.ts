@@ -11,6 +11,7 @@ import {
   SECRET_MASK,
   type StorageConfigPayload,
 } from '../media-storage-config'
+import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 import type { StorageProviderRegistry } from '../storage-provider-registry'
 import type { RegisterAdminRoute } from './auth'
 
@@ -187,6 +188,20 @@ function handleTest(ctx: AdminMediaStorageContext): Handler {
   }
 }
 
+function handleEncryptionKeyStatus(): Handler {
+  return (c) => c.json({ configured: hasEncryptionKey() })
+}
+
+function handleGenerateEncryptionKey(): Handler {
+  return (c) => {
+    if (hasEncryptionKey()) {
+      return c.json({ ok: true, alreadyConfigured: true })
+    }
+    generateAndActivateEncryptionKey()
+    return c.json({ ok: true })
+  }
+}
+
 export function registerMediaStorageRoutes(
   registerRoute: RegisterAdminRoute,
   context: AdminMediaStorageContext,
@@ -200,4 +215,16 @@ export function registerMediaStorageRoutes(
   )
   registerRoute('PUT', '/media/storage-config', 'platform.sites.manage', handlePut(context))
   registerRoute('POST', '/media/storage-config/test', 'platform.sites.manage', handleTest(context))
+  registerRoute(
+    'GET',
+    '/media/encryption-key/status',
+    'platform.sites.read',
+    handleEncryptionKeyStatus(),
+  )
+  registerRoute(
+    'POST',
+    '/media/encryption-key/generate',
+    'platform.sites.manage',
+    handleGenerateEncryptionKey(),
+  )
 }

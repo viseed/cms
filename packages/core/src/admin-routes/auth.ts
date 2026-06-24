@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { sessions, siteDomains, sites, userSiteRoles, users } from '@viseed/schema'
+import { generateAndActivateEncryptionKey, hasEncryptionKey } from '../secret-cipher'
 import type { Permission, RequestContext } from '@viseed/types'
 import { SINGLE_SITE_CONTEXT, toAuthContextPayload } from '@viseed/types'
 import { loginSchema } from '@viseed/validator'
@@ -257,6 +258,10 @@ function handleSetup(ctx: AdminAuthContext): Handler {
       siteId: SINGLE_SITE_CONTEXT.id,
       role: 'admin',
     })
+
+    if (!hasEncryptionKey()) {
+      generateAndActivateEncryptionKey()
+    }
 
     return c.json({ ok: true })
   }

@@ -9,7 +9,32 @@
 
     <div v-if="loading" class="settings-loading">Loading current configuration…</div>
 
-    <form v-else class="settings-form" @submit.prevent="save">
+    <template v-else>
+      <div
+        class="encrypt-key-banner"
+        :class="encryptionKeyConfigured ? 'configured' : 'missing'"
+      >
+        <template v-if="encryptionKeyConfigured">
+        </template>
+        <template v-else>
+          <span class="key-icon">⚠️</span>
+          <span>
+            Encryption key is not set. S3 and R2 storage require an encryption key to protect
+            credentials at rest.
+          </span>
+          <button
+            type="button"
+            class="generate-key-btn"
+            :disabled="generatingKey"
+            @click="generateKey"
+          >
+            <span v-if="generatingKey">Generating…</span>
+            <span v-else>Generate Key</span>
+          </button>
+        </template>
+      </div>
+
+    <form class="settings-form" @submit.prevent="save">
       <div class="form-group">
         <label class="form-label" for="storage-type">Provider</label>
         <select id="storage-type" v-model="type" class="form-input" @change="onProviderChange">
@@ -64,6 +89,7 @@
         </button>
       </div>
     </form>
+    </template>
   </div>
 </template>
 
@@ -106,6 +132,8 @@ const LOCAL_PROVIDER: ProviderDef = {
 const loading = ref(true)
 const saving = ref(false)
 const testing = ref(false)
+const generatingKey = ref(false)
+const encryptionKeyConfigured = ref(false)
 const message = ref('')
 const messageType = ref<'success' | 'error'>('success')
 
@@ -180,6 +208,33 @@ function buildPayload(): Record<string, unknown> {
   return payload
 }
 
+async function loadEncryptionKeyStatus() {
+  try {
+    const res = await adminFetch('/api/admin/media/encryption-key/status')
+    if (!res.ok) return
+    const data = await res.json()
+    encryptionKeyConfigured.value = !!data.configured
+  } catch {
+    // non-critical — silently ignore
+  }
+}
+
+async function generateKey() {
+  generatingKey.value = true
+  message.value = ''
+  try {
+    const res = await adminFetch('/api/admin/media/encryption-key/generate', { method: 'POST' })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error((data as { error?: string }).error ?? `Failed (${res.status})`)
+    encryptionKeyConfigured.value = true
+    setMessage('Encryption key generated and saved to .env.', 'success')
+  } catch (err) {
+    setMessage(err instanceof Error ? err.message : 'Failed to generate key', 'error')
+  } finally {
+    generatingKey.value = false
+  }
+}
+
 async function loadProviders() {
   try {
     const res = await adminFetch('/api/admin/media/storage-config/providers')
@@ -208,7 +263,7 @@ async function loadConfig() {
 async function load() {
   loading.value = true
   try {
-    await loadProviders()
+    await Promise.all([loadProviders(), loadEncryptionKeyStatus()])
     await loadConfig()
   } catch (err) {
     setMessage(err instanceof Error ? err.message : 'Failed to load configuration', 'error')
@@ -364,6 +419,49 @@ onMounted(load)
 
 .test-btn:disabled,
 .save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.encrypt-key-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.encrypt-key-banner.configured {
+  /* background: #ecfdf5; */
+  /* color: #065f46; */
+  display: none;
+}
+
+.encrypt-key-banner.missing {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.key-icon {
+  flex-shrink: 0;
+}
+
+.generate-key-btn {
+  margin-left: auto;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #d97706;
+  border-radius: 6px;
+  background: #fff;
+  color: #92400e;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.generate-key-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

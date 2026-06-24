@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
+import { upsertEnvFile } from './env-file'
 
 /**
  * Reversible secret encryption for storage credentials (e.g. S3/R2
@@ -33,6 +34,34 @@ function getMasterKey(): Buffer {
 
   cachedKey = createHash('sha256').update(raw, 'utf8').digest()
   return cachedKey
+}
+
+/** Generates a cryptographically random 32-byte base64 string suitable for use as the master key. */
+export function generateEncryptionKey(): string {
+  return randomBytes(32).toString('base64')
+}
+
+/** Clears the in-process key cache so the next getMasterKey() call re-reads process.env. */
+export function clearCachedKey(): void {
+  cachedKey = null
+}
+
+/**
+ * Generates a new encryption key, writes it to the `.env` file, and activates it
+ * in the current process immediately (no restart needed). Logs a warning if the
+ * `.env` write fails but still activates the key for the running process.
+ *
+ * Safe to call only when `hasEncryptionKey()` returns false.
+ */
+export function generateAndActivateEncryptionKey(): void {
+  const key = generateEncryptionKey()
+  try {
+    upsertEnvFile('VISEED_ENCRYPTION_KEY', key)
+  } catch (err) {
+    console.warn('[EncryptionKey] Could not write VISEED_ENCRYPTION_KEY to .env:', err)
+  }
+  process.env['VISEED_ENCRYPTION_KEY'] = key
+  clearCachedKey()
 }
 
 /** Returns true when an encryption key is configured (without throwing). */
