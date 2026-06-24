@@ -1,7 +1,7 @@
 import { config } from 'dotenv'
 import { defineConfig } from 'drizzle-kit'
 
-config({ path: '.env.drizzle' })
+config({ path: '.env.drizzle', override: true })
 
 export default defineConfig({
   dialect: 'postgresql',
