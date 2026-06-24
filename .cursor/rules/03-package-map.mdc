@@ -72,7 +72,7 @@ packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-s
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
 packages/core/src/build.ts          → buildPluginAdmin() / buildPluginPublic() / buildPluginBundle() — Vite helpers for plugin admin + public bundles (@viseed/core/build subpath)
-packages/cli/src/commands/db.ts     → viseedbi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
+packages/cli/src/commands/db.ts     → viseed db push/generate/migrate (dynamic schema discovery + drizzle-kit)
 packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
@@ -89,6 +89,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-24 — Sửa cú pháp CLI trong mô tả `packages/cli/src/commands/db.ts`: `viseedbi db ...` -> `viseed db ...` (bin name đúng là `viseed`).
 2026-06-22 — Dashboard Widget system: bảng `dashboard_widgets` (per-site) trong `@viseed/schema` coreSchema; `DashboardWidgetRegistry` + dashboard-widget CRUD/reorder routes trong `@viseed/core`; `DashboardView.vue` (order 0) render grid 4 cột với dashboard widgets từ admin bundle; `plugin-blog` thêm dashboard widget demo `blog/recent-posts`.
 2026-06-22 — `@viseed/core/build` subpath added: `buildPluginAdmin()`, `buildPluginPublic()`, `buildPluginBundle()` — Vite helpers for plugin admin/public bundles. Vite devDeps added to core. All 6 plugin build scripts refactored to use helper.
 2026-06-10 — `@viseed/cli` chuyển từ private → **published** (bỏ `private`, bỏ khỏi changeset `ignore`, thêm vào linked group cùng `@viseed/cms`). Lý do: `@viseed/cms` externalize và re-export cli ở runtime nên cli phải publish, nếu không cài `@viseed/cms` sẽ thiếu dependency. Bundling cli vào cms không khả thi do bug Bun bundler trên Windows (backslash path panic). Các package `@viseed/config`, `@viseed/admin`, `@viseed/docs`, `@viseed/starter` vẫn private/ignored.

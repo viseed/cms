@@ -47,9 +47,9 @@ const app = await cms.launch()
 After adding a new plugin, update the database schema:
 
 ```bash
-bunx viseedbi db push      # development
-bunx viseedbi db generate  # production — generates migration files
-bunx viseedbi db migrate   # production — applies migrations
+bunx viseed db push      # development
+bunx viseed db generate  # production — generates migration files
+bunx viseed db migrate   # production — applies migrations
 ```
 
 ---
@@ -93,11 +93,11 @@ Adds standalone content pages.
 
 ## Using the CLI
 
-You can also install and uninstall plugins using the `viseedbi` CLI:
+You can also install and uninstall plugins using the `viseed` CLI:
 
 ```bash
-bunx viseedbi plugin install viseed-plugin-pages
-bunx viseedbi plugin uninstall viseed-plugin-pages
+bunx viseed plugin install viseed-plugin-pages
+bunx viseed plugin uninstall viseed-plugin-pages
 ```
 
 See the [CLI Reference](/guide/cli) for details.

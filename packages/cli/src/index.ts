@@ -12,7 +12,7 @@ async function main(): Promise<void> {
     case 'init': {
       const name = args[0]
       if (!name) {
-        console.error('Usage: viseedbi init <project-name>')
+        console.error('Usage: viseed init <project-name>')
         process.exit(1)
       }
       await initProject(name)
@@ -22,7 +22,7 @@ async function main(): Promise<void> {
     case 'db': {
       const subcommand = args[0]
       if (!subcommand) {
-        console.error('Usage: viseedbi db <push|generate|migrate>')
+        console.error('Usage: viseed db <push|generate|migrate>')
         process.exit(1)
       }
       await runDbCommand(subcommand)
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     }
 
     case 'migrate': {
-      console.log('Note: "viseedbi migrate" is deprecated. Use "viseedbi db migrate" instead.')
+      console.log('Note: "viseed migrate" is deprecated. Use "viseed db migrate" instead.')
       await runDbCommand('migrate')
       break
     }
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: viseedbi plugin <install|uninstall> <package-name>')
+        console.error('Usage: viseed plugin <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -57,7 +57,7 @@ async function main(): Promise<void> {
       const action = args[0]
       const packageName = args[1]
       if (!action || !packageName) {
-        console.error('Usage: viseedbi theme <install|uninstall> <package-name>')
+        console.error('Usage: viseed theme <install|uninstall> <package-name>')
         process.exit(1)
       }
       if (action === 'install') {
@@ -72,7 +72,7 @@ async function main(): Promise<void> {
     }
 
     default:
-      console.log('Viseedbi CMS CLI')
+      console.log('Viseed CMS CLI')
       console.log('')
       console.log('Commands:')
       console.log('  init <name>                     Create a new Viseed CMS project')

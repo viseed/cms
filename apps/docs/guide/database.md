@@ -37,14 +37,14 @@ postgresql://user:pass@host:5432/db?sslmode=verify-full&sslrootcert=./ca-certifi
 
 ## Schema Management
 
-Use the `viseedbi db` commands to manage your database schema. The CLI automatically discovers the core schema plus schemas from all installed `viseed-plugin-*` packages.
+Use the `viseed db` commands to manage your database schema. The CLI automatically discovers the core schema plus schemas from all installed `viseed-plugin-*` packages.
 
 ### Development
 
 Push your current schema directly to the database. This is the fastest way to iterate during development — no migration files are generated.
 
 ```bash
-bunx viseedbi db push
+bunx viseed db push
 ```
 
 ::: warning
@@ -56,27 +56,27 @@ bunx viseedbi db push
 Generate SQL migration files that can be reviewed and committed to source control:
 
 ```bash
-bunx viseedbi db generate
+bunx viseed db generate
 ```
 
 Apply pending migrations to the database:
 
 ```bash
-bunx viseedbi db migrate
+bunx viseed db migrate
 ```
 
 The recommended production workflow:
 
 ```bash
 # 1. Generate migration files (in CI or locally)
-bunx viseedbi db generate
+bunx viseed db generate
 
 # 2. Review generated files in drizzle/
 git add drizzle/
 git commit -m "feat: add migration"
 
 # 3. Apply migrations on the server
-bunx viseedbi db migrate
+bunx viseed db migrate
 ```
 
 ---
@@ -110,7 +110,7 @@ Plugins contribute their own Drizzle table definitions. All plugin schemas are m
 const finalSchema = mergeSchemas(coreSchema, ...pluginSchemas)
 ```
 
-When running `viseedbi db` commands, the CLI scans your `package.json` for `viseed-plugin-*` dependencies and auto-generates a schema barrel file to feed into `drizzle-kit`.
+When running `viseed db` commands, the CLI scans your `package.json` for `viseed-plugin-*` dependencies and auto-generates a schema barrel file to feed into `drizzle-kit`.
 
 ---
 
@@ -125,7 +125,7 @@ export default {
 }
 ```
 
-These will be included when running any `viseedbi db` command.
+These will be included when running any `viseed db` command.
 
 Example custom schema:
 

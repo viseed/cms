@@ -1,13 +1,13 @@
 ﻿# CLI Reference
 
-The `viseedbi` CLI is the companion tool for Viseed CMS projects. It handles project scaffolding, database management, and plugin/theme management.
+The `viseed` CLI is the companion tool for Viseed CMS projects. It handles project scaffolding, database management, and plugin/theme management.
 
 ## Installation
 
 The CLI is available as `@viseed/cli`. You can use it without installing via `bunx`:
 
 ```bash
-bunx viseedbi <command>
+bunx @viseed/cli <command>
 ```
 
 Or install it as a dev dependency in your project:
@@ -18,18 +18,18 @@ bun add -d @viseed/cli
 
 ---
 
-## `viseedbi init`
+## `viseed init`
 
 Scaffold a new Viseed CMS project.
 
 ```bash
-viseedbi init <project-name>
+viseed init <project-name>
 ```
 
 **Example:**
 
 ```bash
-bunx viseedbi init my-blog
+bunx @viseed/cli init my-blog
 cd my-blog
 bun install
 ```
@@ -48,7 +48,7 @@ The generated `src/index.ts` is pre-configured with `authPlugin` and `blogPlugin
 
 ---
 
-## `viseedbi db`
+## `viseed db`
 
 Manage your database schema using Drizzle.
 
@@ -58,36 +58,36 @@ All `db` subcommands require `DATABASE_URL` to be set:
 export DATABASE_URL="postgresql://user:password@localhost:5432/hana"
 ```
 
-### `viseedbi db push`
+### `viseed db push`
 
 Push the current schema directly to the database. Intended for **development only**.
 
 ```bash
-bunx viseedbi db push
+bunx viseed db push
 ```
 
 - Fast — no migration files generated
 - May drop or alter columns to match the schema
 - Not safe for production databases with live data
 
-### `viseedbi db generate`
+### `viseed db generate`
 
 Generate SQL migration files from the current schema. Intended for **production**.
 
 ```bash
-bunx viseedbi db generate
+bunx viseed db generate
 ```
 
 - Creates timestamped `.sql` files in `drizzle/`
 - Safe to review and commit to source control
 - Does not apply changes to the database
 
-### `viseedbi db migrate`
+### `viseed db migrate`
 
 Apply pending migration files to the database.
 
 ```bash
-bunx viseedbi db migrate
+bunx viseed db migrate
 ```
 
 - Reads migration files from `drizzle/`
@@ -100,14 +100,14 @@ The CLI scans your `package.json` for `viseed-plugin-*` dependencies and auto-ge
 
 ---
 
-## `viseedbi plugin`
+## `viseed plugin`
 
 Manage plugins in your project.
 
-### `viseedbi plugin install`
+### `viseed plugin install`
 
 ```bash
-viseedbi plugin install <package-name>
+viseed plugin install <package-name>
 ```
 
 Installs the package via `bun add` and prints a reminder to restart the server.
@@ -115,7 +115,7 @@ Installs the package via `bun add` and prints a reminder to restart the server.
 **Example:**
 
 ```bash
-bunx viseedbi plugin install viseed-plugin-pages
+bunx viseed plugin install viseed-plugin-pages
 ```
 
 After installing, register the plugin in your `src/index.ts`:
@@ -128,35 +128,35 @@ cms.use(pagesPlugin())
 Then push the updated schema:
 
 ```bash
-bunx viseedbi db push   # development
+bunx viseed db push   # development
 # or
-bunx viseedbi db generate && bunx viseedbi db migrate   # production
+bunx viseed db generate && bunx viseed db migrate   # production
 ```
 
-### `viseedbi plugin uninstall`
+### `viseed plugin uninstall`
 
 ```bash
-viseedbi plugin uninstall <package-name>
+viseed plugin uninstall <package-name>
 ```
 
 Removes the package via `bun remove`.
 
 ---
 
-## `viseedbi theme`
+## `viseed theme`
 
 Manage themes in your project.
 
-### `viseedbi theme install`
+### `viseed theme install`
 
 ```bash
-viseedbi theme install <package-name>
+viseed theme install <package-name>
 ```
 
 **Example:**
 
 ```bash
-bunx viseedbi theme install viseed-theme-blog
+bunx viseed theme install viseed-theme-blog
 ```
 
 After installing, register the theme in your config:
@@ -171,10 +171,10 @@ const cms = createCMS({
 })
 ```
 
-### `viseedbi theme uninstall`
+### `viseed theme uninstall`
 
 ```bash
-viseedbi theme uninstall <package-name>
+viseed theme uninstall <package-name>
 ```
 
 ---
@@ -183,11 +183,11 @@ viseedbi theme uninstall <package-name>
 
 | Command                                   | Description                             |
 |-------------------------------------------|-----------------------------------------|
-| `viseedbi init <name>`                      | Scaffold a new project                  |
-| `viseedbi db push`                          | Push schema to DB (dev)                 |
-| `viseedbi db generate`                      | Generate SQL migration files (prod)     |
-| `viseedbi db migrate`                       | Apply pending migrations (prod)         |
-| `viseedbi plugin install <package>`         | Install a plugin                        |
-| `viseedbi plugin uninstall <package>`       | Uninstall a plugin                      |
-| `viseedbi theme install <package>`          | Install a theme                         |
-| `viseedbi theme uninstall <package>`        | Uninstall a theme                       |
+| `viseed init <name>`                      | Scaffold a new project                  |
+| `viseed db push`                          | Push schema to DB (dev)                 |
+| `viseed db generate`                      | Generate SQL migration files (prod)     |
+| `viseed db migrate`                       | Apply pending migrations (prod)         |
+| `viseed plugin install <package>`         | Install a plugin                        |
+| `viseed plugin uninstall <package>`       | Uninstall a plugin                      |
+| `viseed theme install <package>`          | Install a theme                         |
+| `viseed theme uninstall <package>`        | Uninstall a theme                       |
