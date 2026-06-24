@@ -23,6 +23,8 @@ COPY plugins/plugin-auth/package.json   ./plugins/plugin-auth/package.json
 COPY plugins/plugin-blog/package.json   ./plugins/plugin-blog/package.json
 COPY plugins/plugin-menu/package.json   ./plugins/plugin-menu/package.json
 COPY plugins/plugin-pages/package.json  ./plugins/plugin-pages/package.json
+COPY plugins/plugin-s3/package.json     ./plugins/plugin-s3/package.json
+COPY plugins/plugin-r2/package.json     ./plugins/plugin-r2/package.json
 COPY themes/theme-blog/package.json     ./themes/theme-blog/package.json
 COPY themes/theme-insurance/package.json ./themes/theme-insurance/package.json
 
