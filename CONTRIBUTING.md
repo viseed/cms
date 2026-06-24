@@ -15,7 +15,6 @@ Thank you for considering a contribution to Viseed CMS. This guide covers everyt
 - [Adding a New Package or Plugin](#adding-a-new-package-or-plugin)
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
-- [Submitting a Pull Request](#submitting-a-pull-request)
 - [Versioning & Publishing](#versioning--publishing)
 
 ---
@@ -294,7 +293,14 @@ bun run changeset
 
 The interactive CLI will ask:
 1. **Which packages changed?** — use `space` to toggle, `enter` to confirm.
-2. **Bump type?** — `patch` for bug fixes, `minor` for new features, `major` for breaking changes.
+2. **Bump type?** — choose based on the nature of your change:
+
+| Bump | When to use |
+|------|-------------|
+| `patch` | Bug fix, no API change |
+| `minor` | New feature, backward-compatible |
+| `major` | Breaking change |
+
 3. **Summary** — write a short user-facing description. This becomes the changelog entry.
 
 A file is created under `.changeset/`. Commit it alongside your code:
@@ -448,54 +454,9 @@ The publish script (`scripts/publish-packages.ts`) resolves `workspace:*` to rea
 
 ---
 
-## Submitting a Pull Request
+## Versioning & Publishing
 
-1. **Fork** the repository and create a feature branch from `master`:
-   ```bash
-   git checkout -b feat/my-feature
-   ```
-
-2. Make your changes, following the coding standards above.
-
-3. Ensure all checks pass locally:
-   ```bash
-   bun run lint
-   bun test
-   bun run build
-   ```
-
-4. **Create a changeset** if your change affects any published package:
-   ```bash
-   bun run changeset
-   ```
-   Select the affected packages and choose the correct bump type (`patch`, `minor`, or `major`).
-
-5. Push and open a pull request against `master`. Describe:
-   - **What** changed and **why**.
-   - Any breaking changes.
-   - How to test the change manually if automated tests do not cover it.
-
-6. A maintainer will review within a few business days. Address review comments promptly; stale PRs (no activity for 30 days) may be closed.
-
----
-
-## Versioning
-
-Viseed CMS uses [Changesets](https://github.com/changesets/changesets) to track version bumps. As a contributor, **your only responsibility is to include a changeset in your PR** if your change affects any published package.
-
-```bash
-bun run changeset
-```
-
-Select the affected packages and choose the appropriate bump type:
-
-| Bump | When to use |
-|------|-------------|
-| `patch` | Bug fix, no API change |
-| `minor` | New feature, backward-compatible |
-| `major` | Breaking change |
-
-The changeset file (auto-generated in `.changeset/`) should be committed alongside your code changes. Maintainers handle the actual version bump and npm publish after merging.
+Viseed CMS uses [Changesets](https://github.com/changesets/changesets). As a contributor, your only responsibility is Step 6 in the workflow above — include a changeset if your change affects any published package. Maintainers handle the actual version bump and `npm publish` after merging.
 
 ---
 
