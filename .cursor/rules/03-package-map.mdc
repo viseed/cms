@@ -74,7 +74,7 @@ packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-s
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
 packages/core/src/build.ts          → buildPluginAdmin() / buildPluginPublic() / buildPluginBundle() — Vite helpers for plugin admin + public bundles (@viseed/core/build subpath)
-packages/cli/src/commands/db.ts     → viseedbi db push/generate/migrate (dynamic schema discovery + drizzle-kit)
+packages/cli/src/commands/db.ts     → viseed db push/generate/migrate (dynamic schema discovery + drizzle-kit)
 packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
@@ -91,6 +91,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-24 — Sửa cú pháp CLI trong mô tả `packages/cli/src/commands/db.ts`: `viseedbi db ...` -> `viseed db ...` (bin name đúng là `viseed`).
 2026-06-24 — Tách S3/R2 khỏi core thành plugin: thêm `plugins/plugin-s3` (`@viseed/plugin-s3`) + `plugins/plugin-r2` (`@viseed/plugin-r2`), mỗi plugin đóng góp `storageProviders[]`. Core gỡ `S3StorageAdapter`/`R2StorageAdapter`/`@aws-sdk/client-s3`, thêm `StorageProviderRegistry` (rebuild cùng widget registry khi enable/disable). `StorageAdapter` interface + `StorageProviderDef`/`StorageProviderField` + field `storageProviders` trên `CMSPlugin` ở `@viseed/types`. Admin Settings render form động từ `GET /api/admin/media/storage-config/providers`; config field generic (extra-field) lưu vào `media_storage_config.config`, secret (`secret: true`) mã hoá at-rest. Cách dùng: chỉ `createCMS({ plugins: [s3Plugin()] })`, không truyền tham số storage trong code.
 2026-06-24 — Media storage providers: `media_storage_config` table (single platform-wide row) in `@viseed/schema` coreSchema; `S3StorageAdapter` + `R2StorageAdapter` + `createStorageAdapter()` in `@viseed/core/media-storage`; `secret-cipher.ts` (AES-256-GCM, env `VISEED_ENCRYPTION_KEY`) encrypts `secretAccessKey` at rest; `setupMediaRoutes` now takes `getAdapter()` for hot-swap and redirects remote files (S3/R2) to public URL in `GET /api/media/file/:slug`; `/api/admin/media/storage-config` GET/PUT/test routes (platform.sites.read/manage); `CMSConfig.media.storage` (+ `MediaStorageConfig` type in `@viseed/types`) as boot-time seed. Admin: Media view gains Library/Settings tabs (`MediaStorageSettings.vue`), Settings gated to platform admins. Added `@aws-sdk/client-s3` to core deps.
 2026-06-22 — Dashboard Widget system: bảng `dashboard_widgets` (per-site) trong `@viseed/schema` coreSchema; `DashboardWidgetRegistry` + dashboard-widget CRUD/reorder routes trong `@viseed/core`; `DashboardView.vue` (order 0) render grid 4 cột với dashboard widgets từ admin bundle; `plugin-blog` thêm dashboard widget demo `blog/recent-posts`.

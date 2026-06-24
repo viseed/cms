@@ -176,13 +176,13 @@ const client = new SQL(...)  // ❌
 
 ```bash
 # Development — push schema trực tiếp
-bunx viseedbi db push
+bunx viseed db push
 
 # Production — generate SQL migration files
-bunx viseedbi db generate
+bunx viseed db generate
 
 # Production — apply pending migrations
-bunx viseedbi db migrate
+bunx viseed db migrate
 ```
 
 CLI tự động:
@@ -207,6 +207,7 @@ Config: `drizzle.config.ts` (root) — schema paths point to source files in mon
 
 ## Last updated
 
+2026-06-24 — Sửa cú pháp CLI trong ví dụ Migration: `bunx viseedbi db ...` -> `bunx viseed db ...` (bin name đúng là `viseed`).
 2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql). Zero external DB deps.
 2026-04-12 — PostgreSQL-only rewrite: removed SQLite/Turso/MySQL. Updated query patterns, CLI db commands, schema conventions.
 2026-04-03 — Added plugin content table `site_id` convention
