@@ -23,5 +23,5 @@ features:
   - title: Media Library
     details: Upload, serve, and manage files out of the box. The media API is built into core — no plugin installation required.
   - title: Developer-First CLI
-    details: Scaffold projects, push schemas, generate migrations, and manage plugins with the viseedbi CLI.
+    details: Scaffold projects, push schemas, generate migrations, and manage plugins with the viseed CLI.
 ---
