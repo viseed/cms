@@ -3,6 +3,7 @@ export { dashboardWidgets } from './tables/dashboard-widgets'
 export { installedPlugins } from './tables/installed-plugins'
 export { installedThemes } from './tables/installed-themes'
 export { mediaFiles } from './tables/media-files'
+export { mediaStorageConfig } from './tables/media-storage-config'
 export { sessions } from './tables/sessions'
 export { siteDomains } from './tables/site-domains'
 export { sites } from './tables/sites'
@@ -15,6 +16,7 @@ import { dashboardWidgets } from './tables/dashboard-widgets'
 import { installedPlugins } from './tables/installed-plugins'
 import { installedThemes } from './tables/installed-themes'
 import { mediaFiles } from './tables/media-files'
+import { mediaStorageConfig } from './tables/media-storage-config'
 import { sessions } from './tables/sessions'
 import { siteDomains } from './tables/site-domains'
 import { sites } from './tables/sites'
@@ -33,6 +35,7 @@ export const coreSchema = {
   installedThemes,
   themeState,
   mediaFiles,
+  mediaStorageConfig,
   widgets,
   dashboardWidgets,
 }

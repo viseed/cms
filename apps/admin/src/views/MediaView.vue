@@ -5,6 +5,27 @@
     @dragleave.prevent="onDragLeave"
     @drop.prevent="onDrop"
   >
+    <div class="media-tabs">
+      <button
+        type="button"
+        class="media-tab"
+        :class="{ 'is-active': activeTab === 'library' }"
+        @click="activeTab = 'library'"
+      >
+        Library
+      </button>
+      <button
+        v-if="canManageStorage"
+        type="button"
+        class="media-tab"
+        :class="{ 'is-active': activeTab === 'settings' }"
+        @click="activeTab = 'settings'"
+      >
+        Settings
+      </button>
+    </div>
+
+    <div v-show="activeTab === 'library'" class="media-tab-panel">
     <!-- Drop overlay -->
     <div v-if="dragging" class="drop-overlay">
       <div class="drop-overlay-inner">
@@ -162,11 +183,25 @@
         </div>
       </div>
     </div>
+    </div>
+
+    <MediaStorageSettings v-if="activeTab === 'settings'" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useAdminAuthContext } from '../composables/useAdminAuthContext'
+import MediaStorageSettings from './MediaStorageSettings.vue'
+
+const { permissions } = useAdminAuthContext()
+
+const activeTab = ref<'library' | 'settings'>('library')
+
+// Storage configuration is platform-wide, so only platform admins may see it.
+const canManageStorage = computed(() =>
+  permissions.value.some((permission) => permission.startsWith('platform.')),
+)
 
 interface MediaFile {
   id: string
@@ -298,6 +333,7 @@ async function handleFileChange(event: Event) {
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 function onDragOver() {
+  if (activeTab.value !== 'library') return
   dragging.value = true
 }
 
@@ -309,6 +345,7 @@ function onDragLeave() {
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 async function onDrop(event: DragEvent) {
   dragging.value = false
+  if (activeTab.value !== 'library') return
   const dropped = event.dataTransfer?.files
   if (!dropped || dropped.length === 0) return
   await uploadFiles(Array.from(dropped))
@@ -446,6 +483,36 @@ async function copyUrl(url: string) {
   gap: 1.5rem;
   position: relative;
   min-height: 200px;
+}
+
+/* ---- Tabs ---- */
+.media-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.media-tab {
+  padding: 0.6rem 1rem;
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.media-tab.is-active {
+  color: var(--primary, #2563eb);
+  border-bottom-color: var(--primary, #2563eb);
+}
+
+.media-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* ---- Drop overlay ---- */

@@ -35,9 +35,14 @@ alwaysApply: false
   ├── KHÔNG `new Hono()` / `import { Hono } from 'hono'` runtime. Dùng
   │   `helpers.createSubApp(basePath)` do core cấp; chỉ `import type { Hono }`.
   │   → `hono` là devDependency (type-only).
-  └── plugin admin bundles có thể import @viseed/ui/vue (Vue source subpath, consumer tự compile)
-      để dùng shared components như RichTextEditor. KHÔNG external @viseed/ui/vue khi build.
-      @viseed/ui chỉ cần lúc build bundle → devDependency (bundle prebuilt vào dist).
+  ├── plugin admin bundles có thể import @viseed/ui/vue (Vue source subpath, consumer tự compile)
+  │   để dùng shared components như RichTextEditor. KHÔNG external @viseed/ui/vue khi build.
+  │   @viseed/ui chỉ cần lúc build bundle → devDependency (bundle prebuilt vào dist).
+  └── Storage-only plugins (plugin-s3, plugin-r2): CHỈ đóng góp `storageProviders` (không
+      schema/routes/admin) nên KHÔNG cần @viseed/core, drizzle-orm, hono, validator.
+      Deps thật: @viseed/types + @aws-sdk/client-s3 (mỗi plugin tự khai báo, KHÔNG đặt ở core).
+
+@viseed/plugin-s3 / plugin-r2 ←── @viseed/types, @aws-sdk/client-s3  (self-contained, độc lập nhau)
 
 @viseed/theme-*  ←── @viseed/types  (CHỈ import types, KHÔNG import core/schema/plugin)
 
@@ -128,6 +133,7 @@ Trong `package.json` của mỗi package, dùng `workspace:*` cho internal deps 
 
 ## Last updated
 
+2026-06-24 — Storage providers tách khỏi core: `@aws-sdk/client-s3` GỠ khỏi `@viseed/core`. Thêm 2 plugin `@viseed/plugin-s3`, `@viseed/plugin-r2` (storage-only) chỉ phụ thuộc `@viseed/types` + `@aws-sdk/client-s3`, độc lập nhau. `StorageAdapter` interface chuyển sang `@viseed/types`; plugin trả `StorageAdapter` qua `storageProviders[].createAdapter`. Core còn `LocalStorageAdapter` + `StorageProviderRegistry`.
 2026-06-10 — Publish-readiness: plugin runtime deps (`@viseed/core`, `drizzle-orm`, `@viseed/validator`) chuyển sang `peerDependencies` (+ mirror trong devDependencies); `hono` thành devDependency type-only (plugin dùng `helpers.createSubApp`); `@viseed/ui` của plugin là devDependency (bundle prebuilt). Mọi package có `bun` export ship thêm `src` trong `files`. Export conditions đặt `types` trước, bỏ `require`/`./components` chết.
 2026-05-12 — `@viseed/ui` thêm `./vue` subpath export trỏ source `.vue` files (RichTextEditor). Consumer plugin Vite tự compile, không publish dist cho subpath này. `@viseed/ui` thêm `@tiptap/*` dependencies.
 2026-05-11 — Widget system v1: no new packages; `@viseed/schema` now exports `widgets` (part of `coreSchema`); `@viseed/core` adds `WidgetTypeRegistry`, imports `@tiptap/core`. No graph changes.

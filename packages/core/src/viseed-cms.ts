@@ -1,11 +1,20 @@
 ﻿import { randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
-import { installedPlugins, sites, themeState, userSiteRoles, users, widgets } from '@viseed/schema'
+import {
+  installedPlugins,
+  mediaStorageConfig,
+  sites,
+  themeState,
+  userSiteRoles,
+  users,
+  widgets,
+} from '@viseed/schema'
 import type {
   CMSConfig,
   CMSPlugin,
   CMSRouteContextHelpers,
   CMSTheme,
+  MediaStorageConfig,
   Permission,
   RequestContext,
   RequiredLayoutKey,
@@ -24,6 +33,7 @@ import {
 } from './admin-auth-policy'
 import { registerAuthRoutes } from './admin-routes/auth'
 import { registerDashboardWidgetRoutes } from './admin-routes/dashboard-widgets'
+import { registerMediaStorageRoutes } from './admin-routes/media-storage'
 import { registerPluginRoutes } from './admin-routes/plugins'
 import { registerThemeRoutes } from './admin-routes/themes'
 import { registerWidgetRoutes } from './admin-routes/widgets'
@@ -31,9 +41,20 @@ import { DashboardWidgetRegistry } from './dashboard-widget-registry'
 import { createDatabase, type DatabaseInstance } from './database'
 import { HookRegistry } from './hook-registry'
 import { setupMediaRoutes } from './media-routes'
-import { LocalStorageAdapter } from './media-storage'
+import {
+  createStorageAdapter,
+  LocalStorageAdapter,
+  type StorageAdapter,
+  type StorageConfig,
+} from './media-storage'
+import {
+  prepareConfigForStorage,
+  resolveStoredConfig,
+  type StorageConfigPayload,
+} from './media-storage-config'
 import { PluginRouteRegistry } from './plugin-route-registry'
 import { resolveSiteContextByHost } from './site-resolver'
+import { StorageProviderRegistry } from './storage-provider-registry'
 import { resolveValidatedPreviewRoot } from './theme-preview-path'
 import {
   createThemeRuntime,
@@ -83,6 +104,9 @@ export class ViseedCMS {
   private pluginRegistry = new PluginRouteRegistry()
   private widgetTypeRegistry = new WidgetTypeRegistry()
   private dashboardWidgetRegistry = new DashboardWidgetRegistry()
+  private storageProviderRegistry = new StorageProviderRegistry()
+  private currentMediaAdapter: StorageAdapter | null = null
+  private mediaStorageType: MediaStorageConfig['type'] = 'local'
 
   constructor(config: CMSConfig) {
     this.config = config
@@ -129,10 +153,10 @@ export class ViseedCMS {
 
     const helpers = this.createRouteContextHelpers()
 
-    // Mount core media routes (always available, no plugin required)
-    const mediaStorage = new LocalStorageAdapter(this.config.media?.uploadDir ?? './uploads')
+    // Mount core media routes (always available, no plugin required).
+    // The adapter is resolved from DB-backed config and can be hot-swapped.
     setupMediaRoutes(this.app, helpers, () => this.db, {
-      storage: mediaStorage,
+      getAdapter: () => this.currentMediaAdapter ?? new LocalStorageAdapter(),
       maxFileSizeMb: this.config.media?.maxFileSizeMb,
     })
 
@@ -145,7 +169,12 @@ export class ViseedCMS {
       }
     }
     await this.syncPluginActiveStateFromDb()
-    this.rebuildWidgetTypeRegistry()
+    this.rebuildRegistries()
+
+    // Storage providers are contributed by active plugins, so the media adapter
+    // can only be resolved after the provider registry has been built.
+    await this.initMediaStorage()
+
     this.app.use('*', this.pluginRegistry.middleware())
 
     await this.resolveActiveTheme()
@@ -292,10 +321,11 @@ export class ViseedCMS {
     }
   }
 
-  private rebuildWidgetTypeRegistry(): void {
+  private rebuildRegistries(): void {
     const isActive = (name: string) => this.pluginRegistry.isActive(name)
     this.widgetTypeRegistry.rebuild(this.plugins, isActive)
     this.dashboardWidgetRegistry.rebuild(this.plugins, isActive)
+    this.storageProviderRegistry.rebuild(this.plugins, isActive)
   }
 
   private async registerPluginHooks(plugin: CMSPlugin): Promise<void> {
@@ -376,7 +406,53 @@ export class ViseedCMS {
     )
   }
 
+  /**
+   * Resolves the media storage adapter from the DB-backed config (row
+   * `default`), seeding it from `CMSConfig.media.storage` on first boot.
+   * The secret is decrypted exactly once here and cached in the adapter.
+   */
+  private async initMediaStorage(): Promise<void> {
+    const db = this.getDatabase()
+    const [row] = await db
+      .select()
+      .from(mediaStorageConfig)
+      .where(eq(mediaStorageConfig.id, 'default'))
+
+    if (!row) {
+      const initial: MediaStorageConfig = this.config.media?.storage ?? {
+        type: 'local',
+        uploadDir: this.config.media?.uploadDir,
+      }
+      const secretFields = this.storageProviderRegistry.secretFieldsOf(initial.type)
+      const stored = prepareConfigForStorage(initial, secretFields)
+      await db.insert(mediaStorageConfig).values({
+        id: 'default',
+        type: stored.type,
+        config: stored.config,
+        updatedAt: new Date(),
+      })
+      this.applyMediaStorageConfig(initial)
+      return
+    }
+
+    const secretFields = this.storageProviderRegistry.secretFieldsOf(row.type)
+    const resolved = resolveStoredConfig(row.type, row.config as StorageConfigPayload, secretFields)
+    this.applyMediaStorageConfig(resolved)
+  }
+
+  /** Hot-swaps the in-memory storage adapter from a resolved (decrypted) config. */
+  private applyMediaStorageConfig(resolved: MediaStorageConfig): void {
+    this.currentMediaAdapter = createStorageAdapter(
+      resolved as StorageConfig,
+      this.storageProviderRegistry,
+    )
+    this.mediaStorageType = resolved.type
+  }
+
   private mountUploadsServing(): void {
+    // Local filesystem serving is only meaningful for the local adapter.
+    if (this.mediaStorageType !== 'local') return
+
     const uploadDir = this.config.media?.uploadDir ?? './uploads'
     const absoluteUploadDir = resolve(uploadDir)
     this.app.get(
@@ -756,7 +832,7 @@ export class ViseedCMS {
       getDatabase: () => this.getDatabase(),
       plugins: this.plugins,
       pluginRegistry: this.pluginRegistry,
-      rebuildWidgetTypeRegistry: () => this.rebuildWidgetTypeRegistry(),
+      rebuildRegistries: () => this.rebuildRegistries(),
       hooks: this.hooks,
       cms: this as never,
     })
@@ -791,6 +867,12 @@ export class ViseedCMS {
       pluginRegistry: this.pluginRegistry,
       dashboardWidgetRegistry: this.dashboardWidgetRegistry,
       resolveRequestContext: (c) => this.resolveRequestContext(c),
+    })
+
+    registerMediaStorageRoutes(registerAdminRoute, {
+      getDatabase: () => this.getDatabase(),
+      applyConfig: (resolved) => this.applyMediaStorageConfig(resolved),
+      getProviderRegistry: () => this.storageProviderRegistry,
     })
 
     this.app.route('/api/admin', adminApi)

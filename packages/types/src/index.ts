@@ -4,6 +4,7 @@ export type {
   AuthContextPayload,
   CMSConfig,
   DatabaseConfig,
+  MediaStorageConfig,
   Permission,
   PermissionChecker,
   PermissionCheckInput,
@@ -11,6 +12,9 @@ export type {
   RequestContext,
   RoleAssignment,
   SiteContext,
+  StorageAdapter,
+  StorageProviderDef,
+  StorageProviderField,
   ViseedCMS,
 } from './cms'
 export {

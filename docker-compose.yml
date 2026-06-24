@@ -10,7 +10,7 @@ x-logging: &default-logging
 services:
   insurance:
     image: nshermione/mipu_insurance:${IMAGE_TAG:-latest}
-    env_file: .env.insurance
+    env_file: .env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ca-certificate.crt
       - TZ=Asia/Ho_Chi_Minh
