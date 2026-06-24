@@ -1,5 +1,14 @@
 # @viseed/plugin-common-widgets
 
+## 0.3.1
+
+### Patch Changes
+
+- d530e05: refactor: re-format project by biome rules
+- Updated dependencies [d530e05]
+- Updated dependencies [533ac4c]
+  - @viseed/types@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

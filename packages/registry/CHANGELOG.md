@@ -1,5 +1,14 @@
 # @viseed/registry
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [d530e05]
+- Updated dependencies [533ac4c]
+  - @viseed/types@0.4.0
+  - @viseed/validator@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes

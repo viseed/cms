@@ -1,5 +1,20 @@
 # @viseed/core
 
+## 0.4.0
+
+### Minor Changes
+
+- 533ac4c: Add media plugins: plugin-s3, plugin-r2
+
+### Patch Changes
+
+- d530e05: refactor: re-format project by biome rules
+- Updated dependencies [d530e05]
+- Updated dependencies [533ac4c]
+  - @viseed/schema@0.4.0
+  - @viseed/types@0.4.0
+  - @viseed/validator@0.3.0
+
 ## 0.3.0
 
 ### Minor Changes
