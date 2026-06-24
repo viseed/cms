@@ -16,10 +16,16 @@
         "noUnusedImports": "warn"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "warn",
+        "noUndeclaredEnvVars": "off"
       },
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "off",
+        "noImportantStyles": "off",
+        "useLiteralKeys": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
       }
     }
   },
@@ -36,6 +42,17 @@
     }
   },
   "files": {
-    "includes": ["**", "!node_modules/", "!dist/", "!.turbo/", "!**/*.min.js"]
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.turbo",
+      "!**/.vitepress/cache",
+      "!**/my-site",
+      "!**/static/css",
+      "!**/*.min.js",
+      "!**/*.svg",
+      "!**/*.vue"
+    ]
   }
 }
