@@ -49,6 +49,7 @@ import {
 } from './media-storage'
 import {
   prepareConfigForStorage,
+  readProviderConfigs,
   resolveStoredConfig,
   type StorageConfigPayload,
 } from './media-storage-config'
@@ -436,17 +437,35 @@ export class ViseedCMS {
     }
 
     const secretFields = this.storageProviderRegistry.secretFieldsOf(row.type)
-    const resolved = resolveStoredConfig(row.type, row.config as StorageConfigPayload, secretFields)
+    // `row.config` may be the legacy flat format or the new per-provider store
+    // envelope ({ _v: 2, configs: {...} }). Extract only the active provider's
+    // config so resolveStoredConfig receives the correct flat payload.
+    const allConfigs = readProviderConfigs(row.config as StorageConfigPayload, row.type)
+    const providerConfig = allConfigs[row.type] ?? {}
+    const resolved = resolveStoredConfig(row.type, providerConfig, secretFields)
     this.applyMediaStorageConfig(resolved)
   }
 
   /** Hot-swaps the in-memory storage adapter from a resolved (decrypted) config. */
   private applyMediaStorageConfig(resolved: MediaStorageConfig): void {
-    this.currentMediaAdapter = createStorageAdapter(
-      resolved as StorageConfig,
-      this.storageProviderRegistry,
-    )
-    this.mediaStorageType = resolved.type
+    try {
+      this.currentMediaAdapter = createStorageAdapter(
+        resolved as StorageConfig,
+        this.storageProviderRegistry,
+      )
+      this.mediaStorageType = resolved.type
+    } catch (err) {
+      console.error(
+        `[Media] Failed to initialize "${resolved.type}" storage adapter — falling back to local:`,
+        err,
+      )
+      const fallback: MediaStorageConfig = { type: 'local' }
+      this.currentMediaAdapter = createStorageAdapter(
+        fallback as StorageConfig,
+        this.storageProviderRegistry,
+      )
+      this.mediaStorageType = 'local'
+    }
   }
 
   private mountUploadsServing(): void {
