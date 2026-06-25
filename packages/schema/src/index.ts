@@ -4,6 +4,8 @@ export { installedPlugins } from './tables/installed-plugins'
 export { installedThemes } from './tables/installed-themes'
 export { mediaFiles } from './tables/media-files'
 export { mediaStorageConfig } from './tables/media-storage-config'
+export { rolePermissions } from './tables/role-permissions'
+export { roles } from './tables/roles'
 export { sessions } from './tables/sessions'
 export { siteDomains } from './tables/site-domains'
 export { sites } from './tables/sites'
@@ -17,6 +19,8 @@ import { installedPlugins } from './tables/installed-plugins'
 import { installedThemes } from './tables/installed-themes'
 import { mediaFiles } from './tables/media-files'
 import { mediaStorageConfig } from './tables/media-storage-config'
+import { rolePermissions } from './tables/role-permissions'
+import { roles } from './tables/roles'
 import { sessions } from './tables/sessions'
 import { siteDomains } from './tables/site-domains'
 import { sites } from './tables/sites'
@@ -29,6 +33,8 @@ export const coreSchema = {
   sites,
   siteDomains,
   users,
+  roles,
+  rolePermissions,
   userSiteRoles,
   sessions,
   installedPlugins,

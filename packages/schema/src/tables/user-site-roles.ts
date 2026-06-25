@@ -12,7 +12,10 @@ export const userSiteRoles = pgTable(
     siteId: text('site_id')
       .notNull()
       .references(() => sites.id, { onDelete: 'cascade' }),
-    role: text('role', { enum: ['admin', 'site_admin', 'site_content_writer'] }).notNull(),
+    // Slug referencing `viseed_roles.slug`. No DB-level FK: system roles are
+    // seeded at boot (after migrations), so a hard FK would break upgrades on
+    // databases that already contain role assignments. Validated at the app layer.
+    role: text('role').notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   (table) => ({

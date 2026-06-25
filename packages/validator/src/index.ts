@@ -51,10 +51,21 @@ export {
   themeSettingsValueSchema,
 } from './theme-settings'
 export {
+  type CreateRoleInput,
+  createRoleSchema,
   type CreateUserInput,
   createUserSchema,
   type LoginInput,
   loginSchema,
+  type ResetPasswordInput,
+  resetPasswordSchema,
+  type RoleAssignmentInput,
+  roleAssignmentSchema,
+  roleSlugSchema,
+  type TransferOwnershipInput,
+  transferOwnershipSchema,
+  type UpdateRoleInput,
+  updateRoleSchema,
   type UpdateUserInput,
   updateUserSchema,
 } from './user'

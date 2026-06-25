@@ -92,6 +92,17 @@ export const adminRoutes: Array<RouteRecordRaw> = [
     }),
   },
   {
+    path: '/users',
+    component: () => import('../views/UsersRolesView.vue'),
+    meta: meta({
+      requiresAuth: true,
+      requiredPermissions: ['platform.users.read'],
+      navigation: { label: 'Users & Roles', icon: '☻' },
+      platformOnly: true,
+      order: 85,
+    }),
+  },
+  {
     path: '/sites',
     component: () => import('../views/SiteManagementView.vue'),
     meta: meta({

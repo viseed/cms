@@ -138,6 +138,10 @@ export function useAdminAuthContext() {
 
   const roleAssignments = computed(() => payload.value?.roleAssignments ?? [])
 
+  const isOwner = computed(() => payload.value?.isOwner ?? false)
+
+  const currentUserId = computed(() => payload.value?.currentUser?.id ?? null)
+
   const userLabel = computed(() => {
     const u = payload.value?.currentUser
     if (!u) return 'Guest'
@@ -181,6 +185,8 @@ export function useAdminAuthContext() {
     accessibleSites,
     permissions,
     roleAssignments,
+    isOwner,
+    currentUserId,
     userLabel,
     isRole,
   }

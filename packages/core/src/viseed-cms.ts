@@ -3,6 +3,8 @@ import { resolve } from 'node:path'
 import {
   installedPlugins,
   mediaStorageConfig,
+  rolePermissions,
+  roles,
   sites,
   themeState,
   userSiteRoles,
@@ -16,10 +18,17 @@ import type {
   CMSTheme,
   MediaStorageConfig,
   Permission,
+  RBACRole,
   RequestContext,
   RequiredLayoutKey,
 } from '@viseed/types'
-import { HOOK_KEY, resolveDefaultSettings, SINGLE_SITE_CONTEXT } from '@viseed/types'
+import {
+  HOOK_KEY,
+  resolveDefaultSettings,
+  ROLE_PERMISSION_MATRIX,
+  SINGLE_SITE_CONTEXT,
+  SYSTEM_ROLE_SLUGS,
+} from '@viseed/types'
 import { and, eq, sql } from 'drizzle-orm'
 import type { Context, Handler } from 'hono'
 import { Hono } from 'hono'
@@ -35,7 +44,9 @@ import { registerAuthRoutes } from './admin-routes/auth'
 import { registerDashboardWidgetRoutes } from './admin-routes/dashboard-widgets'
 import { registerMediaStorageRoutes } from './admin-routes/media-storage'
 import { registerPluginRoutes } from './admin-routes/plugins'
+import { registerRolesRoutes } from './admin-routes/roles'
 import { registerThemeRoutes } from './admin-routes/themes'
+import { registerUsersRoutes } from './admin-routes/users'
 import { registerWidgetRoutes } from './admin-routes/widgets'
 import { DashboardWidgetRegistry } from './dashboard-widget-registry'
 import { createDatabase, type DatabaseInstance } from './database'
@@ -148,7 +159,9 @@ export class ViseedCMS {
 
     this.db = await createDatabase(this.config.db, allSchemas)
 
+    await this.ensureSystemRoles()
     await this.ensureBootstrapAdmin()
+    await this.ensureOwner()
 
     await this.hooks.run(HOOK_KEY.CMS_INIT, this as never)
 
@@ -689,6 +702,7 @@ export class ViseedCMS {
       name,
       passwordHash,
       role: 'admin',
+      isOwner: true,
     })
 
     await db.insert(userSiteRoles).values({
@@ -697,6 +711,96 @@ export class ViseedCMS {
       siteId,
       role: 'admin',
     })
+  }
+
+  /**
+   * Idempotently seed the built-in system roles and their permission sets from
+   * {@link ROLE_PERMISSION_MATRIX}. System role permissions are kept in sync on
+   * every boot so catalog changes propagate automatically.
+   */
+  private async ensureSystemRoles(): Promise<void> {
+    const db = this.getDatabase()
+
+    const labels: Record<RBACRole, { name: string; description: string }> = {
+      admin: { name: 'Administrator', description: 'Full platform access.' },
+      site_admin: { name: 'Site Admin', description: 'Manage a site and its content.' },
+      site_content_writer: {
+        name: 'Content Writer',
+        description: 'Create and edit site content.',
+      },
+    }
+
+    for (const slug of SYSTEM_ROLE_SLUGS) {
+      const [existing] = await db.select().from(roles).where(eq(roles.slug, slug))
+      if (!existing) {
+        await db.insert(roles).values({
+          id: randomUUID(),
+          slug,
+          name: labels[slug].name,
+          description: labels[slug].description,
+          isSystem: true,
+        })
+      } else if (!existing.isSystem) {
+        await db.update(roles).set({ isSystem: true }).where(eq(roles.slug, slug))
+      }
+
+      const desired = ROLE_PERMISSION_MATRIX[slug]
+      const currentRows = await db
+        .select({ permission: rolePermissions.permission })
+        .from(rolePermissions)
+        .where(eq(rolePermissions.roleSlug, slug))
+      const current = new Set(currentRows.map((row) => row.permission))
+
+      for (const permission of desired) {
+        if (!current.has(permission)) {
+          await db.insert(rolePermissions).values({
+            id: randomUUID(),
+            roleSlug: slug,
+            permission,
+          })
+        }
+      }
+
+      const desiredSet = new Set<string>(desired)
+      for (const permission of current) {
+        if (!desiredSet.has(permission)) {
+          await db
+            .delete(rolePermissions)
+            .where(
+              and(eq(rolePermissions.roleSlug, slug), eq(rolePermissions.permission, permission)),
+            )
+        }
+      }
+    }
+  }
+
+  /**
+   * Ensure exactly one platform owner exists. If none is set yet (e.g. an
+   * upgraded database), promote the earliest-created admin to owner.
+   */
+  private async ensureOwner(): Promise<void> {
+    const db = this.getDatabase()
+
+    const [existingOwner] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.isOwner, true))
+      .limit(1)
+    if (existingOwner) {
+      return
+    }
+
+    const [firstAdmin] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, 'admin'))
+      .orderBy(users.createdAt)
+      .limit(1)
+    if (!firstAdmin) {
+      return
+    }
+
+    await db.update(users).set({ isOwner: true }).where(eq(users.id, firstAdmin.id))
   }
 
   private setupHealthRoute(): void {
@@ -845,6 +949,15 @@ export class ViseedCMS {
     registerAuthRoutes(registerPublicAdminRoute, registerAdminRoute, {
       getDatabase: () => this.getDatabase(),
       resolveRequestContext: (c) => this.resolveRequestContext(c),
+    })
+
+    registerUsersRoutes(registerAdminRoute, {
+      getDatabase: () => this.getDatabase(),
+      resolveRequestContext: (c) => this.resolveRequestContext(c),
+    })
+
+    registerRolesRoutes(registerAdminRoute, {
+      getDatabase: () => this.getDatabase(),
     })
 
     registerPluginRoutes(registerAdminRoute, {
