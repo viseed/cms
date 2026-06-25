@@ -1,5 +1,12 @@
 # @viseed/theme-blog
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/types@0.5.0
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @viseed/validator
 
+## 0.5.0
+
+### Minor Changes
+
+- 8b6ab62: Add user and role management
+
 ## 0.3.0
 
 ### Minor Changes

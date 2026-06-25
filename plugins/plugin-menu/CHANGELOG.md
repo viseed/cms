@@ -1,5 +1,12 @@
 # @viseed/plugin-menu
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/types@0.5.0
+
 ## 1.1.1
 
 ### Patch Changes

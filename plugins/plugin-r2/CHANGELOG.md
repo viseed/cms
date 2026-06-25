@@ -1,5 +1,12 @@
 # @viseed/plugin-r2
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/types@0.5.0
+
 ## 2.0.0
 
 ### Major Changes

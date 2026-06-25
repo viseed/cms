@@ -1,5 +1,13 @@
 # @viseed/plugin-auth
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/validator@0.5.0
+  - @viseed/types@0.5.0
+
 ## 2.0.1
 
 ### Patch Changes
