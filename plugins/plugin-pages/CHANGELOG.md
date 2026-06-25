@@ -1,5 +1,14 @@
 # @viseed/plugin-pages
 
+## 4.0.0
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/validator@0.5.0
+  - @viseed/types@0.5.0
+  - @viseed/core@0.5.0
+
 ## 3.0.0
 
 ### Patch Changes

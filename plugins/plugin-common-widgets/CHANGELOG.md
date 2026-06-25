@@ -1,5 +1,12 @@
 # @viseed/plugin-common-widgets
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [8b6ab62]
+  - @viseed/types@0.5.0
+
 ## 0.3.1
 
 ### Patch Changes
