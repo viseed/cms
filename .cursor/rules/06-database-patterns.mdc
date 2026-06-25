@@ -45,13 +45,21 @@ const cms = createCMS({
 ```
 sites              → site registry (slug, status, config)
 site_domains       → domain mapping cho site (primary/verified)
-users              → platform user identity (global)
-user_site_roles    → role assignment theo site
+users              → platform user identity (global); `is_owner` bool + partial unique index (`WHERE is_owner = true`) đảm bảo đúng 1 owner toàn platform
+roles              → RBAC role definitions (global): `slug` unique constraint, `name`, `is_system`
+role_permissions   → permissions của mỗi role: (`role_slug` FK→roles.slug cascade, `permission`), unique (role_slug, permission)
+user_site_roles    → role assignment theo site; `role` là text slug (tham chiếu roles.slug, KHÔNG FK cứng — xem ghi chú dưới)
 sessions           → user sessions (site-scoped qua `site_id`)
 installed_plugins  → plugins đã cài theo site
 installed_themes   → themes đã cài theo site
 theme_state        → active theme + settings theo site (`site_id`)
 ```
+
+> **Single-owner enforcement**: `users.is_owner` dùng partial unique index nên Postgres chỉ cho phép tối đa 1 row `is_owner = true`. Khi transfer ownership phải set owner cũ `false` TRƯỚC khi set owner mới `true` (trong transaction) để không vi phạm index.
+
+> **Role slug không FK cứng trên `user_site_roles.role`**: system roles được seed lúc **boot** (`ensureSystemRoles()`), sau khi migrations chạy. Một FK cứng `user_site_roles.role → roles.slug` sẽ làm `db:migrate` fail trên DB đã có sẵn role assignments (roles table còn rỗng tại thời điểm migrate). Vì vậy giữ `role` là text slug, validate slug tồn tại ở tầng app (`assertRoleSlugsExist`). Ngược lại `role_permissions.role_slug` CÓ FK (bảng mới, dữ liệu seed lúc boot sau khi roles tồn tại).
+
+> **FK target phải là UNIQUE constraint, không phải unique index**: Postgres yêu cầu cột được FK tham chiếu có UNIQUE *constraint* (hoặc PK). Dùng `.unique()` trên cột (vd `roles.slug`) thay vì `uniqueIndex(...)` riêng, nếu không `db:push` báo `there is no unique constraint matching given keys`.
 
 ### Plugin Tables
 
@@ -207,6 +215,7 @@ Config: `drizzle.config.ts` (root) — schema paths point to source files in mon
 
 ## Last updated
 
+2026-06-25 — Thêm 2 core table `roles` + `role_permissions` và cột `users.is_owner` (partial unique index `single_owner`). Ghi chú pattern mới: single-owner enforcement bằng partial unique index (transfer ownership clear owner cũ trước trong transaction); `user_site_roles.role` giữ text slug KHÔNG FK cứng (tránh fail migrate khi roles seed ở boot), `role_permissions.role_slug` có FK; FK target phải là `.unique()` constraint chứ không phải `uniqueIndex`.
 2026-06-24 — Sửa cú pháp CLI trong ví dụ Migration: `bunx viseedbi db ...` -> `bunx viseed db ...` (bin name đúng là `viseed`).
 2026-04-12 — Switch from pg (node-postgres) to bun:sql (drizzle-orm/bun-sql). Zero external DB deps.
 2026-04-12 — PostgreSQL-only rewrite: removed SQLite/Turso/MySQL. Updated query patterns, CLI db commands, schema conventions.

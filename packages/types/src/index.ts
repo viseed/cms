@@ -11,10 +11,13 @@ export type {
   RBACRole,
   RequestContext,
   RoleAssignment,
+  RoleSlug,
+  RoleSummary,
   SiteContext,
   StorageAdapter,
   StorageProviderDef,
   StorageProviderField,
+  UserSummary,
   ViseedCMS,
 } from './cms'
 export {
@@ -26,6 +29,7 @@ export {
   SINGLE_SITE_CONTEXT,
   SITE_ADMIN_PERMISSIONS,
   SITE_CONTENT_WRITER_PERMISSIONS,
+  SYSTEM_ROLE_SLUGS,
   toAuthContextPayload,
 } from './cms'
 export type {

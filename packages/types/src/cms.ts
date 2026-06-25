@@ -16,6 +16,8 @@ export const HOOK_KEY = {
 export const PERMISSION_CATALOG = [
   'platform.sites.read',
   'platform.sites.manage',
+  'platform.users.read',
+  'platform.users.manage',
   'site.content.read',
   'site.content.write',
   'site.menu.read',
@@ -30,7 +32,40 @@ export const PERMISSION_CATALOG = [
 
 export type Permission = (typeof PERMISSION_CATALOG)[number]
 
+/**
+ * Slugs of the built-in system roles. These are seeded at boot and can never be
+ * deleted. Custom roles introduce additional slugs at runtime, so a role slug is
+ * a `string` in general (see {@link RoleSlug}).
+ */
 export type RBACRole = 'admin' | 'site_admin' | 'site_content_writer'
+
+/** A role slug. System roles use {@link RBACRole} values; custom roles use any string. */
+export type RoleSlug = string
+
+export const SYSTEM_ROLE_SLUGS: ReadonlyArray<RBACRole> = [
+  'admin',
+  'site_admin',
+  'site_content_writer',
+]
+
+/** Role definition as exposed by the admin roles API. */
+export interface RoleSummary {
+  slug: RoleSlug
+  name: string
+  description: string | null
+  isSystem: boolean
+  permissions: Array<Permission>
+}
+
+/** User entry as exposed by the admin users API. */
+export interface UserSummary {
+  id: string
+  email: string
+  name: string
+  isOwner: boolean
+  globalRole: RoleSlug | null
+  assignments: Array<RoleAssignment>
+}
 
 export interface SiteContext {
   id: string
@@ -40,7 +75,7 @@ export interface SiteContext {
 }
 
 export interface RoleAssignment {
-  role: RBACRole
+  role: RoleSlug
   siteId?: string
 }
 
@@ -49,6 +84,7 @@ export interface ActorContext {
   email?: string
   name?: string
   roleAssignments: Array<RoleAssignment>
+  isOwner: boolean
 }
 
 export interface RequestContext {
@@ -63,6 +99,7 @@ export interface AuthContextPayload {
   currentSite: SiteContext
   accessibleSites: Array<SiteContext>
   permissions: Array<Permission>
+  isOwner: boolean
 }
 
 export interface PermissionCheckInput {
@@ -108,7 +145,7 @@ export function resolvePermissionsForRoles(
   const permissions = new Set<Permission>()
 
   for (const assignment of roleAssignments) {
-    const mappedPermissions = ROLE_PERMISSION_MATRIX[assignment.role] ?? []
+    const mappedPermissions = ROLE_PERMISSION_MATRIX[assignment.role as RBACRole] ?? []
     for (const permission of mappedPermissions) {
       permissions.add(permission)
     }
@@ -131,6 +168,7 @@ export function toAuthContextPayload(context: RequestContext): AuthContextPayloa
     currentSite,
     accessibleSites: [currentSite],
     permissions: context.permissions,
+    isOwner: context.actor?.isOwner ?? false,
   }
 }
 

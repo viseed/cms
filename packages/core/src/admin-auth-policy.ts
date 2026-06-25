@@ -1,10 +1,46 @@
-﻿import { sessions, userSiteRoles, users } from '@viseed/schema'
-import type { ActorContext, Permission, RBACRole, RequestContext, SiteContext } from '@viseed/types'
-import { resolvePermissionsForRoles } from '@viseed/types'
-import { and, eq, gt } from 'drizzle-orm'
+﻿import { rolePermissions, sessions, userSiteRoles, users } from '@viseed/schema'
+import type {
+  ActorContext,
+  Permission,
+  RequestContext,
+  RoleSlug,
+  SiteContext,
+} from '@viseed/types'
+import { PERMISSION_CATALOG } from '@viseed/types'
+import { and, eq, gt, inArray } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { getCookie } from 'hono/cookie'
 import type { DatabaseInstance } from './database'
+
+const PERMISSION_SET: ReadonlySet<string> = new Set(PERMISSION_CATALOG)
+
+/**
+ * Resolve the union of permissions granted by a set of role slugs, sourced from
+ * the DB-backed `role_permissions` table. Unknown permissions (not in the
+ * catalog) are ignored defensively.
+ */
+async function resolvePermissionsForRoleSlugs(
+  db: DatabaseInstance,
+  slugs: Array<RoleSlug>,
+): Promise<Array<Permission>> {
+  if (slugs.length === 0) {
+    return []
+  }
+
+  const rows = await db
+    .select({ permission: rolePermissions.permission })
+    .from(rolePermissions)
+    .where(inArray(rolePermissions.roleSlug, slugs))
+
+  const permissions = new Set<Permission>()
+  for (const row of rows) {
+    if (PERMISSION_SET.has(row.permission)) {
+      permissions.add(row.permission as Permission)
+    }
+  }
+
+  return [...permissions]
+}
 
 export const REQUEST_CONTEXT_KEY = 'viseed.requestContext'
 
@@ -96,24 +132,16 @@ export function getSessionToken(c: Context): string | null {
   return null
 }
 
-const USERS_TABLE_ROLES: ReadonlySet<RBACRole> = new Set([
-  'admin',
-  'site_admin',
-  'site_content_writer',
-])
-
-function parseUsersTableRole(role: string | null | undefined): RBACRole | null {
-  if (!role || !USERS_TABLE_ROLES.has(role as RBACRole)) {
-    return null
-  }
-  return role as RBACRole
+function parseUsersTableRole(role: string | null | undefined): RoleSlug | null {
+  const slug = role?.trim()
+  return slug ? slug : null
 }
 
 function dedupeRoleAssignments(
-  roleAssignments: Array<{ role: RBACRole; siteId?: string }>,
-): Array<{ role: RBACRole; siteId?: string }> {
+  roleAssignments: Array<{ role: RoleSlug; siteId?: string }>,
+): Array<{ role: RoleSlug; siteId?: string }> {
   const seen = new Set<string>()
-  const deduped: Array<{ role: RBACRole; siteId?: string }> = []
+  const deduped: Array<{ role: RoleSlug; siteId?: string }> = []
 
   for (const assignment of roleAssignments) {
     const key = `${assignment.role}:${assignment.siteId ?? 'all'}`
@@ -176,6 +204,26 @@ export async function resolveSessionActorContext(
     }
   }
 
+  // The owner is a platform-wide superuser: full permissions on every site and
+  // never blocked by per-site role checks.
+  if (user.isOwner) {
+    return {
+      ok: true,
+      status: 200,
+      error: null,
+      value: {
+        actor: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          roleAssignments: [{ role: 'admin' }],
+          isOwner: true,
+        },
+        permissions: [...PERMISSION_CATALOG],
+      },
+    }
+  }
+
   const roleRows = await db
     .select({
       role: userSiteRoles.role,
@@ -185,7 +233,7 @@ export async function resolveSessionActorContext(
     .where(eq(userSiteRoles.userId, user.id))
 
   const explicitAssignments = roleRows.map((row) => ({
-    role: row.role as RBACRole,
+    role: row.role as RoleSlug,
     siteId: row.role === 'admin' ? undefined : row.siteId,
   }))
 
@@ -210,6 +258,8 @@ export async function resolveSessionActorContext(
     }
   }
 
+  const slugs = [...new Set(scopedAssignments.map((assignment) => assignment.role))]
+
   return {
     ok: true,
     status: 200,
@@ -220,8 +270,9 @@ export async function resolveSessionActorContext(
         email: user.email,
         name: user.name,
         roleAssignments: scopedAssignments,
+        isOwner: false,
       },
-      permissions: resolvePermissionsForRoles(scopedAssignments),
+      permissions: await resolvePermissionsForRoleSlugs(db, slugs),
     },
   }
 }

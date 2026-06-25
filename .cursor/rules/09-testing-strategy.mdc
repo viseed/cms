@@ -26,23 +26,50 @@ Khi thêm **mới** các phần dưới đây, PHẢI viết test **trước** k
 | Pattern | Loại | Phụ thuộc | Khi nào chạy |
 |---|---|---|---|
 | `*.test.ts` | Unit | KHÔNG I/O (DB, network, fs) | Mọi lúc, không cần hạ tầng |
-| `*.integration.test.ts` | Integration | Cần PostgreSQL / network | Chỉ khi có `DATABASE_URL` |
+| `*.integration.test.ts` | Integration | Cần PostgreSQL / network | Tự provision `viseed_test`; skip khi Postgres không kết nối được |
 
 - Đặt test cạnh source (`foo.ts` → `foo.test.ts`).
 - Import từ `bun:test`: `import { describe, expect, test } from 'bun:test'`.
 - Style theo Biome: single quote, no semicolon, 2-space indent (xem `07-coding-standards`).
 
+## Integration test — Tự provision DB test riêng (KHÔNG bao giờ DB dev thật)
+
+> ⚠️ Integration test ghi/đổi data (tạo user, đổi cờ `is_owner`, transfer ownership…). **TUYỆT ĐỐI KHÔNG** chạy trên DB dev thật (`viseed`). Test resolve DB qua `ensureTestDatabase()`, KHÔNG đọc `DATABASE_URL`.
+
+`packages/core/src/test-support.ts` → `ensureTestDatabase()` lo trọn vòng đời DB test, gọi **một lần mỗi tiến trình** (cached):
+
+1. Resolve URL = `TEST_DATABASE_URL` ?? mặc định `viseed_test`. **Guard cứng**: tên DB phải chứa `"test"`, nếu không → throw (không bao giờ trỏ nhầm `viseed`).
+2. `CREATE DATABASE` nếu chưa tồn tại (qua maintenance DB `postgres`).
+3. `drizzle-kit push --config drizzle.config.test.ts` để đồng bộ schema (idempotent).
+4. `TRUNCATE` toàn bộ bảng `viseed_*` (clean slate mỗi lần chạy — giống DB ephemeral của CI).
+
+Cách chạy — **không cần set env gì cả**:
+
+```bash
+bun run test            # turbo run test → tự provision viseed_test + chạy integration
+bun test integration    # trong package @viseed/core
+```
+
+- File integration provision ở **top-level await**, set cờ `testDatabaseReady`; nếu Postgres không kết nối được thì `console.warn` + skip cả suite (không fail). Đây là cách giữ `bun run test` vừa **an toàn** (không đụng `viseed`) vừa **tự đủ**.
+- `turbo.json`: task `test`/`test:unit`/`test:integration` đặt `cache: false` (integration đổi DB, không cache kết quả) + `passThroughEnv: ["DATABASE_URL","TEST_DATABASE_URL"]` để CI/máy khác có thể override DB test bằng `TEST_DATABASE_URL` thật trong OS env. **Lưu ý**: `bun run` nạp `.env` vào runtime của chính nó NHƯNG không truyền xuống tiến trình con turbo (Go binary) → vì vậy gate phải dựa vào **khả năng kết nối**, không dựa vào `DATABASE_URL`.
+- `drizzle.config.test.ts` riêng (không đọc `.env.drizzle`, mặc định `viseed_test`, override bằng `TEST_DATABASE_URL`).
+- Test có precondition đặc thù (vd cần users trống để kiểm tra seed boot-time) phải tự reset trong test (vd `resetUsersTable()` trong `admin-guards.integration.test.ts`), vì DB test dùng chung trong cả tiến trình.
+
 ## Integration test — Bắt buộc skip rõ ràng
 
-Integration test PHẢI tự skip khi thiếu env, KHÔNG được `return` âm thầm (gây false-positive):
+Integration test PHẢI tự skip khi không provision được DB, KHÔNG được `return` âm thầm (gây false-positive):
 
 ```typescript
-// ✅ Đúng — skip hiện rõ trong report
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
-describe.skipIf(!hasDatabaseUrl)('blog plugin site isolation', () => { ... })
-
-// ✅ Hoặc ở cấp test
-test.skipIf(!process.env.DATABASE_URL)('creates a database instance', async () => { ... })
+// ✅ Đúng — provision up-front, skip cả suite nếu Postgres không reachable
+let testDatabaseReady = false
+let testDatabaseUrl = ''
+try {
+  testDatabaseUrl = await ensureTestDatabase()
+  testDatabaseReady = true
+} catch (error) {
+  console.warn(`skipping: test database unavailable — ${(error as Error).message}`)
+}
+describe.skipIf(!testDatabaseReady)('users & roles', () => { ... })
 
 // ❌ Sai — giả vờ pass khi không có DB
 test('...', async () => {
@@ -54,18 +81,18 @@ test('...', async () => {
 
 - Feature mới = code + test trong **cùng PR**.
 - Unit test phải xanh mà không cần DB/network/secrets.
-- Integration test phải `skipIf` khi thiếu env; cấm swallow lỗi.
+- Integration test phải `skipIf` khi không provision được DB test; cấm swallow lỗi.
 
 ## Lệnh chạy
 
 ```bash
-bun test                 # trong 1 package: chạy tất cả (integration tự skip nếu không có DATABASE_URL)
+bun test                 # trong 1 package: chạy tất cả; integration tự provision viseed_test, skip nếu Postgres down
 bun run test:unit        # root: turbo run test:unit — build-independent, nhanh
-bun run test:integration # root: turbo run test:integration — cần DATABASE_URL (depends build)
+bun run test:integration # root: turbo run test:integration — depends build
 ```
 
 - `test:unit` (turbo) **không** depend `build` → vòng feedback nhanh.
-- `test:integration` (turbo) depend `build` và yêu cầu `DATABASE_URL`.
+- `test:integration` (turbo) depend `build`.
 - **Chỉ package có test file mới khai báo script `test`** — `bun test` thoát code 1 khi `No tests found!`, làm fail cả `turbo run test`. Hiện có: `@viseed/core`, `@viseed/validator`, `@viseed/registry`, `@viseed/plugin-blog`. Khi thêm test file đầu tiên vào một package, nhớ thêm lại script `test` (và `test:unit`/`test:integration` nếu cần).
 - Chỉ package có integration test mới khai báo script `test:integration` (`@viseed/core`, `@viseed/plugin-blog`).
 
@@ -75,8 +102,15 @@ bun run test:integration # root: turbo run test:integration — cần DATABASE_U
 - Badge CI pass/fail dùng native GitHub Actions (`.../actions/workflows/ci.yml/badge.svg`) trên README — KHÔNG dùng coverage service (Codecov/Coveralls) hay coverage badge.
 - KHÔNG chạy `biome check` trong CI hiện tại (repo còn nhiều lỗi lint chưa cleanup → luôn đỏ).
 
+## Tip — Tránh cạn connection trong integration suite
+
+Mỗi `cms.launch()` mở một DB pool riêng. Một file integration gọi `launch()` mỗi test sẽ tích luỹ nhiều pool và có thể vượt `max_connections` của Postgres (`too many clients already`) khi chạy chung với các suite khác. **Khuyến nghị**: launch **1 lần** trong `beforeAll` rồi share `app`/`db` cho cả file (xem `users-roles.integration.test.ts`). Khi cần state sạch trong từng test, reset bằng query (vd `clearOwners`) thay vì launch lại.
+
 ## Last updated
 
+2026-06-25 — Integration test **tự provision** `viseed_test` qua `packages/core/src/test-support.ts → ensureTestDatabase()` (create DB → drizzle-kit push → truncate clean-slate, cached 1 lần/tiến trình, guard tên DB chứa "test"). Gate chuyển từ `DATABASE_URL` sang **khả năng kết nối** (top-level await + `skipIf(!testDatabaseReady)`) vì `bun run` không truyền `.env` xuống tiến trình con turbo. `turbo.json`: test tasks `cache:false` + `passThroughEnv:["DATABASE_URL","TEST_DATABASE_URL"]`. Kết quả: `bun run test` luôn chạy integration trên `viseed_test`, tự tạo nếu chưa có, KHÔNG bao giờ đụng `viseed`. Đổi tên test `seeds default dev admin` để khớp hành vi hiện tại (chỉ auto-seed khi có `HANA_ADMIN_*`).
+2026-06-25 — Quy ước DB test riêng: integration test CHỈ chạy trên `viseed_test`, KHÔNG bao giờ DB dev thật. Thêm `drizzle.config.test.ts` (không đọc `.env.drizzle`), script `scripts/setup-test-db.ts` (chặn tạo DB không chứa "test"), và npm scripts `db:setup:test` + `db:push:test`. Integration test phải self-contained (seed site `default` trong `beforeAll`). Lý do bổ sung quy ước: một lần verify đã lỡ trỏ `DATABASE_URL` vào DB dev thật làm bẩn data.
+2026-06-25 — Users & Roles: thêm unit test-first `packages/validator/src/user.test.ts` (createUser/updateUser/resetPassword/roleAssignment/createRole/updateRole/transferOwnership) và integration `packages/core/src/users-roles.integration.test.ts` (owner full-perms, custom role resolve, guard `/users`, không xoá owner, transfer ownership, non-owner bị chặn). Thêm tip: share 1 `cms.launch()` qua `beforeAll` trong integration để tránh `too many clients already`.
 2026-06-23 — Initial creation: test-first cho code mới, tách unit/integration, skipIf cho integration.
 2026-06-23 — Quy ước: chỉ package có test file mới khai báo script `test` (tránh `No tests found!` fail turbo).
 2026-06-23 — Thêm CI `ci.yml` (test trên push master + PR) + badge CI native; bỏ ý tưởng coverage chi tiết.

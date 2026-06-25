@@ -1,17 +1,65 @@
-﻿import { describe, expect, test } from 'bun:test'
+﻿import { SQL } from 'bun'
+import { beforeAll, describe, expect, test } from 'bun:test'
 import { randomUUID } from 'node:crypto'
 import { sessions, siteDomains, userSiteRoles, users } from '@viseed/schema'
 import { eq } from 'drizzle-orm'
 import { createCMS } from './viseed-cms'
+import { ensureTestDatabase } from './test-support'
 
-const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://localhost:5432/viseed_test'
 const DEFAULT_SITE_ID = 'default'
-const hasDatabaseUrl = Boolean(process.env.DATABASE_URL)
 
-describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
+// Provision the dedicated test database up-front (create + migrate + clean slate).
+// The suite runs whenever a local Postgres is reachable and ALWAYS targets the
+// guarded test DB (never `DATABASE_URL`). If Postgres is unavailable, skip instead
+// of failing — this is what keeps `bun run test` both safe and self-contained.
+let testDatabaseUrl = ''
+let testDatabaseReady = false
+try {
+  testDatabaseUrl = await ensureTestDatabase()
+  testDatabaseReady = true
+} catch (error) {
+  console.warn(`[admin-guards.integration] skipping: test database unavailable — ${(error as Error).message}`)
+}
+
+// Some tests assert the boot-time seeding that only runs when no users exist.
+// They must start from an empty users table regardless of what earlier tests
+// inserted into the shared test database.
+async function resetUsersTable(): Promise<void> {
+  const sql = new SQL(testDatabaseUrl)
+  try {
+    await sql`TRUNCATE TABLE viseed_users CASCADE`
+  } finally {
+    await sql.end()
+  }
+}
+
+function restoreEnv(key: string, value: string | undefined): void {
+  if (value === undefined) {
+    delete process.env[key]
+  } else {
+    process.env[key] = value
+  }
+}
+
+describe.skipIf(!testDatabaseReady)('admin runtime tenancy and guards', () => {
+  beforeAll(async () => {
+    // Sessions/role assignments reference the default site; ensure it exists so
+    // the suite is self-contained on a fresh (dedicated) test database.
+    const sql = new SQL(testDatabaseUrl)
+    try {
+      await sql`
+        INSERT INTO viseed_sites (id, name, slug, status)
+        VALUES (${DEFAULT_SITE_ID}, 'Default', 'default', 'active')
+        ON CONFLICT (id) DO NOTHING
+      `
+    } finally {
+      await sql.end()
+    }
+  })
+
   test('rejects admin API requests without session token', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -26,7 +74,7 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
 
   test('allows admin session for platform route', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -62,7 +110,7 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
 
   test('forbids writer role on platform-managed routes', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -106,7 +154,7 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
 
   test('rejects unresolved host for non-fallback domains', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -145,7 +193,7 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
 
   test('enforces deny-by-default for unmapped admin routes', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -189,7 +237,7 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
 
   test('supports admin login endpoint in core auth flow', async () => {
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: { enabled: false },
     })
     const app = await cms.launch()
@@ -238,9 +286,10 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
   })
 
   test('bootstraps initial admin when configured on first launch', async () => {
+    await resetUsersTable()
     const bootstrapEmail = `bootstrap-${randomUUID()}@viseed.dev`
     const cms = createCMS({
-      db: { driver: 'postgres', url: DATABASE_URL },
+      db: { driver: 'postgres', url: testDatabaseUrl },
       admin: {
         enabled: false,
         bootstrapAdmin: {
@@ -269,13 +318,25 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
     expect(adminRole?.siteId).toBe(DEFAULT_SITE_ID)
   })
 
-  test('seeds default dev admin automatically when no users exist', async () => {
-    const previousEnv = process.env.NODE_ENV
+  test('seeds default dev admin automatically when dev env vars are set', async () => {
+    const previousEnv = {
+      NODE_ENV: process.env.NODE_ENV,
+      email: process.env.HANA_ADMIN_EMAIL,
+      password: process.env.HANA_ADMIN_PASSWORD,
+      name: process.env.HANA_ADMIN_NAME,
+    }
     process.env.NODE_ENV = 'development'
+    // The dev admin is auto-seeded only when explicit HANA_ADMIN_* env vars are
+    // provided (see ensureBootstrapAdmin); without them the setup wizard handles
+    // first-run setup instead.
+    process.env.HANA_ADMIN_EMAIL = 'admin@local.dev'
+    process.env.HANA_ADMIN_PASSWORD = 'local-dev-password'
+    process.env.HANA_ADMIN_NAME = 'Local Admin'
 
     try {
+      await resetUsersTable()
       const cms = createCMS({
-        db: { driver: 'postgres', url: DATABASE_URL },
+        db: { driver: 'postgres', url: testDatabaseUrl },
         admin: { enabled: false },
       })
       await cms.launch()
@@ -286,7 +347,10 @@ describe.skipIf(!hasDatabaseUrl)('admin runtime tenancy and guards', () => {
       expect(defaultAdmin?.name).toBe('Local Admin')
       expect(Boolean(defaultAdmin?.passwordHash)).toBe(true)
     } finally {
-      process.env.NODE_ENV = previousEnv
+      process.env.NODE_ENV = previousEnv.NODE_ENV
+      restoreEnv('HANA_ADMIN_EMAIL', previousEnv.email)
+      restoreEnv('HANA_ADMIN_PASSWORD', previousEnv.password)
+      restoreEnv('HANA_ADMIN_NAME', previousEnv.name)
     }
   })
 })

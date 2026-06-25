@@ -76,27 +76,30 @@ function handleLogin(ctx: AdminAuthContext): Handler {
       return c.json({ error: 'Invalid email or password.' }, 401)
     }
 
-    const roleRows = await db
-      .select({
-        role: userSiteRoles.role,
-        siteId: userSiteRoles.siteId,
-      })
-      .from(userSiteRoles)
-      .where(eq(userSiteRoles.userId, user.id))
+    if (!user.isOwner) {
+      const roleRows = await db
+        .select({
+          role: userSiteRoles.role,
+          siteId: userSiteRoles.siteId,
+        })
+        .from(userSiteRoles)
+        .where(eq(userSiteRoles.userId, user.id))
 
-    const usersTableRole = parseUsersTableRole(user.role)
-    const usersTableGrantsDefaultSite =
-      site.id === SINGLE_SITE_CONTEXT.id &&
-      (usersTableRole === 'site_admin' || usersTableRole === 'site_content_writer')
-    const hasSiteAccess =
-      roleRows.some(
-        (row: { role: string; siteId: string }) => row.role === 'admin' || row.siteId === site.id,
-      ) ||
-      usersTableRole === 'admin' ||
-      usersTableGrantsDefaultSite
+      const usersTableRole = parseUsersTableRole(user.role)
+      const usersTableGrantsDefaultSite =
+        site.id === SINGLE_SITE_CONTEXT.id &&
+        (usersTableRole === 'site_admin' || usersTableRole === 'site_content_writer')
+      const hasSiteAccess =
+        roleRows.some(
+          (row: { role: string; siteId: string }) =>
+            row.role === 'admin' || row.siteId === site.id,
+        ) ||
+        usersTableRole === 'admin' ||
+        usersTableGrantsDefaultSite
 
-    if (!hasSiteAccess) {
-      return c.json({ error: `User has no access to site "${site.slug}".` }, 403)
+      if (!hasSiteAccess) {
+        return c.json({ error: `User has no access to site "${site.slug}".` }, 403)
+      }
     }
 
     const token = randomBytes(32).toString('hex')
@@ -250,6 +253,7 @@ function handleSetup(ctx: AdminAuthContext): Handler {
       name,
       passwordHash,
       role: 'admin',
+      isOwner: true,
     })
 
     await db.insert(userSiteRoles).values({
