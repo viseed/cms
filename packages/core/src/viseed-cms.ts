@@ -36,8 +36,9 @@ import { serveStatic } from 'hono/bun'
 import { getCookie, setCookie } from 'hono/cookie'
 import {
   AdminPolicyRegistry,
+  authenticateRequest,
   getRequestContext,
-  resolveSessionActorContext,
+  type PermissionCatalog,
   setRequestContext,
 } from './admin-auth-policy'
 import { registerAuthRoutes } from './admin-routes/auth'
@@ -64,7 +65,8 @@ import {
   resolveStoredConfig,
   type StorageConfigPayload,
 } from './media-storage-config'
-import { PluginRouteRegistry } from './plugin-route-registry'
+import { createPluginRouter, PluginRouteRegistry } from './plugin-route-registry'
+import { PermissionRegistry } from './permission-registry'
 import { resolveSiteContextByHost } from './site-resolver'
 import { StorageProviderRegistry } from './storage-provider-registry'
 import { resolveValidatedPreviewRoot } from './theme-preview-path'
@@ -113,16 +115,21 @@ export class ViseedCMS {
   private themeRegistry = new Map<string, CMSTheme>()
   private themeRuntimes = new Map<string, ThemeRuntime>()
   private activeThemeName: string | null = null
-  private pluginRegistry = new PluginRouteRegistry()
+  private pluginRegistry: PluginRouteRegistry
   private widgetTypeRegistry = new WidgetTypeRegistry()
   private dashboardWidgetRegistry = new DashboardWidgetRegistry()
   private storageProviderRegistry = new StorageProviderRegistry()
+  private permissionRegistry = new PermissionRegistry()
   private currentMediaAdapter: StorageAdapter | null = null
   private mediaStorageType: MediaStorageConfig['type'] = 'local'
 
   constructor(config: CMSConfig) {
     this.config = config
     this.app = new Hono()
+    this.pluginRegistry = new PluginRouteRegistry({
+      authenticate: (c) => authenticateRequest(this.getDatabase(), c, this.permissionCatalog()),
+      setRequestContext,
+    })
 
     if (config.plugins) {
       for (const plugin of config.plugins) {
@@ -340,6 +347,17 @@ export class ViseedCMS {
     this.widgetTypeRegistry.rebuild(this.plugins, isActive)
     this.dashboardWidgetRegistry.rebuild(this.plugins, isActive)
     this.storageProviderRegistry.rebuild(this.plugins, isActive)
+    this.permissionRegistry.rebuild(this.plugins, isActive, (name) =>
+      this.pluginRegistry.getDeclaredPermissions(name),
+    )
+  }
+
+  /** Adapter exposing the dynamic permission catalog to the auth pipeline. */
+  private permissionCatalog(): PermissionCatalog {
+    return {
+      has: (key) => this.permissionRegistry.has(key),
+      keys: () => this.permissionRegistry.list().map((entry) => entry.key),
+    }
   }
 
   private async registerPluginHooks(plugin: CMSPlugin): Promise<void> {
@@ -856,29 +874,13 @@ export class ViseedCMS {
         await next()
         return
       }
-      const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
-
-      if (!siteResolution.site) {
-        return c.json(
-          {
-            error: siteResolution.error ?? 'Unable to resolve site from Host header.',
-          },
-          400,
-        )
+      const auth = await authenticateRequest(db, c, this.permissionCatalog())
+      if (!auth.ok || !auth.requestContext) {
+        const statusCode = auth.status === 400 ? 400 : auth.status === 403 ? 403 : 401
+        return c.json({ error: auth.error ?? 'Unauthorized' }, statusCode)
       }
 
-      const sessionResolution = await resolveSessionActorContext(db, c, siteResolution.site)
-      if (!sessionResolution.ok || !sessionResolution.value) {
-        const statusCode = sessionResolution.status === 403 ? 403 : 401
-        return c.json({ error: sessionResolution.error ?? 'Unauthorized' }, statusCode)
-      }
-
-      const requestContext: RequestContext = {
-        site: siteResolution.site,
-        actor: sessionResolution.value.actor,
-        permissions: sessionResolution.value.permissions,
-      }
-
+      const requestContext = auth.requestContext
       setRequestContext(c, requestContext)
       const policyEntry = policyRegistry.resolve(c.req.method, routePath)
       if (!policyEntry) {
@@ -958,6 +960,7 @@ export class ViseedCMS {
 
     registerRolesRoutes(registerAdminRoute, {
       getDatabase: () => this.getDatabase(),
+      permissionRegistry: this.permissionRegistry,
     })
 
     registerPluginRoutes(registerAdminRoute, {
@@ -1216,10 +1219,14 @@ export class ViseedCMS {
       // deferred createSubApp from PluginRouteRegistry (which mounts the sub-app
       // after the plugin defines its routes), so this immediate-mount variant is
       // only safe for callers that register routes before requests are served.
+      // It shares the same auth + RBAC guard as plugin routes.
       createSubApp: (basePath) => {
         const child = new Hono()
         this.app.route(basePath, child)
-        return child
+        return createPluginRouter(child, {
+          authenticate: (c) => authenticateRequest(this.getDatabase(), c, this.permissionCatalog()),
+          setRequestContext,
+        })
       },
     }
   }

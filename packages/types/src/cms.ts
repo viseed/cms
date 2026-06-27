@@ -13,24 +13,113 @@ export const HOOK_KEY = {
   PLUGIN_DISABLED: 'plugin:disabled',
 } as const
 
-export const PERMISSION_CATALOG = [
-  'platform.sites.read',
-  'platform.sites.manage',
-  'platform.users.read',
-  'platform.users.manage',
-  'site.content.read',
-  'site.content.write',
-  'site.menu.read',
-  'site.menu.write',
-  'site.path.read',
-  'site.path.write',
-  'site.media.read',
-  'site.media.write',
-  'site.widgets.read',
-  'site.widgets.manage',
+/**
+ * Built-in permission metadata — the SINGLE SOURCE OF TRUTH for core
+ * permissions. To add a new built-in permission, add exactly one entry here:
+ * {@link Permission}, {@link PERMISSION_CATALOG}, and {@link PERMISSIONS} are
+ * all derived from this list. Plugins may freely reuse any of these keys.
+ */
+export const BUILTIN_PERMISSION_DEFS = [
+  { key: 'platform.sites.read', label: 'View sites', group: 'Platform' },
+  { key: 'platform.sites.manage', label: 'Manage sites', group: 'Platform' },
+  { key: 'platform.users.read', label: 'View users & roles', group: 'Platform' },
+  { key: 'platform.users.manage', label: 'Manage users & roles', group: 'Platform' },
+  { key: 'site.content.read', label: 'View content', group: 'Content' },
+  { key: 'site.content.write', label: 'Edit content', group: 'Content' },
+  { key: 'site.menu.read', label: 'View menus', group: 'Menus' },
+  { key: 'site.menu.write', label: 'Edit menus', group: 'Menus' },
+  { key: 'site.path.read', label: 'View paths', group: 'Paths' },
+  { key: 'site.path.write', label: 'Edit paths', group: 'Paths' },
+  { key: 'site.media.read', label: 'View media', group: 'Media' },
+  { key: 'site.media.write', label: 'Manage media', group: 'Media' },
+  { key: 'site.widgets.read', label: 'View widgets', group: 'Widgets' },
+  { key: 'site.widgets.manage', label: 'Manage widgets', group: 'Widgets' },
 ] as const
 
-export type Permission = (typeof PERMISSION_CATALOG)[number]
+/** Union of built-in permission keys, derived from {@link BUILTIN_PERMISSION_DEFS}. */
+export type Permission = (typeof BUILTIN_PERMISSION_DEFS)[number]['key']
+
+/**
+ * A permission key in the general (runtime) sense. Built-in permissions use the
+ * strict {@link Permission} union; plugin-declared permissions are arbitrary
+ * namespaced strings (e.g. `'pages.publish'`). The `(string & {})` keeps IDE
+ * autocomplete for the built-in literals while still allowing custom strings.
+ */
+export type PermissionKey = Permission | (string & {})
+
+/** Flat list of built-in permission keys, derived from {@link BUILTIN_PERMISSION_DEFS}. */
+export const PERMISSION_CATALOG: ReadonlyArray<Permission> = BUILTIN_PERMISSION_DEFS.map(
+  (def) => def.key,
+)
+
+/** Where a permission entry in the dynamic catalog originates from. */
+export type PermissionSource = 'builtin' | 'plugin'
+
+/**
+ * Declarative description of a permission. Plugins contribute these via
+ * {@link CMSPlugin.permissions}; core seeds the built-in catalog with the same
+ * shape so the admin Roles view can render labels and groups uniformly.
+ */
+export interface PermissionDef {
+  /** Unique permission key, e.g. `'site.content.read'` or `'pages.publish'`. */
+  key: PermissionKey
+  /** Human-readable label shown in the Roles view. */
+  label: string
+  description?: string
+  /** Optional grouping bucket for the Roles UI, e.g. `'Content'`. */
+  group?: string
+}
+
+/** A permission entry as exposed by the admin permissions API. */
+export interface PermissionCatalogEntry extends PermissionDef {
+  source: PermissionSource
+  /** Name of the contributing plugin when `source === 'plugin'`. */
+  pluginName?: string
+}
+
+/**
+ * Define a custom (plugin) permission with full metadata. Prefer this over a
+ * bare key string: the IDE enforces `key` + `label` and suggests `group` /
+ * `description`, so the admin Roles view always has something meaningful to
+ * render. The literal `key` is preserved, so the result can be passed directly
+ * to a route (e.g. `router.put(path, PAGES_PUBLISH, handler)`) and reused as
+ * `PAGES_PUBLISH.key` while staying type-safe and refactor-friendly.
+ *
+ * @example
+ * const PAGES_PUBLISH = definePermission({
+ *   key: 'pages.publish',
+ *   label: 'Publish pages',
+ *   group: 'Pages',
+ * })
+ * // plugin.permissions: [PAGES_PUBLISH]
+ * // route:              api.put('/:id/publish', PAGES_PUBLISH, handler)
+ */
+export function definePermission<const Key extends string>(
+  definition: PermissionDef & { key: Key },
+): PermissionDef & { key: Key } {
+  return definition
+}
+
+/** Maps a dotted permission key to a camelCase constant name, e.g.
+ * `'site.content.read'` → `'siteContentRead'`. */
+type CamelizeDottedKey<S extends string> = S extends `${infer Head}.${infer Tail}`
+  ? `${Head}${Capitalize<CamelizeDottedKey<Tail>>}`
+  : S
+
+/**
+ * Named constants for the built-in permissions, derived from
+ * {@link BUILTIN_PERMISSION_DEFS}. Use these for IDE autocomplete and
+ * refactor-safety instead of typing raw strings, e.g.
+ * `PERMISSIONS.siteContentRead === 'site.content.read'`.
+ */
+export const PERMISSIONS: { [K in Permission as CamelizeDottedKey<K>]: K } = (() => {
+  const constants: Record<string, Permission> = {}
+  for (const def of BUILTIN_PERMISSION_DEFS) {
+    const name = def.key.replace(/\.(\w)/g, (_match, char: string) => char.toUpperCase())
+    constants[name] = def.key
+  }
+  return constants as { [K in Permission as CamelizeDottedKey<K>]: K }
+})()
 
 /**
  * Slugs of the built-in system roles. These are seeded at boot and can never be

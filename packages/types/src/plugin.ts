@@ -1,5 +1,13 @@
-import type { Context, Hono } from 'hono'
-import type { HOOK_KEY, Permission, RequestContext, StorageProviderDef, ViseedCMS } from './cms'
+import type { Context, Handler, Hono } from 'hono'
+import type {
+  HOOK_KEY,
+  Permission,
+  PermissionDef,
+  PermissionKey,
+  RequestContext,
+  StorageProviderDef,
+  ViseedCMS,
+} from './cms'
 import type { ComponentRegistry } from './component-registry'
 import type { CMSTheme } from './theme'
 
@@ -10,15 +18,41 @@ export interface ThemeRenderRequestContext {
   path: string
 }
 
+/**
+ * Router handed to plugins for declaring API routes. Every protected method
+ * REQUIRES a permission — either a key string (built-in or custom) or a
+ * {@link PermissionDef} from `definePermission()`. Passing a `PermissionDef`
+ * also surfaces its label/group in the admin Roles view without a separate
+ * `plugin.permissions` declaration. Plugin endpoints are authenticated and
+ * authorized by default (secure-by-default); routes that must stay public have
+ * to opt out explicitly via the `public.*` variants.
+ *
+ * Core owns the single Hono instance, so plugins never import `hono` at runtime
+ * — they only need its `Handler` type for their callbacks.
+ */
+export interface PluginRouter {
+  get: (path: string, permission: PermissionKey | PermissionDef, handler: Handler) => void
+  post: (path: string, permission: PermissionKey | PermissionDef, handler: Handler) => void
+  put: (path: string, permission: PermissionKey | PermissionDef, handler: Handler) => void
+  delete: (path: string, permission: PermissionKey | PermissionDef, handler: Handler) => void
+  /** Explicitly public (unauthenticated) routes. Use sparingly. */
+  public: {
+    get: (path: string, handler: Handler) => void
+    post: (path: string, handler: Handler) => void
+    put: (path: string, handler: Handler) => void
+    delete: (path: string, handler: Handler) => void
+  }
+}
+
 export interface CMSRouteContextHelpers {
   resolveRequestContext: (context: Context) => RequestContext
   hasPermission: (context: Context, permission: Permission) => boolean
   /**
-   * Create a Hono sub-app and mount it at `basePath` on the plugin's router.
-   * The core owns the single Hono instance, so plugins must not import `hono`
-   * at runtime — they only need its type.
+   * Create a permission-aware sub-router mounted at `basePath` on the plugin's
+   * router. Protected routes require a permission key and are guarded by the
+   * core auth + RBAC pipeline before the handler runs.
    */
-  createSubApp: (basePath: string) => Hono
+  createSubApp: (basePath: string) => PluginRouter
 }
 
 export interface PluginLifecycle {
@@ -34,7 +68,7 @@ export interface PluginAdminMenuItem {
   icon: string
   /** Admin route path, e.g. '/blog/posts' */
   path: string
-  requiredPermissions?: Permission[]
+  requiredPermissions?: PermissionKey[]
   siteScoped?: boolean
   /** Lower = higher in sidebar; default 50 */
   order?: number
@@ -119,6 +153,13 @@ export interface CMSPlugin {
   public?: PluginPublicConfig
   /** Media storage providers this plugin contributes (e.g. S3, R2) */
   storageProviders?: StorageProviderDef[]
+  /**
+   * Custom permissions this plugin declares. Reuse built-in keys freely (no
+   * need to redeclare them); only declare entries here for plugin-specific
+   * permissions. Declared entries surface in the admin Roles view and become
+   * valid grant targets.
+   */
+  permissions?: PermissionDef[]
 }
 
 export interface CMSPluginHooks {

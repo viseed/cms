@@ -25,10 +25,20 @@ interface PluginAdminMenuItem {
   label: string
   icon: string
   path: string                       // admin route path, e.g. '/blog/posts'
-  requiredPermissions?: Permission[]
+  requiredPermissions?: PermissionKey[] // built-in OR plugin-declared keys
   siteScoped?: boolean
   order?: number                     // lower = higher in sidebar
   componentExport?: string           // export name in admin bundle
+}
+
+// Plugin-declared permission. Reuse built-in keys freely (no need to redeclare);
+// only declare entries here for plugin-specific permissions. Declared entries
+// surface in the admin Roles view and become valid grant targets.
+interface PermissionDef {
+  key: PermissionKey   // 'site.content.read' (built-in) | 'pages.publish' (custom)
+  label: string
+  description?: string
+  group?: string       // grouping bucket for the Roles UI
 }
 
 interface PluginAdminConfig {
@@ -79,16 +89,36 @@ interface CMSPlugin {
   dashboardWidgets?: DashboardWidgetDef[] // admin dashboard widgets (rendered in admin SPA)
   public?: PluginPublicConfig         // public-facing ESM bundle (Vue widget renderers)
   storageProviders?: StorageProviderDef[] // media storage providers (e.g. S3, R2)
+  permissions?: PermissionDef[]       // custom permissions this plugin declares
   // helpers.resolveRequestContext(c): chuẩn hóa site + actor + permissions
   // helpers.hasPermission(c, permission): kiểm tra quyền thống nhất với core
-  // helpers.createSubApp(basePath): core tạo + mount Hono sub-app cho plugin
+  // helpers.createSubApp(basePath): core tạo + mount sub-router cho plugin
   //   (plugin KHÔNG tự `new Hono()`, chỉ `import type { Hono }`)
 }
+
+// PluginRouter — secure-by-default: mọi method protected BẮT BUỘC khai báo
+// permission (key string built-in/custom HOẶC PermissionDef từ definePermission).
+// Truyền PermissionDef → metadata tự vào Roles view, khỏi khai plugin.permissions.
+// Route public phải opt-out tường minh qua `public.*`.
+type PermissionArg = PermissionKey | PermissionDef
+interface PluginRouter {
+  get:    (path: string, permission: PermissionArg, handler: Handler) => void
+  post:   (path: string, permission: PermissionArg, handler: Handler) => void
+  put:    (path: string, permission: PermissionArg, handler: Handler) => void
+  delete: (path: string, permission: PermissionArg, handler: Handler) => void
+  public: { get; post; put; delete }   // (path, handler) — KHÔNG auth, dùng hạn chế
+}
+
+// definePermission — tạo custom permission có metadata (IDE bắt buộc key+label),
+// giữ literal key. Dùng cho plugin.permissions HOẶC truyền thẳng vào route.
+function definePermission<const K extends string>(
+  def: PermissionDef & { key: K },
+): PermissionDef & { key: K }
 
 interface CMSRouteContextHelpers {
   resolveRequestContext: (c: Context) => RequestContext
   hasPermission: (c: Context, permission: Permission) => boolean
-  createSubApp: (basePath: string) => Hono   // core owns Hono; mount sau khi plugin định nghĩa routes
+  createSubApp: (basePath: string) => PluginRouter  // permission-aware; core owns Hono
 }
 
 interface CMSPluginHooks {
@@ -156,18 +186,53 @@ export const schema = { posts }
 // ✅ Đúng — dùng helpers.createSubApp, KHÔNG import hono runtime
 import type { Hono } from 'hono'
 import type { CMSRouteContextHelpers } from '@viseed/types'
+import { PERMISSIONS } from '@viseed/types' // hằng built-in (autocomplete + refactor-safe)
 
 export function setupBlogRoutes(_app: Hono, helpers: CMSRouteContextHelpers): void {
-  const blog = helpers.createSubApp('/api/blog') // core tạo + mount sub-app
-  blog.get('/posts', async (c) => {
-    if (!helpers.hasPermission(c, 'site.content.read')) {
-      return c.json({ error: 'Forbidden' }, 403)
-    }
+  const blog = helpers.createSubApp('/api/blog') // permission-aware sub-router
+  // method protected: bắt buộc permission key; core lo auth + RBAC guard
+  blog.get('/posts', PERMISSIONS.siteContentRead, async (c) => {
     return c.json({ posts: [] }) // lấy db qua cms:init hook
   })
+  blog.post('/posts', PERMISSIONS.siteContentWrite, async (c) => {
+    return c.json({ ok: true })
+  })
+  // route public (vd login) phải opt-out tường minh:
+  blog.public.get('/feed.xml', async (c) => c.text('<rss/>'))
 }
 ```
 
+- **Secure-by-default**: mỗi method protected BẮT BUỘC truyền `permission` (TS-enforced).
+  Core resolve session + site, set request context, và chặn 401 (chưa đăng nhập)
+  / 403 (thiếu quyền) TRƯỚC khi handler chạy. KHÔNG tự gọi `hasPermission` trong handler nữa.
+- Dùng hằng `PERMISSIONS.*` (vd `PERMISSIONS.siteContentRead`) cho built-in permission —
+  có autocomplete + refactor-safe. Gõ chuỗi cũng được (LiteralUnion vẫn gợi ý). Built-in
+  là single source of truth ở `BUILTIN_PERMISSION_DEFS`; thêm mới chỉ sửa 1 chỗ.
+- **Custom permission**: tạo bằng `definePermission` (IDE bắt buộc `key` + `label`,
+  gợi ý `group`/`description`), rồi truyền THẲNG def vào route — metadata tự vào Roles
+  view, KHỎI khai lại trong `plugin.permissions`:
+
+```typescript
+import { definePermission } from '@viseed/types'
+
+const PAGES_PUBLISH = definePermission({
+  key: 'pages.publish',
+  label: 'Publish pages',
+  group: 'Pages',
+})
+
+export function setupPagesRoutes(_app: Hono, helpers: CMSRouteContextHelpers): void {
+  const api = helpers.createSubApp('/api/pages')
+  api.put('/:id/publish', PAGES_PUBLISH, async (c) => c.json({ ok: true }))
+  // (hoặc dùng PAGES_PUBLISH.key nếu chỉ cần chuỗi)
+}
+```
+
+- Phân biệt read/write: GET → `*.read`, POST/PUT/DELETE → `*.write`/`*.manage`.
+- Route công khai (không auth) phải dùng `blog.public.*` — dùng hạn chế.
+- Tái dùng built-in permission key thoải mái; chỉ khai `CMSPlugin.permissions`
+  cho permission riêng của plugin. Permission khai báo + tham chiếu (menuItems/routes)
+  đều tự xuất hiện trong Roles view qua `PermissionRegistry`.
 - Routes prefix bằng tên plugin: `/api/blog`, `/api/auth`, `/api/menus`
 - KHÔNG `new Hono()` và KHÔNG `import { Hono } from 'hono'` (runtime). Chỉ
   `import type { Hono }`; tạo sub-app qua `helpers.createSubApp(basePath)`.
@@ -371,6 +436,9 @@ Permissions: đọc dùng `site.content.read`, sửa layout dùng `site.widgets.
 
 ## Last updated
 
+2026-06-27 — (bổ sung) `definePermission(def)` (export `@viseed/types`): tạo custom permission có metadata, IDE bắt buộc `key`+`label`, giữ literal key. `PluginRouter` method protected nhận `PermissionKey | PermissionDef` — truyền thẳng def vào route thì label/group tự vào Roles catalog (registry ghi nhận def đầy đủ từ route declaration), không cần khai lại `plugin.permissions`.
+2026-06-27 — (bổ sung) Built-in permission có hằng `PERMISSIONS` (camelCase, vd `PERMISSIONS.siteContentRead`) export từ `@viseed/types` để dev autocomplete + refactor-safe. Single source of truth = `BUILTIN_PERMISSION_DEFS` (`as const`); `Permission`, `PERMISSION_CATALOG`, `PERMISSIONS` đều derive từ đó (thêm built-in mới chỉ sửa 1 chỗ). Built-in plugins pages/menu/blog đổi sang dùng `PERMISSIONS.*`.
+2026-06-27 — Plugin route permissions & dynamic catalog: `CMSRouteContextHelpers.createSubApp` giờ trả `PluginRouter` permission-aware — mỗi method protected BẮT BUỘC `permission` key (secure-by-default), route public dùng `router.public.*`. Core guard (auth + RBAC) chạy trước handler (401/403). Thêm `PermissionDef` + field `CMSPlugin.permissions` (khai báo permission riêng); `PluginAdminMenuItem.requiredPermissions` nới sang `PermissionKey[]`. Core `PermissionRegistry` gom built-in + plugin-declared + key tham chiếu (menuItems/routes) → dùng cho enforce, validate role, và Roles view (`GET /api/admin/permissions` trả `PermissionCatalogEntry[]`). Owner nhận trọn catalog động. `authenticateRequest()` (admin-auth-policy) dùng chung cho admin API + plugin guard. Built-in plugins (pages/menu/blog) khai báo read/write per-route; plugin-auth dùng `public.*`.
 2026-06-24 — Storage Provider System: thêm field `storageProviders?: StorageProviderDef[]` trên `CMSPlugin`, `StorageProviderDef`/`StorageProviderField`, và `StorageAdapter` (chuyển sang `@viseed/types`). Core `StorageProviderRegistry` (rebuild cùng widget registry). Admin route `/api/admin/media/storage-config/providers`. S3/R2 tách ra `@viseed/plugin-s3`/`@viseed/plugin-r2`. Form admin render động (declarative fields), secret mã hoá at-rest.
 2026-06-22 — Dashboard Widget System: thêm `DashboardWidgetSize`, `DashboardWidgetDef` + field `dashboardWidgets` trên `CMSPlugin`. `DashboardWidgetRegistry` (core) rebuild cùng `WidgetTypeRegistry`. Bảng `dashboard_widgets` (per-site) trong `@viseed/schema`. Admin routes `/api/admin/dashboard-widget-types` + CRUD/reorder `/api/admin/dashboard-widgets`. `DashboardView.vue` render grid 4 cột, component lấy từ admin bundle. Demo: `blog/recent-posts` trong `plugin-blog`.
 2026-06-10 — `CMSRouteContextHelpers.createSubApp(basePath)`: core sở hữu Hono, plugin không `new Hono()` / không import hono runtime (chỉ `import type`). Core mount sub-app sau khi plugin định nghĩa routes. `hono` thành devDependency type-only của plugin.

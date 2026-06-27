@@ -69,16 +69,17 @@ alwaysApply: false
 
 ```
 packages/core/src/viseed-cms.ts       → ViseedCMS class, createCMS(), theme registry, hot-swap, companion plugin toggle, plugin-manifest + bundle-serving APIs, ensureSystemRoles()/ensureOwner() seeding
-packages/core/src/admin-auth-policy.ts → AdminPolicyRegistry, resolveSessionActorContext (DB-driven permissions + owner bypass), resolvePermissionsForRoleSlugs
+packages/core/src/admin-auth-policy.ts → AdminPolicyRegistry, resolveSessionActorContext (DB-driven permissions + owner bypass), resolvePermissionsForRoleSlugs, authenticateRequest (shared site+session+RBAC resolution for admin API + plugin guard)
+packages/core/src/permission-registry.ts → PermissionRegistry — dynamic catalog (built-in + plugin-declared + keys referenced by menuItems/routes)
 packages/core/src/admin-routes/users.ts → users CRUD + reset password + transfer-ownership (owner-only enforced in handler)
-packages/core/src/admin-routes/roles.ts → roles CRUD + GET /permissions (admin role permissions locked; system roles undeletable)
+packages/core/src/admin-routes/roles.ts → roles CRUD + GET /permissions (returns dynamic PermissionCatalogEntry[]; validate via PermissionRegistry; admin role locked; system roles undeletable)
 packages/core/src/hook-registry.ts  → HookRegistry class, runWaterfallAt()
-packages/core/src/plugin-route-registry.ts → PluginRouteRegistry, plugin hot-swap middleware
+packages/core/src/plugin-route-registry.ts → PluginRouteRegistry + createPluginRouter (permission-aware PluginRouter, per-route auth+RBAC guard), plugin hot-swap middleware
 packages/core/src/theme-runtime.ts  → ThemeRuntime, Eta template rendering
 packages/core/src/database.ts       → createDatabase() (bun:sql + drizzle-orm/bun-sql)
 packages/core/src/build.ts          → buildPluginAdmin() / buildPluginPublic() / buildPluginBundle() — Vite helpers for plugin admin + public bundles (@viseed/core/build subpath)
 packages/cli/src/commands/db.ts     → viseed db push/generate/migrate (dynamic schema discovery + drizzle-kit)
-packages/types/src/plugin.ts        → CMSPlugin, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
+packages/types/src/plugin.ts        → CMSPlugin (permissions[]), PluginRouter, PluginAdminConfig, PluginAdminMenuItem, PluginLifecycle, CMSPluginHooks
 packages/types/src/cms.ts           → CMSConfig (themes[], defaultTheme), DatabaseConfig, AdminConfig
 packages/types/src/theme.ts         → CMSTheme (companionPlugin, routePattern), ThemeLayoutEntry
 packages/schema/src/schema-builder.ts → mergeSchemas()
@@ -94,6 +95,7 @@ apps/admin/src/composables/usePluginManifest.ts → fetch + cache plugin manifes
 
 ## Last updated
 
+2026-06-27 — Plugin route permissions & dynamic permission catalog: thêm `packages/core/src/permission-registry.ts` (`PermissionRegistry`: built-in + plugin-declared + key tham chiếu từ menuItems/routes; rebuild cùng các registry khác). `CMSRouteContextHelpers.createSubApp` trả `PluginRouter` permission-aware (per-route auth+RBAC guard, `public.*` opt-out); thêm `createPluginRouter` trong `plugin-route-registry.ts`. `admin-auth-policy.ts` thêm `authenticateRequest()` dùng chung cho admin API + plugin guard; permission resolution nhận `PermissionCatalog` động (owner = trọn catalog). `admin-routes/roles.ts` trả `PermissionCatalogEntry[]` động + validate qua registry. Types: thêm `PermissionDef`/`PermissionKey`/`PermissionCatalogEntry`/`BUILTIN_PERMISSION_DEFS`, field `CMSPlugin.permissions`, `PluginRouter`; `PluginAdminMenuItem.requiredPermissions` nới sang `PermissionKey[]`. Built-in plugins pages/menu/blog khai báo read/write per-route; plugin-auth dùng `public.*`. `RolesTab.vue` hiển thị group theo source/group + label.
 2026-06-25 — Users & Roles + dynamic RBAC: thêm bảng `roles` + `role_permissions` (global roles) và cột `is_owner` + partial unique index `single_owner` trên `users` ở `@viseed/schema`. `user_site_roles.role` nới enum → text slug (không FK cứng để an toàn upgrade). Permission resolution chuyển từ matrix tĩnh sang **DB-driven** (`resolvePermissionsForRoleSlugs`); owner = full `PERMISSION_CATALOG` + bypass site-access. Boot seed `ensureSystemRoles()` (3 system role từ `ROLE_PERMISSION_MATRIX`) + `ensureOwner()`. User đầu tiên (setup/bootstrap) `isOwner=true`. Thêm permission `platform.users.read/manage`. API mới: `/api/admin/users` (CRUD + `:id/password` + `:id/transfer-ownership`), `/api/admin/roles` (CRUD), `/api/admin/permissions`. Validator thêm createUser(assignments)/updateUser/resetPassword/roleAssignment/createRole/updateRole/transferOwnership. Admin: view `/users` (order 85, platformOnly) `UsersRolesView` + `UsersTab` + `RolesTab`; composable `useAdminAuthContext` thêm `isOwner`/`currentUserId`. Types: `isOwner` trên `ActorContext`/`AuthContextPayload`, `RoleSlug`/`RoleSummary`/`UserSummary`/`SYSTEM_ROLE_SLUGS`.
 2026-06-24 — Sửa cú pháp CLI trong mô tả `packages/cli/src/commands/db.ts`: `viseedbi db ...` -> `viseed db ...` (bin name đúng là `viseed`).
 2026-06-24 — Tách S3/R2 khỏi core thành plugin: thêm `plugins/plugin-s3` (`@viseed/plugin-s3`) + `plugins/plugin-r2` (`@viseed/plugin-r2`), mỗi plugin đóng góp `storageProviders[]`. Core gỡ `S3StorageAdapter`/`R2StorageAdapter`/`@aws-sdk/client-s3`, thêm `StorageProviderRegistry` (rebuild cùng widget registry khi enable/disable). `StorageAdapter` interface + `StorageProviderDef`/`StorageProviderField` + field `storageProviders` trên `CMSPlugin` ở `@viseed/types`. Admin Settings render form động từ `GET /api/admin/media/storage-config/providers`; config field generic (extra-field) lưu vào `media_storage_config.config`, secret (`secret: true`) mã hoá at-rest. Cách dùng: chỉ `createCMS({ plugins: [s3Plugin()] })`, không truyền tham số storage trong code.

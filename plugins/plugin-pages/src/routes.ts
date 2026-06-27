@@ -1,5 +1,6 @@
 ﻿import type { DatabaseInstance } from '@viseed/core'
 import type { CMSRouteContextHelpers } from '@viseed/types'
+import { PERMISSIONS } from '@viseed/types'
 import { contentQuerySchema, createContentSchema, updateContentSchema } from '@viseed/validator'
 import { and, eq, like, sql } from 'drizzle-orm'
 import type { Context, Hono } from 'hono'
@@ -12,7 +13,7 @@ export function setupPagesRoutes(
 ): void {
   const pagesApi = helpers.createSubApp('/api/pages')
 
-  pagesApi.get('/', async (c: Context) => {
+  pagesApi.get('/', PERMISSIONS.siteContentRead, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -51,7 +52,7 @@ export function setupPagesRoutes(
     })
   })
 
-  pagesApi.get('/:slug', async (c: Context) => {
+  pagesApi.get('/:slug', PERMISSIONS.siteContentRead, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -67,7 +68,7 @@ export function setupPagesRoutes(
     return c.json({ page })
   })
 
-  pagesApi.post('/', async (c: Context) => {
+  pagesApi.post('/', PERMISSIONS.siteContentWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -102,7 +103,7 @@ export function setupPagesRoutes(
     return c.json({ page: created }, 201)
   })
 
-  pagesApi.put('/:id', async (c: Context) => {
+  pagesApi.put('/:id', PERMISSIONS.siteContentWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -143,7 +144,7 @@ export function setupPagesRoutes(
     return c.json({ page: updated })
   })
 
-  pagesApi.delete('/:id', async (c: Context) => {
+  pagesApi.delete('/:id', PERMISSIONS.siteContentWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 

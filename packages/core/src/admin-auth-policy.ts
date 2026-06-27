@@ -11,17 +11,35 @@ import { and, eq, gt, inArray } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { getCookie } from 'hono/cookie'
 import type { DatabaseInstance } from './database'
+import { resolveSiteContextByHost } from './site-resolver'
 
-const PERMISSION_SET: ReadonlySet<string> = new Set(PERMISSION_CATALOG)
+const BUILTIN_PERMISSION_SET: ReadonlySet<string> = new Set(PERMISSION_CATALOG)
+
+/**
+ * View of the active permission catalog used during auth resolution. Defaults
+ * to the built-in catalog so callers without the dynamic
+ * {@link PermissionRegistry} stay backward compatible. The owner is granted
+ * every key in the catalog; role-based permissions are filtered by `has`.
+ */
+export interface PermissionCatalog {
+  has: (key: string) => boolean
+  keys: () => string[]
+}
+
+const BUILTIN_PERMISSION_CATALOG: PermissionCatalog = {
+  has: (key) => BUILTIN_PERMISSION_SET.has(key),
+  keys: () => [...PERMISSION_CATALOG],
+}
 
 /**
  * Resolve the union of permissions granted by a set of role slugs, sourced from
- * the DB-backed `role_permissions` table. Unknown permissions (not in the
- * catalog) are ignored defensively.
+ * the DB-backed `role_permissions` table. Permissions unknown to the active
+ * catalog are ignored defensively.
  */
 async function resolvePermissionsForRoleSlugs(
   db: DatabaseInstance,
   slugs: Array<RoleSlug>,
+  catalog: PermissionCatalog = BUILTIN_PERMISSION_CATALOG,
 ): Promise<Array<Permission>> {
   if (slugs.length === 0) {
     return []
@@ -34,7 +52,7 @@ async function resolvePermissionsForRoleSlugs(
 
   const permissions = new Set<Permission>()
   for (const row of rows) {
-    if (PERMISSION_SET.has(row.permission)) {
+    if (catalog.has(row.permission)) {
       permissions.add(row.permission as Permission)
     }
   }
@@ -159,6 +177,7 @@ export async function resolveSessionActorContext(
   db: DatabaseInstance,
   c: Context,
   site: SiteContext,
+  catalog: PermissionCatalog = BUILTIN_PERMISSION_CATALOG,
 ): Promise<SessionResolutionResult> {
   const token = getSessionToken(c)
 
@@ -219,7 +238,7 @@ export async function resolveSessionActorContext(
           roleAssignments: [{ role: 'admin' }],
           isOwner: true,
         },
-        permissions: [...PERMISSION_CATALOG],
+        permissions: catalog.keys() as Array<Permission>,
       },
     }
   }
@@ -272,7 +291,62 @@ export async function resolveSessionActorContext(
         roleAssignments: scopedAssignments,
         isOwner: false,
       },
-      permissions: await resolvePermissionsForRoleSlugs(db, slugs),
+      permissions: await resolvePermissionsForRoleSlugs(db, slugs, catalog),
+    },
+  }
+}
+
+/**
+ * Resolve the full authenticated {@link RequestContext} for a request: resolve
+ * the site from the Host header, validate the session, and compute the actor's
+ * effective permissions. Shared by the admin API middleware and the plugin
+ * route guard so both enforce identical auth semantics.
+ */
+export interface AuthenticationResult {
+  ok: boolean
+  status: number
+  error: string | null
+  requestContext: RequestContext | null
+}
+
+export async function authenticateRequest(
+  db: DatabaseInstance,
+  c: Context,
+  catalog: PermissionCatalog = BUILTIN_PERMISSION_CATALOG,
+): Promise<AuthenticationResult> {
+  const siteResolution = await resolveSiteContextByHost(db, c.req.header('host'))
+  if (!siteResolution.site) {
+    return {
+      ok: false,
+      status: 400,
+      error: siteResolution.error ?? 'Unable to resolve site from Host header.',
+      requestContext: null,
+    }
+  }
+
+  const sessionResolution = await resolveSessionActorContext(
+    db,
+    c,
+    siteResolution.site,
+    catalog,
+  )
+  if (!sessionResolution.ok || !sessionResolution.value) {
+    return {
+      ok: false,
+      status: sessionResolution.status === 403 ? 403 : 401,
+      error: sessionResolution.error ?? 'Unauthorized',
+      requestContext: null,
+    }
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    error: null,
+    requestContext: {
+      site: siteResolution.site,
+      actor: sessionResolution.value.actor,
+      permissions: sessionResolution.value.permissions,
     },
   }
 }

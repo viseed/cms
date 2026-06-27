@@ -1,5 +1,6 @@
 ﻿import type { DatabaseInstance } from '@viseed/core'
 import type { CMSRouteContextHelpers } from '@viseed/types'
+import { PERMISSIONS } from '@viseed/types'
 import { asc, eq } from 'drizzle-orm'
 import type { Context, Hono } from 'hono'
 import { menuItems, menus } from './schema'
@@ -11,7 +12,7 @@ export function setupMenuRoutes(
 ): void {
   const router = helpers.createSubApp('/api/menus')
 
-  router.get('/', async (c: Context) => {
+  router.get('/', PERMISSIONS.siteMenuRead, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -20,7 +21,7 @@ export function setupMenuRoutes(
     return c.json({ menus: rows })
   })
 
-  router.post('/', async (c: Context) => {
+  router.post('/', PERMISSIONS.siteMenuWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -44,7 +45,7 @@ export function setupMenuRoutes(
     return c.json({ menu: created }, 201)
   })
 
-  router.put('/:id', async (c: Context) => {
+  router.put('/:id', PERMISSIONS.siteMenuWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -64,7 +65,7 @@ export function setupMenuRoutes(
     return c.json({ menu: updated })
   })
 
-  router.delete('/:id', async (c: Context) => {
+  router.delete('/:id', PERMISSIONS.siteMenuWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -78,7 +79,7 @@ export function setupMenuRoutes(
     return c.json({ message: 'Menu deleted', id })
   })
 
-  router.get('/:id/items', async (c: Context) => {
+  router.get('/:id/items', PERMISSIONS.siteMenuRead, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
@@ -93,7 +94,7 @@ export function setupMenuRoutes(
     return c.json({ items })
   })
 
-  router.put('/:id/items', async (c: Context) => {
+  router.put('/:id/items', PERMISSIONS.siteMenuWrite, async (c: Context) => {
     const db = getDb()
     if (!db) return c.json({ error: 'Database not ready' }, 503)
 
