@@ -1,24 +1,26 @@
 import { randomUUID } from 'node:crypto'
 import { rolePermissions, roles, userSiteRoles, users } from '@viseed/schema'
 import type { Permission, RoleSummary } from '@viseed/types'
-import { PERMISSION_CATALOG } from '@viseed/types'
 import { createRoleSchema, updateRoleSchema } from '@viseed/validator'
 import { eq } from 'drizzle-orm'
 import type { Handler } from 'hono'
 import type { DatabaseInstance } from '../database'
+import type { PermissionRegistry } from '../permission-registry'
 import type { RegisterAdminRoute } from './auth'
 
 export interface AdminRolesContext {
   getDatabase: () => DatabaseInstance
+  permissionRegistry: PermissionRegistry
 }
 
-const PERMISSION_SET: ReadonlySet<string> = new Set(PERMISSION_CATALOG)
-
-function validatePermissions(permissions: Array<string>): {
+function validatePermissions(
+  registry: PermissionRegistry,
+  permissions: Array<string>,
+): {
   ok: boolean
   invalid: Array<string>
 } {
-  const invalid = permissions.filter((permission) => !PERMISSION_SET.has(permission))
+  const invalid = permissions.filter((permission) => !registry.has(permission))
   return { ok: invalid.length === 0, invalid }
 }
 
@@ -38,8 +40,8 @@ async function setRolePermissions(
   }
 }
 
-function handleListPermissions(): Handler {
-  return (c) => c.json({ permissions: PERMISSION_CATALOG })
+function handleListPermissions(ctx: AdminRolesContext): Handler {
+  return (c) => c.json({ permissions: ctx.permissionRegistry.list() })
 }
 
 function handleListRoles(ctx: AdminRolesContext): Handler {
@@ -61,7 +63,7 @@ function handleListRoles(ctx: AdminRolesContext): Handler {
 
     const permissionsByRole = new Map<string, Array<Permission>>()
     for (const row of permissionRows) {
-      if (!PERMISSION_SET.has(row.permission)) continue
+      if (!ctx.permissionRegistry.has(row.permission)) continue
       const list = permissionsByRole.get(row.roleSlug) ?? []
       list.push(row.permission as Permission)
       permissionsByRole.set(row.roleSlug, list)
@@ -93,7 +95,7 @@ function handleCreateRole(ctx: AdminRolesContext): Handler {
       return c.json({ error: 'Invalid role payload.', details: parsed.error.flatten() }, 400)
     }
 
-    const { ok, invalid } = validatePermissions(parsed.data.permissions)
+    const { ok, invalid } = validatePermissions(ctx.permissionRegistry, parsed.data.permissions)
     if (!ok) {
       return c.json({ error: `Unknown permission(s): ${invalid.join(', ')}.` }, 400)
     }
@@ -162,7 +164,7 @@ function handleUpdateRole(ctx: AdminRolesContext): Handler {
           400,
         )
       }
-      const { ok, invalid } = validatePermissions(parsed.data.permissions)
+      const { ok, invalid } = validatePermissions(ctx.permissionRegistry, parsed.data.permissions)
       if (!ok) {
         return c.json({ error: `Unknown permission(s): ${invalid.join(', ')}.` }, 400)
       }
@@ -210,7 +212,7 @@ export function registerRolesRoutes(
   registerRoute: RegisterAdminRoute,
   context: AdminRolesContext,
 ): void {
-  registerRoute('GET', '/permissions', 'platform.users.read', handleListPermissions())
+  registerRoute('GET', '/permissions', 'platform.users.read', handleListPermissions(context))
   registerRoute('GET', '/roles', 'platform.users.read', handleListRoles(context))
   registerRoute('POST', '/roles', 'platform.users.manage', handleCreateRole(context))
   registerRoute('PUT', '/roles/:slug', 'platform.users.manage', handleUpdateRole(context))

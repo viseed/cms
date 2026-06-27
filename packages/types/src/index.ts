@@ -6,8 +6,12 @@ export type {
   DatabaseConfig,
   MediaStorageConfig,
   Permission,
+  PermissionCatalogEntry,
   PermissionChecker,
   PermissionCheckInput,
+  PermissionDef,
+  PermissionKey,
+  PermissionSource,
   RBACRole,
   RequestContext,
   RoleAssignment,
@@ -21,9 +25,12 @@ export type {
   ViseedCMS,
 } from './cms'
 export {
+  BUILTIN_PERMISSION_DEFS,
   checkPermission,
+  definePermission,
   HOOK_KEY,
   PERMISSION_CATALOG,
+  PERMISSIONS,
   ROLE_PERMISSION_MATRIX,
   resolvePermissionsForRoles,
   SINGLE_SITE_CONTEXT,
@@ -53,6 +60,7 @@ export type {
   PluginFactory,
   PluginLifecycle,
   PluginPublicConfig,
+  PluginRouter,
   ThemeRenderRequestContext,
   WidgetTypeDef,
 } from './plugin'

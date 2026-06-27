@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Permission, RoleSummary } from '@viseed/types'
+import type { PermissionCatalogEntry, RoleSummary } from '@viseed/types'
 import { computed, onMounted, ref } from 'vue'
 import { useAdminAuthContext } from '../composables/useAdminAuthContext'
 import { adminFetch } from '../lib/admin-api'
@@ -7,9 +7,47 @@ import { adminFetch } from '../lib/admin-api'
 const { permissions: actorPermissions } = useAdminAuthContext()
 
 const roles = ref<RoleSummary[]>([])
-const allPermissions = ref<Permission[]>([])
+const allPermissions = ref<PermissionCatalogEntry[]>([])
 const loading = ref(true)
 const error = ref('')
+
+interface PermissionGroup {
+  label: string
+  permissions: PermissionCatalogEntry[]
+}
+
+// Group permissions for display: built-in groups first (alphabetical), then
+// each plugin's contributed permissions under its own bucket.
+const permissionGroups = computed<PermissionGroup[]>(() => {
+  const builtinByGroup = new Map<string, PermissionCatalogEntry[]>()
+  const pluginByName = new Map<string, PermissionCatalogEntry[]>()
+
+  for (const entry of allPermissions.value) {
+    if (entry.source === 'plugin') {
+      const key = entry.pluginName ?? 'Plugins'
+      const list = pluginByName.get(key) ?? []
+      list.push(entry)
+      pluginByName.set(key, list)
+    } else {
+      const key = entry.group ?? 'General'
+      const list = builtinByGroup.get(key) ?? []
+      list.push(entry)
+      builtinByGroup.set(key, list)
+    }
+  }
+
+  const groups: PermissionGroup[] = [...builtinByGroup.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([label, permissions]) => ({ label, permissions }))
+
+  for (const [name, permissions] of [...pluginByName.entries()].sort(([a], [b]) =>
+    a.localeCompare(b),
+  )) {
+    groups.push({ label: `Plugin: ${name}`, permissions })
+  }
+
+  return groups
+})
 
 const showModal = ref(false)
 const editingRole = ref<RoleSummary | null>(null)
@@ -220,19 +258,29 @@ async function deleteRole(role: RoleSummary) {
             <p v-if="isPermissionsLocked" class="locked-note">
               The admin role always has full access and cannot be narrowed.
             </p>
-            <div v-else class="permissions-grid">
-              <label
-                v-for="permission in allPermissions"
-                :key="permission"
-                class="permission-item"
-              >
-                <input
-                  type="checkbox"
-                  :checked="form.permissions.includes(permission)"
-                  @change="togglePermission(permission, ($event.target as HTMLInputElement).checked)"
-                />
-                <span>{{ permission }}</span>
-              </label>
+            <div v-else class="permissions-groups">
+              <div v-for="group in permissionGroups" :key="group.label" class="permission-group">
+                <p class="permission-group-label">{{ group.label }}</p>
+                <div class="permissions-grid">
+                  <label
+                    v-for="permission in group.permissions"
+                    :key="permission.key"
+                    class="permission-item"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="form.permissions.includes(permission.key)"
+                      @change="
+                        togglePermission(permission.key, ($event.target as HTMLInputElement).checked)
+                      "
+                    />
+                    <span class="permission-text">
+                      <span class="permission-label">{{ permission.label }}</span>
+                      <span class="permission-key">{{ permission.key }}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -481,16 +529,31 @@ async function deleteRole(role: RoleSummary) {
   padding: 0.75rem;
 }
 
+.permissions-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.permission-group-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+}
+
 .permissions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin-top: 0.5rem;
   gap: 0.5rem;
 }
 
 .permission-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 400;
@@ -498,12 +561,24 @@ async function deleteRole(role: RoleSummary) {
   margin-bottom: 0;
 }
 
-.permission-item span {
+.permission-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.permission-label {
+  font-size: 0.85rem;
+}
+
+.permission-key {
   font-family: monospace;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  color: #9ca3af;
 }
 
 .permission-item input {
   cursor: pointer;
+  margin-top: 0.15rem;
 }
 </style>
